@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sangam / Annapurna Dairy — Daily Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAFAF6;
+    --surface: #FFFFFF;
+    --ink: #2B2620;
+    --ink-soft: #6B6355;
+    --line: #E1DCCE;
+    --green: #35634A;
+    --green-soft: #E7EFE7;
+    --gold: #B9862E;
+    --gold-soft: #FBF1DE;
+    --red: #A23E3E;
+    --red-soft: #FBEAEA;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px;}
+
+  header{margin-bottom:18px;}
+  .shop-name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .shop-sub{
+    color:var(--ink-soft);
+    font-size:13px;
+    margin-top:2px;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+  }
+  .header-rule{
+    height:2px;
+    background:repeating-linear-gradient(90deg, var(--green) 0 6px, transparent 6px 10px);
+    margin:14px 0 0;
+    opacity:0.5;
+  }
+
+  .tabs{display:flex;gap:6px;margin:20px 0 18px;}
+  .tab-btn{
+    flex:1;
+    padding:10px 10px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    border-radius:var(--radius);
+    font-family:'IBM Plex Sans';
+    font-weight:600;
+    font-size:13px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .tab-btn.active{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:16px;
+  }
+
+  label.field-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--ink-soft);
+    font-weight:600;
+    display:block;
+    margin-bottom:6px;
+  }
+  input[type=date]{
+    font-family:'IBM Plex Mono';
+    font-size:15px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+  }
+
+  .search-box{
+    width:100%;
+    font-family:'IBM Plex Sans';
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fdfcf9;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .search-box:focus{outline:none;border-color:var(--green);}
+
+  .legend{
+    font-size:11px;color:var(--ink-soft);margin:10px 0 12px;line-height:1.6;
+  }
+  .legend b{color:var(--ink);}
+
+  .cat-block{
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-bottom:8px;
+    overflow:hidden;
+  }
+  .cat-header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:11px 14px;
+    background:#F5F2E9;
+    cursor:pointer;
+    user-select:none;
+  }
+  .cat-header .cat-title{
+    font-family:'Fraunces';font-weight:600;font-size:14.5px;
+  }
+  .cat-header .cat-meta{
+    font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono';
+    display:flex;align-items:center;gap:8px;
+  }
+  .cat-chevron{transition:transform 0.15s;display:inline-block;}
+  .cat-block.open .cat-chevron{transform:rotate(90deg);}
+  .cat-items{padding:10px;display:none;}
+  .cat-block.open .cat-items{display:block;}
+
+  .item-card{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px;
+    margin-bottom:8px;
+    background:#fff;
+  }
+  .item-card:last-child{margin-bottom:0;}
+  .item-head{
+    display:flex;align-items:center;gap:8px;margin-bottom:9px;
+  }
+  .item-head .item-name{
+    flex:1;
+    font-family:'IBM Plex Sans';
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .qty-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:7px;
+  }
+  .price-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:7px;
+    margin-top:7px;
+  }
+  .qty-box label{
+    font-size:9.5px;text-transform:uppercase;letter-spacing:0.03em;
+    color:var(--ink-soft);font-weight:600;display:block;margin-bottom:3px;
+  }
+  .qty-box input{
+    width:100%;
+    font-family:'IBM Plex Mono';
+    font-size:14px;
+    text-align:center;
+    padding:6px 3px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fdfcf9;
+    color:var(--ink);
+  }
+  .qty-box.mrp input{background:var(--gold-soft);border-color:#EAD9AE;}
+  .qty-box.agent input{background:#EFEAE0;border-color:#DCD3C0;}
+  .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;}
+
+  .item-foot{
+    display:flex;justify-content:space-between;
+    margin-top:7px;font-size:11.5px;color:var(--ink-soft);
+    font-family:'IBM Plex Mono';
+  }
+  .item-foot .amt{font-weight:700;color:var(--ink);font-size:12.5px;}
+  .item-foot .margin{color:var(--green);}
+
+  .total-line{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-top:14px;margin-top:14px;
+    border-top:2px solid var(--ink);
+  }
+  .total-line .lbl{font-family:'Fraunces';font-weight:600;font-size:16px;}
+  .total-line .val{font-family:'IBM Plex Mono';font-weight:700;font-size:22px;}
+
+  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .split-box{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px;
+  }
+  .split-box.cash{background:var(--gold-soft);border-color:#EAD9AE;}
+  .split-box.online{background:var(--green-soft);border-color:#CFE1D2;}
+  .split-box label{
+    font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;
+    display:block;margin-bottom:6px;color:var(--ink-soft);
+  }
+  .split-box .cur{font-family:'IBM Plex Mono';font-weight:600;}
+  .split-box input{
+    width:100%;
+    border:none;background:transparent;
+    font-family:'IBM Plex Mono';font-size:20px;font-weight:600;
+    color:var(--ink);padding:2px 0;
+  }
+  .split-box input:focus{outline:none;}
+
+  .balance-note{
+    margin-top:12px;
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:8px;
+    font-weight:500;
+  }
+  .balance-note.ok{background:var(--green-soft);color:var(--green);}
+  .balance-note.off{background:var(--red-soft);color:var(--red);}
+
+  .save-btn{
+    width:100%;
+    padding:14px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:var(--radius);
+    font-family:'IBM Plex Sans';
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .save-btn:disabled{opacity:0.5;}
+
+  .status-msg{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    min-height:16px;
+  }
+
+  .hist-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 4px;
+    border-bottom:1px solid #F0EDE3;
+    cursor:pointer;
+  }
+  .hist-item:last-child{border-bottom:none;}
+  .hist-item:hover{background:var(--green-soft);}
+  .hist-date{font-family:'Fraunces';font-weight:600;font-size:15px;}
+  .hist-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .hist-amt{font-family:'IBM Plex Mono';font-weight:700;font-size:16px;text-align:right;}
+  .hist-split{font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px;font-family:'IBM Plex Mono';}
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+  .period-summary{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;
+  }
+  .stat-box{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px;text-align:center;
+  }
+  .stat-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:18px;}
+  .stat-box .l{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.03em;margin-top:2px;}
+
+  .shared-note{
+    font-size:12px;color:var(--ink-soft);text-align:center;margin-top:18px;
+    padding-top:14px;border-top:1px solid var(--line);
+  }
+  .no-match{
+    text-align:center;color:var(--ink-soft);font-size:13px;padding:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="shop-name">Annapurna Dairy &amp; Foods</h1>
+    <div class="shop-sub">Daily Stock &amp; Sales Ledger — Sangam Rate Chart</div>
+    <div class="header-rule"></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabTodayBtn" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">History</button>
+  </div>
+
+  <!-- TODAY TAB -->
+  <div id="todayTab">
+    <div class="card">
+      <label class="field-label">Date</label>
+      <input type="date" id="dateInput">
+
+      <div class="legend">
+        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold &nbsp;·&nbsp; <b>Closing</b> auto-calculated, carries to tomorrow's opening. Tap a category to expand it.
+      </div>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search a product…" oninput="onSearch()">
+
+      <div id="categoriesBody"></div>
+
+      <div class="total-line">
+        <span class="lbl">Total Sales</span>
+        <span class="val" id="totalSalesVal">₹0</span>
+      </div>
+      <div class="item-foot" style="margin-top:8px;">
+        <span>Total Margin (MRP − Agent, on sold)</span>
+        <span class="margin" id="totalMarginVal" style="font-weight:700;">₹0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Payment Received</label>
+      <div class="split-grid">
+        <div class="split-box cash">
+          <label>Cash</label>
+          <span class="cur">₹</span><input type="number" id="cashInput" placeholder="0" inputmode="decimal">
+        </div>
+        <div class="split-box online">
+          <label>Online</label>
+          <span class="cur">₹</span><input type="number" id="onlineInput" placeholder="0" inputmode="decimal">
+        </div>
+      </div>
+      <div class="balance-note ok" id="balanceNote">Enter cash and online received</div>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveDay()">Save Today's Entry</button>
+    <div class="status-msg" id="statusMsg"></div>
+    <div class="shared-note">Saved entries are shared — you and your friend both see the same ledger.</div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="historyTab" style="display:none;">
+    <div class="period-summary" id="periodSummary"></div>
+    <div class="card" style="padding:6px 14px;">
+      <div id="historyList"><div class="empty-state">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATALOG = [{"category": "MILK SECTION", "items": [{"name": "FCM GOLD PLUS 500 ML", "mrp": 82, "agent": 75.4}, {"name": "FULLCREAMILK 500ML", "mrp": 80, "agent": 73.6}, {"name": "STM 500 ML(SANGAM PREMIUM)", "mrp": 68, "agent": 61.75}, {"name": "TEA SPECIAL 500 ML", "mrp": 78, "agent": 71.6}, {"name": "TONNED MILK 500ML", "mrp": 64, "agent": 57.85}, {"name": "TONNEDMILK 170ML (5 pack)", "mrp": 50, "agent": 41.75}, {"name": "DTM500ML", "mrp": 56, "agent": 51.35}]}, {"category": "CURD SECTION", "items": [{"name": "CURD 120 GMS SATCHET", "mrp": 10, "agent": 7.6}, {"name": "CURD 200 G PACK", "mrp": 15, "agent": 13}, {"name": "CURD 450GMS SACHET", "mrp": 84, "agent": 61}, {"name": "CURD SACHEET 900 GMS", "mrp": 70, "agent": 55.5}, {"name": "S.T.M. CURD CUP100G", "mrp": 10, "agent": 8}, {"name": "CURD 200 G CUP", "mrp": 20, "agent": 17.5}, {"name": "S.T.M CURD 500G CUPS", "mrp": 55, "agent": 46}, {"name": "S.T.M CURD 400G CUPS", "mrp": 38, "agent": 34}, {"name": "STM CURD 1 KG DISPO", "mrp": 115, "agent": 88}, {"name": "S.T.M.CURD 10 LIT (DISPO BUCKET)", "mrp": 780, "agent": 710}, {"name": "S.T.M.CURD 5 KG (DISPO BUCKET)", "mrp": 400, "agent": 360}, {"name": "TM CURD 10 KG DISPO", "mrp": 750, "agent": 660}, {"name": "TM CURD DISPO 5 KG", "mrp": 390, "agent": 340}]}, {"category": "BUTTER MILK & LASSI", "items": [{"name": "BUTTERMILK", "mrp": 9, "agent": 7.6}, {"name": "JEERA BUTTER MILK", "mrp": 15, "agent": 10}, {"name": "LASSI SACHET 180 GMS", "mrp": 12, "agent": 10.4}, {"name": "LASSI (WHITE)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(MANGO)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(PINEAPPLE)", "mrp": 25, "agent": 18.25}, {"name": "SABJA LASSI", "mrp": 22, "agent": 18.75}, {"name": "SWEETLASSI(STRAWBERRY)", "mrp": 25, "agent": 18.25}]}, {"category": "PANNER", "items": [{"name": "PANNER 100 GRMS", "mrp": 49, "agent": 42.5}, {"name": "PANNEER 200 GRMS", "mrp": 85, "agent": 70}, {"name": "PANNEER 500 GRMS", "mrp": 190, "agent": 168}, {"name": "PANNEER 1 KG", "mrp": 380, "agent": 337}, {"name": "JUNNU 100GMS CUP", "mrp": 22, "agent": 17.25}, {"name": "JUNNU 50GMS CUP", "mrp": 12, "agent": 9}, {"name": "CREAM 1000 ML PACK", "mrp": 200, "agent": 180}]}, {"category": "TETRA MILK", "items": [{"name": "DTCM TETRA 180 ML (APS)", "mrp": 13, "agent": 11.65}, {"name": "DTM (TETRA) 180 ML", "mrp": 13, "agent": 11.65}, {"name": "TETRA T.M.(3%) 1 LIT PACK(12)", "mrp": 64, "agent": 58.5}, {"name": "E LIFE BUFFELOW (TM 500ML)(CARTON)", "mrp": 29, "agent": 26.4}]}, {"category": "BI -PRODUCTS", "items": [{"name": "SUGARLESSKOVA", "mrp": 400, "agent": 380}, {"name": "BASUNDI FAMILY PACK 300GMS", "mrp": 75, "agent": 64}, {"name": "BASUNDHI 50 GMS(HOMEPACK)12", "mrp": 180, "agent": 132}, {"name": "DOODH PEDA 20GMS", "mrp": 9, "agent": 7.9}, {"name": "DOODH PEDA(MAP) 200 GMS", "mrp": 100, "agent": 81}, {"name": "BADAM BARFI 200GMS", "mrp": 130, "agent": 114}, {"name": "BADAM MILK POWDER 200GMS", "mrp": 80, "agent": 63}, {"name": "GULABJAM 100 GMS", "mrp": 22, "agent": 18.5}, {"name": "GULABJAM 400 GMS", "mrp": 80, "agent": 71}, {"name": "GULAB JAMUN 500 G", "mrp": 100, "agent": 90}, {"name": "JOWR LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU BARFI 200 GMS", "mrp": 150, "agent": 135}, {"name": "KALAKAND (MAP)200 GMS", "mrp": 100, "agent": 81}, {"name": "SUGARLESS KALAKAND (MAP)200 GMS", "mrp": 120, "agent": 106}, {"name": "MYSORE PAK 200 GMS", "mrp": 120, "agent": 106}, {"name": "RAGILADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "SUNNUNDA", "mrp": 120, "agent": 112}, {"name": "KORRALADU 200 GMS", "mrp": 100, "agent": 88}, {"name": "MALAI LADDU (MAP)150GMS", "mrp": 95, "agent": 79}, {"name": "MIXED MILLET LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU STICKS 120 G", "mrp": 75, "agent": 68}, {"name": "KAJU STICKS 200 G", "mrp": 110, "agent": 100}, {"name": "KAJU BITEES 200G", "mrp": 200, "agent": 182}, {"name": "ORANGE KAJU BITES 200", "mrp": 200, "agent": 182}, {"name": "CHOCOLATE KAJU 200G", "mrp": 200, "agent": 182}, {"name": "BADAM RAKI 200G", "mrp": 200, "agent": 180}, {"name": "ATTA LADDU 200 G", "mrp": 200, "agent": 180}, {"name": "CHANA LADDU 200G", "mrp": 200, "agent": 180}, {"name": "MILK CAKE (MAP)200 GMS", "mrp": 110, "agent": 90}]}, {"category": "CUP CAKE &BAR CAKE", "items": [{"name": "CHOCOLATE CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "ORANGE BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "PINE APPLE BAR CK 32G", "mrp": 10, "agent": 8.6}]}, {"category": "BADAM MILK SECTION", "items": [{"name": "SF NUT BADAM 200ML", "mrp": 35, "agent": 25}, {"name": "SFM CHOCOLATE MILK", "mrp": 35, "agent": 25}, {"name": "S F MILK ( DISPO)", "mrp": 30, "agent": 22}, {"name": "S F MILK ( PP)", "mrp": 30, "agent": 20}, {"name": "SF KESAR PISTA 200ML", "mrp": 30, "agent": 22}, {"name": "SF PINAPPLE 200 ML", "mrp": 30, "agent": 22}, {"name": "SF PISTA CHIO 200ML", "mrp": 30, "agent": 22}, {"name": "SF STRAWBERRY 200ML", "mrp": 30, "agent": 22}]}, {"category": "MILK SHAKES", "items": [{"name": "MILKSHAKE DOUBLE CHOCOLATE", "mrp": 30, "agent": 23}, {"name": "BUTTER SCOTCH MILK SHAKE", "mrp": 30, "agent": 23}, {"name": "VANILLA MILK SHAKE", "mrp": 30, "agent": 23}]}, {"category": "BUTTER SECTION", "items": [{"name": "P.T BUTTER 500GMS", "mrp": 280, "agent": 264}, {"name": "P.T BUTTER 100 GMS", "mrp": 65, "agent": 55}, {"name": "C BUTTER 500GMS", "mrp": 285, "agent": 266}, {"name": "C.BUTER 5 KG CARTONS", "mrp": 285, "agent": 266}, {"name": "COOKING BUTTER 100 GMS", "mrp": 70, "agent": 61}, {"name": "COW/BUTTER 20KG", "mrp": 11000, "agent": 10700}, {"name": "WHITEBUTTER 20KG", "mrp": 11000, "agent": 10700}]}, {"category": "CHIKKIS SECTION", "items": [{"name": "PEANUTCHIKKI18 GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "SESAM CHIKKI18GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "PEANUTCHIKKI90 GMS PKT", "mrp": 250, "agent": 190}, {"name": "SESAM CHKII90GMS PKT", "mrp": 250, "agent": 190}]}, {"category": "GHEE SECTION", "items": [{"name": "BUFFELOGHEE200ML", "mrp": 145, "agent": 125}, {"name": "BUFFELOGHEE 500ML", "mrp": 345, "agent": 305}, {"name": "BUFFELOGHEE 1000ML (4 PACK)", "mrp": 690, "agent": 610}, {"name": "BUFFELOGHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "BUFFELOGHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "BUFFELOGHEE 50ML", "mrp": 40, "agent": 33}, {"name": "B.GHEE 100ML JAR", "mrp": 78, "agent": 67}, {"name": "B.GHEE 200ML JAR", "mrp": 145, "agent": 123}, {"name": "B. GHEE 500ML JAR", "mrp": 350, "agent": 308}, {"name": "B.GHEE 1000ML JAR", "mrp": 700, "agent": 610}, {"name": "B. GHEE 5L JAR", "mrp": 3350, "agent": 3050}, {"name": "BGHEE 200ML DINING", "mrp": 155, "agent": 133}, {"name": "BGHEE 500ML DINING", "mrp": 355, "agent": 317}, {"name": "BUFFELOGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 100ML JARS", "mrp": 78, "agent": 66}, {"name": "COW GHEE 200ML JARS(60)", "mrp": 145, "agent": 123}, {"name": "COW GHEE 500ML JARS(08JARS)", "mrp": 350, "agent": 310}, {"name": "COW GHEE 1000 ML JARS(4)", "mrp": 700, "agent": 611}, {"name": "COWGHEE 500ML (8 PACK)", "mrp": 345, "agent": 303}, {"name": "COWGHEE 5KG JAR", "mrp": 3350, "agent": 3050}, {"name": "COWGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COWGHEE1000ML (POUCH)", "mrp": 690, "agent": 602}, {"name": "COWGHEE200ML (PACK)", "mrp": 140, "agent": 121}, {"name": "HIGH AROMA GHEE 100ML JAR", "mrp": 88, "agent": 73}, {"name": "HIGH AROMA GHEE 200ML JAR", "mrp": 165, "agent": 140}, {"name": "HIGH AROMA GHEE 500ML JAR", "mrp": 355, "agent": 320}, {"name": "HIGH AROMA GHEE 1000ML JAR", "mrp": 710, "agent": 630}, {"name": "HIGH AROMA GHEE 5L JAR", "mrp": 3500, "agent": 3200}, {"name": "HIGH AROMA GHEE 15 KG JAR", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "COW GHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "COW GHEE 50ML", "mrp": 38, "agent": 34}]}, {"category": "CHEKODI & MURKULU", "items": [{"name": "CHAKODI 100GMS", "mrp": 30, "agent": 24}, {"name": "CHAKODI 200GMS", "mrp": 60, "agent": 48}, {"name": "CHAKODI 500GMS", "mrp": 150, "agent": 120}, {"name": "MURUKU LONG100GMS", "mrp": 30, "agent": 24}, {"name": "MURUKU LONG200GMS", "mrp": 60, "agent": 48}, {"name": "MURUKU LONG500GMS", "mrp": 150, "agent": 120}, {"name": "KARA BOONDHI 100GMS", "mrp": 30, "agent": 24}, {"name": "KARA BOONDHI 200GMS", "mrp": 60, "agent": 48}, {"name": "KARA BOONDHI 500GMS", "mrp": 150, "agent": 120}, {"name": "CORN FLAXES MIXTURE 100GMS", "mrp": 30, "agent": 24}, {"name": "CORN FLAXES MIXTURE 200GMS", "mrp": 60, "agent": 48}, {"name": "CORN FLAXES MIXTURE 500GMS", "mrp": 150, "agent": 120}, {"name": "JEERA SODA 200 ML", "mrp": 15, "agent": 13}, {"name": "LEMON GINGER 200 ML", "mrp": 15, "agent": 13}, {"name": "ORNNGE CRUSH 200 ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-200ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-300ML", "mrp": 20, "agent": 16.75}, {"name": "MANGO MAGIC-600ML", "mrp": 35, "agent": 29.75}, {"name": "MANGO MAGIC-1000ML", "mrp": 60, "agent": 50}, {"name": "MANGO MAGIC-2000ML", "mrp": 110, "agent": 90}, {"name": "ULAVACHARU-100GMS", "mrp": 35, "agent": 30}, {"name": "ULAVACHARU-250GMS", "mrp": 80, "agent": 70}, {"name": "ULAVACHARU-500GMS", "mrp": 155, "agent": 135}, {"name": "ULAVACHARU-1000GMS", "mrp": 290, "agent": 245}, {"name": "RUSK 55GMS PACK(40)", "mrp": 10, "agent": 8.5}, {"name": "RUSK 200GMS PACK(20)", "mrp": 35, "agent": 26}]}, {"category": "SPICES", "items": [{"name": "CHILLI POWDER(50GR)", "mrp": 20, "agent": 13}, {"name": "CHILLI POWDER(100GR)", "mrp": 40, "agent": 26}, {"name": "CHILLI POWDER(200GR)", "mrp": 75, "agent": 49}, {"name": "TURMERIC POWDER(50G)", "mrp": 20, "agent": 11}, {"name": "TURMERIC POWDER(100GR)", "mrp": 35, "agent": 22}, {"name": "SABAR MASALA (8 G)", "mrp": 5, "agent": 2.75}, {"name": "SABAR MASALA (50 G)", "mrp": 20, "agent": 16}, {"name": "GARAM MASALA (8 G)", "mrp": 5, "agent": 2.9}, {"name": "GARAM MASALA (50 G)", "mrp": 35, "agent": 20}, {"name": "CHIKEN MASALA ( 8 G)", "mrp": 5, "agent": 2.75}]}, {"category": "COOKIES", "items": [{"name": "ATTA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "ATTA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "ATTA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "MULTI GRAIN COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "MULTI GRAIN COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "MULTI GRAIN COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SWEETS & SALT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SWEETS & SALT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SWEETS & SALT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "AJWAIN COOKIES 20 G", "mrp": 250, "agent": 200}, {"name": "AJWAIN COOKIES 50 G", "mrp": 200, "agent": 170}, {"name": "AJWAIN COOKIES 100 G", "mrp": 276, "agent": 228}, {"name": "BUTTER SCOTCH COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER SCOTCH COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER SCOTCH COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COCONUT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COCONUT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COCONUT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COFFEE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COFFEE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COFFEE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "CHOCOLATE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "CHOCOLATE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "CHOCOLATE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "BUTTER COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "HONEY OATS COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "HONEY OATS COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "HONEY OATS COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SPICY MASALA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SPICY MASALA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SPICY MASALA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "RAGI ALMOND COOKIES100G", "mrp": 40, "agent": 35}, {"name": "JOWAR CASHEW COOKIES 100G", "mrp": 40, "agent": 35}, {"name": "SUGAR LESS RAGI LADDU 200G", "mrp": 130, "agent": 112}, {"name": "SUGAR LESS SUNNUNDALU 200G", "mrp": 130, "agent": 112}]}];
+
+// working state: array of categories, each with items {name, opening, added, sold, mrp}
+let cats = [];
+let currentDate = "";
+let openCats = new Set();
+
+function freshCats(){
+  return CATALOG.map(c => ({
+    category: c.category,
+    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, mrp: it.mrp, agent: it.agent }))
+  }));
+}
+
+function fmtDateKey(d){ return d.replaceAll("-",""); }
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function prevDateISO(dISO){
+  const d = new Date(dISO + "T00:00:00");
+  d.setDate(d.getDate()-1);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function money(n){
+  n = Math.round((n + Number.EPSILON) * 100) / 100;
+  return "₹" + n.toLocaleString('en-IN', {maximumFractionDigits:2});
+}
+function num(v){ return parseFloat(v)||0; }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function switchTab(tab){
+  document.getElementById('todayTab').style.display = tab==='today' ? 'block':'none';
+  document.getElementById('historyTab').style.display = tab==='history' ? 'block':'none';
+  document.getElementById('tabTodayBtn').classList.toggle('active', tab==='today');
+  document.getElementById('tabHistoryBtn').classList.toggle('active', tab==='history');
+  if(tab==='history') loadHistory();
+}
+
+function toggleCat(ci){
+  if(openCats.has(ci)) openCats.delete(ci); else openCats.add(ci);
+  renderCats();
+}
+
+function onSearch(){
+  renderCats();
+}
+
+function renderCats(){
+  const body = document.getElementById('categoriesBody');
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  body.innerHTML = "";
+
+  cats.forEach((cat, ci) => {
+    let visibleItems = cat.items.map((it, ii) => ({it, ii}));
+    if(q){
+      visibleItems = visibleItems.filter(({it}) => it.name.toLowerCase().includes(q));
+    }
+    if(q && visibleItems.length === 0) return;
+
+    const soldCount = cat.items.filter(it => num(it.sold) > 0).length;
+    const isOpen = q ? true : openCats.has(ci);
+
+    const block = document.createElement('div');
+    block.className = 'cat-block' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'cat-header';
+    header.onclick = () => { if(!q) toggleCat(ci); };
+    header.innerHTML = `
+      <span class="cat-title">${escapeHtml(cat.category)}</span>
+      <span class="cat-meta">${soldCount ? soldCount + ' active · ' : ''}${cat.items.length} items <span class="cat-chevron">›</span></span>
+    `;
+    block.appendChild(header);
+
+    const itemsWrap = document.createElement('div');
+    itemsWrap.className = 'cat-items';
+
+    visibleItems.forEach(({it, ii}) => {
+      const opening = num(it.opening), added = num(it.added), sold = num(it.sold), mrp = num(it.mrp), agent = num(it.agent);
+      const closing = opening + added - sold;
+      const amount = sold * mrp;
+      const margin = sold * (mrp - agent);
+      const div = document.createElement('div');
+      div.className = 'item-card';
+      div.innerHTML = `
+        <div class="item-head"><span class="item-name">${escapeHtml(it.name)}</span></div>
+        <div class="qty-grid">
+          <div class="qty-box">
+            <label>Opening</label>
+            <input type="number" value="${it.opening}" inputmode="decimal" onchange="updateItem(${ci},${ii},'opening',this.value)">
+          </div>
+          <div class="qty-box">
+            <label>Added</label>
+            <input type="number" value="${it.added}" inputmode="decimal" onchange="updateItem(${ci},${ii},'added',this.value)">
+          </div>
+          <div class="qty-box sold">
+            <label>Sold</label>
+            <input type="number" value="${it.sold}" inputmode="decimal" onchange="updateItem(${ci},${ii},'sold',this.value)">
+          </div>
+        </div>
+        <div class="price-grid">
+          <div class="qty-box mrp">
+            <label>MRP</label>
+            <input type="number" value="${it.mrp}" inputmode="decimal" onchange="updateItem(${ci},${ii},'mrp',this.value)">
+          </div>
+          <div class="qty-box agent">
+            <label>Agent Cost</label>
+            <input type="number" value="${it.agent}" inputmode="decimal" onchange="updateItem(${ci},${ii},'agent',this.value)">
+          </div>
+        </div>
+        <div class="item-foot">
+          <span>Closing: <b>${closing}</b></span>
+          <span class="amt">${money(amount)}</span>
+        </div>
+        <div class="item-foot">
+          <span>Margin</span>
+          <span class="margin">${money(margin)}</span>
+        </div>
+      `;
+      itemsWrap.appendChild(div);
+    });
+
+    block.appendChild(itemsWrap);
+    body.appendChild(block);
+  });
+
+  if(body.innerHTML === "" && q){
+    body.innerHTML = '<div class="no-match">No products match "' + escapeHtml(q) + '"</div>';
+  }
+
+  updateTotal();
+}
+
+function updateItem(ci, ii, field, value){
+  const v = value===""?0:parseFloat(value);
+  cats[ci].items[ii][field] = isNaN(v)?0:v;
+  renderCats();
+}
+
+function totalSales(){
+  let t = 0;
+  cats.forEach(c => c.items.forEach(it => t += num(it.sold)*num(it.mrp)));
+  return t;
+}
+
+function totalMargin(){
+  let t = 0;
+  cats.forEach(c => c.items.forEach(it => t += num(it.sold)*(num(it.mrp)-num(it.agent))));
+  return t;
+}
+
+function updateTotal(){
+  document.getElementById('totalSalesVal').textContent = money(totalSales());
+  document.getElementById('totalMarginVal').textContent = money(totalMargin());
+  checkBalance();
+}
+
+function checkBalance(){
+  const total = totalSales();
+  const cash = num(document.getElementById('cashInput').value);
+  const online = num(document.getElementById('onlineInput').value);
+  const received = cash + online;
+  const diff = Math.round((total - received)*100)/100;
+  const note = document.getElementById('balanceNote');
+  if(cash===0 && online===0){
+    note.className = 'balance-note ok';
+    note.textContent = 'Enter cash and online received';
+  } else if(Math.abs(diff) < 0.5){
+    note.className = 'balance-note ok';
+    note.textContent = `Matches total sales — ${money(received)} received`;
+  } else if(diff > 0){
+    note.className = 'balance-note off';
+    note.textContent = `${money(diff)} short of total sales`;
+  } else {
+    note.className = 'balance-note off';
+    note.textContent = `${money(-diff)} more than total sales`;
+  }
+}
+
+document.getElementById('cashInput').addEventListener('input', checkBalance);
+document.getElementById('onlineInput').addEventListener('input', checkBalance);
+
+function mergeIntoCatalogShape(savedCats){
+  // Build a lookup from saved data by item name, then apply onto fresh catalog structure
+  const lookup = {};
+  (savedCats||[]).forEach(c => (c.items||[]).forEach(it => { lookup[it.name] = it; }));
+  const base = freshCats();
+  base.forEach(c => c.items.forEach(it => {
+    const saved = lookup[it.name];
+    if(saved){
+      it.opening = num(saved.opening);
+      it.added = num(saved.added);
+      it.sold = num(saved.sold);
+      it.mrp = saved.mrp!==undefined ? num(saved.mrp) : it.mrp;
+      it.agent = saved.agent!==undefined ? num(saved.agent) : it.agent;
+    }
+  }));
+  return base;
+}
+
+async function loadDay(dateISO){
+  currentDate = dateISO;
+  document.getElementById('dateInput').value = dateISO;
+  document.getElementById('searchBox').value = "";
+  const key = 'day:' + fmtDateKey(dateISO);
+  let loaded = null;
+  try{
+    const res = await window.storage.get(key, true);
+    if(res && res.value) loaded = JSON.parse(res.value);
+  } catch(e){ loaded = null; }
+
+  if(loaded){
+    cats = mergeIntoCatalogShape(loaded.cats);
+    document.getElementById('cashInput').value = loaded.cash || "";
+    document.getElementById('onlineInput').value = loaded.online || "";
+  } else {
+    let prevCats = null;
+    try{
+      const prevKey = 'day:' + fmtDateKey(prevDateISO(dateISO));
+      const prevRes = await window.storage.get(prevKey, true);
+      if(prevRes && prevRes.value) prevCats = JSON.parse(prevRes.value).cats;
+    } catch(e){ prevCats = null; }
+
+    cats = freshCats();
+    if(prevCats && prevCats.length){
+      const lookup = {};
+      prevCats.forEach(c => (c.items||[]).forEach(it => { lookup[it.name] = it; }));
+      cats.forEach(c => c.items.forEach(it => {
+        const prev = lookup[it.name];
+        if(prev){
+          it.opening = num(prev.opening)+num(prev.added)-num(prev.sold);
+          it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
+          it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
+        }
+      }));
+    }
+    document.getElementById('cashInput').value = "";
+    document.getElementById('onlineInput').value = "";
+  }
+  // auto-open categories that have any nonzero values
+  openCats = new Set();
+  cats.forEach((c, ci) => {
+    if(c.items.some(it => num(it.opening)||num(it.added)||num(it.sold))) openCats.add(ci);
+  });
+  renderCats();
+}
+
+document.getElementById('dateInput').addEventListener('change', (e) => {
+  loadDay(e.target.value);
+});
+
+async function saveDay(){
+  const btn = document.getElementById('saveBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  btn.disabled = true;
+  statusMsg.textContent = "Saving…";
+  const cash = num(document.getElementById('cashInput').value);
+  const online = num(document.getElementById('onlineInput').value);
+  const data = {
+    date: currentDate,
+    cats: cats,
+    total: totalSales(),
+    cash: cash,
+    online: online
+  };
+  try{
+    const key = 'day:' + fmtDateKey(currentDate);
+    const result = await window.storage.set(key, JSON.stringify(data), true);
+    statusMsg.textContent = result ? ("Saved — " + currentDate) : "Save failed, try again.";
+  } catch(e){
+    statusMsg.textContent = "Save failed, try again.";
+  }
+  btn.disabled = false;
+  setTimeout(()=>{ statusMsg.textContent=""; }, 3000);
+}
+
+async function loadHistory(){
+  const listEl = document.getElementById('historyList');
+  const summaryEl = document.getElementById('periodSummary');
+  listEl.innerHTML = '<div class="empty-state">Loading…</div>';
+  try{
+    const res = await window.storage.list('day:', true);
+    const keys = (res && res.keys) ? res.keys : [];
+    if(keys.length === 0){
+      listEl.innerHTML = '<div class="empty-state">No entries saved yet.</div>';
+      summaryEl.innerHTML = '';
+      return;
+    }
+    const entries = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value) entries.push(JSON.parse(r.value));
+      } catch(e){}
+    }
+    entries.sort((a,b) => b.date.localeCompare(a.date));
+
+    const recent = entries.slice(0,7);
+    const sumTotal = recent.reduce((s,e)=>s+(e.total||0),0);
+    const sumCash = recent.reduce((s,e)=>s+(e.cash||0),0);
+    const sumOnline = recent.reduce((s,e)=>s+(e.online||0),0);
+    summaryEl.innerHTML = `
+      <div class="stat-box"><div class="n">${money(sumTotal)}</div><div class="l">Sales (last ${recent.length})</div></div>
+      <div class="stat-box"><div class="n">${money(sumCash)}</div><div class="l">Cash</div></div>
+      <div class="stat-box"><div class="n">${money(sumOnline)}</div><div class="l">Online</div></div>
+    `;
+
+    listEl.innerHTML = "";
+    entries.forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'hist-item';
+      div.onclick = () => { loadDay(e.date); switchTab('today'); };
+      const d = new Date(e.date + "T00:00:00");
+      const dateLabel = d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+      let itemCount = 0;
+      (e.cats||[]).forEach(c => (c.items||[]).forEach(it => { if(num(it.sold)>0) itemCount++; }));
+      div.innerHTML = `
+        <div>
+          <div class="hist-date">${dateLabel}</div>
+          <div class="hist-sub">${itemCount} item${itemCount!==1?'s':''} sold</div>
+        </div>
+        <div>
+          <div class="hist-amt">${money(e.total||0)}</div>
+          <div class="hist-split">Cash ${money(e.cash||0)} · Online ${money(e.online||0)}</div>
+        </div>
+      `;
+      listEl.appendChild(div);
+    });
+  } catch(err){
+    listEl.innerHTML = '<div class="empty-state">Could not load history.</div>';
+  }
+}
+
+// init
+loadDay(todayISO());
+</script>
+</body>
+</html>
