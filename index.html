@@ -396,11 +396,13 @@
 
   /* ---- Cash ledger ---- */
   .cash-table-row{
-    display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:6px;padding:8px 4px;
-    border-bottom:1px solid #F0EDE3;font-size:12px;font-family:'IBM Plex Mono';align-items:center;
+    display:grid;grid-template-columns:0.9fr 1fr 1fr 1fr 1fr 1.1fr;gap:4px;padding:8px 2px;
+    border-bottom:1px solid #F0EDE3;font-size:10.5px;font-family:'IBM Plex Mono';align-items:center;
+    min-width:520px;
   }
-  .cash-table-row.head{font-weight:700;color:var(--ink-soft);font-family:'IBM Plex Sans';font-size:11px;text-transform:uppercase;}
+  .cash-table-row.head{font-weight:700;color:var(--ink-soft);font-family:'IBM Plex Sans';font-size:9px;text-transform:uppercase;}
   .cash-table-row:last-child{border-bottom:none;}
+  #cashLedger{overflow-x:auto;}
 
   /* ---- Cash in hand ---- */
   .cash-hand-box{
@@ -427,6 +429,56 @@
   .range-inputs select{
     flex:1;font-family:'IBM Plex Sans';font-size:13px;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
   }
+
+  /* ---- Stock Payments ---- */
+  .pay-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .pay-form input, .pay-form select{
+    font-family:'IBM Plex Sans';font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fdfcf9;
+  }
+  .pay-form-row{display:flex;gap:8px;align-items:center;}
+  .pay-form-row .cur{font-family:'IBM Plex Mono';color:var(--ink-soft);}
+  .pay-form-row input{flex:1.4;}
+  .pay-form-row select{flex:1;}
+
+  .invoice-head-row{
+    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;padding:0 2px;
+    font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-top:6px;
+  }
+  .invoice-row{
+    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;align-items:center;margin-bottom:6px;
+  }
+  .invoice-row input{
+    font-family:'IBM Plex Sans';font-size:12.5px;padding:8px 7px;border:1px solid var(--line);border-radius:7px;background:#fdfcf9;width:100%;
+  }
+  .invoice-row .amt-display{
+    font-family:'IBM Plex Mono';font-size:12.5px;text-align:right;color:var(--ink-soft);padding-right:4px;
+  }
+  .invoice-row .row-del{
+    border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0;
+  }
+  .invoice-total-row{
+    display:flex;justify-content:space-between;align-items:center;padding:10px 4px;margin-top:4px;
+    border-top:2px solid var(--ink);font-family:'IBM Plex Mono';font-weight:700;font-size:15px;
+  }
+  .pay-row{
+    display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px solid #F0EDE3;font-size:12.5px;
+  }
+  .pay-row:last-child{border-bottom:none;}
+  .pay-row .info{flex:1;}
+  .pay-row .info .dist{font-weight:700;}
+  .pay-row .info .item{color:var(--ink-soft);font-size:11.5px;}
+  .pay-row .amt{font-family:'IBM Plex Mono';font-weight:700;margin-right:8px;white-space:nowrap;}
+  .pay-row .mode-tag{
+    font-family:'IBM Plex Sans';font-size:10px;font-weight:700;text-transform:uppercase;padding:1px 7px;border-radius:10px;margin-right:8px;
+  }
+  .pay-row .mode-tag.cash{background:var(--gold-soft);color:var(--gold);}
+  .pay-row .mode-tag.online{background:var(--green-soft);color:var(--green);}
+  .pay-row .del-btn{
+    border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;
+  }
+  .day-summary-row{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;font-family:'IBM Plex Mono';}
+  .day-summary-row:last-child{border-bottom:none;font-weight:700;}
+  .day-summary-row .lbl{font-family:'IBM Plex Sans';font-weight:600;}
 </style>
 </head>
 <body>
@@ -473,6 +525,7 @@
     <button class="tab-btn" id="tabKiranaBtn" onclick="switchTab('kirana')">Kirana</button>
     <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">History</button>
     <button class="tab-btn" id="tabChartsBtn" onclick="switchTab('charts')">📊 Charts</button>
+    <button class="tab-btn" id="tabPaymentsBtn" onclick="switchTab('payments')">💰 Stock Pay</button>
   </div>
 
   <!-- TODAY TAB -->
@@ -663,6 +716,56 @@
       <div class="empty-state" id="prodChartEmpty" style="display:none;">No sales in this range.</div>
     </div>
   </div>
+
+  <!-- PAYMENTS TAB -->
+  <div id="paymentsTab" style="display:none;">
+    <div class="card">
+      <label class="field-label">Stock Payments — pay distributors, day by day</label>
+      <div class="sales-nav">
+        <button onclick="shiftPaymentsDate(-1)">‹</button>
+        <input type="date" id="paymentsDateInput" style="flex:1;">
+        <button onclick="shiftPaymentsDate(1)">›</button>
+      </div>
+
+      <div class="pay-form">
+        <input type="text" id="payDistributor" placeholder="Distributor / Supplier name">
+
+        <div class="invoice-head-row">
+          <span>Item</span><span>Qty</span><span>Price</span><span>Amount</span><span></span>
+        </div>
+        <div id="invoiceRows"></div>
+        <button class="copy-btn" onclick="addInvoiceRow()">+ Add Item</button>
+
+        <div class="invoice-total-row">
+          <span>Total</span>
+          <span id="invoiceTotalVal">₹0</span>
+        </div>
+
+        <div class="pay-form-row">
+          <select id="payMode">
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+        <input type="text" id="payNote" placeholder="Note (optional)">
+        <button class="save-btn" style="margin-top:8px;" onclick="addStockPayment()">Save Invoice</button>
+      </div>
+
+      <datalist id="catalogItemsList"></datalist>
+
+      <div id="paymentsList" style="margin-top:14px;"></div>
+
+      <div class="stock-counts" style="grid-template-columns:1fr 1fr;margin-top:14px;">
+        <div class="stock-count-box red"><div class="n" id="payCashOutVal">₹0</div><div class="l">Cash Out Today</div></div>
+        <div class="stock-count-box yellow"><div class="n" id="payOnlineOutVal">₹0</div><div class="l">Online Out Today</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Day Summary (Sales In vs Stock Out)</label>
+      <div id="paymentsDaySummary"></div>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -723,7 +826,7 @@ function escapeHtml(s){
 }
 
 function switchTab(tab){
-  ['today','stock','sales','kirana','history','charts'].forEach(t => {
+  ['today','stock','sales','kirana','history','charts','payments'].forEach(t => {
     document.getElementById(t+'Tab').style.display = (tab===t) ? 'block':'none';
     document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Btn').classList.toggle('active', tab===t);
   });
@@ -732,6 +835,7 @@ function switchTab(tab){
   if(tab==='sales') openSalesTab();
   if(tab==='kirana') openKiranaTab();
   if(tab==='charts') openChartsTab();
+  if(tab==='payments') openPaymentsTab();
 }
 
 function toggleCat(ci){
@@ -1470,8 +1574,9 @@ async function saveCashAdjustments(list){
   try{ await storageSet('cash:adjustments', JSON.stringify(list)); }catch(e){}
 }
 
-// Cash-in-hand = last "recount" checkpoint, plus all cash collected since, minus deposits/withdrawals since.
-function computeCashInHand(entries, adjustments){
+// Cash-in-hand = last "recount" checkpoint, plus all cash collected since, minus deposits/withdrawals/cash-mode stock payments since.
+function computeCashInHand(entries, adjustments, stockPayments){
+  stockPayments = stockPayments || [];
   const recounts = adjustments.filter(a => a.type==='recount').sort((a,b) => a.date.localeCompare(b.date) || (a.ts||"").localeCompare(b.ts||""));
   let baselineDate = null, baselineTs = null, total = 0;
   if(recounts.length){
@@ -1487,15 +1592,24 @@ function computeCashInHand(entries, adjustments){
     const ts = a.ts || (a.date+"T12:00:00");
     if(!baselineTs || ts > baselineTs) total -= num(a.amount);
   });
+  stockPayments.forEach(p => {
+    if(p.mode !== 'Cash') return;
+    const ts = p.ts || (p.date+"T12:00:00");
+    if(!baselineTs || ts > baselineTs) total -= num(p.amount);
+  });
   return Math.round(total*100)/100;
 }
 
-function renderCashInHand(entries, adjustments){
-  const expected = computeCashInHand(entries, adjustments);
+function renderCashInHand(entries, adjustments, stockPayments){
+  const expected = computeCashInHand(entries, adjustments, stockPayments);
   document.getElementById('cashHandVal').textContent = money(expected);
 
   const listEl = document.getElementById('cashAdjustList');
-  const recent = [...adjustments].sort((a,b) => (b.ts||b.date).localeCompare(a.ts||a.date)).slice(0,8);
+  const stockRows = (stockPayments||[]).filter(p => p.mode==='Cash').map(p => ({
+    date: p.date, ts: p.ts, type: 'withdraw', amount: p.amount, note: 'Stock: ' + p.distributor + (p.item ? ' — '+p.item : '')
+  }));
+  const combined = [...adjustments, ...stockRows];
+  const recent = combined.sort((a,b) => (b.ts||b.date).localeCompare(a.ts||a.date)).slice(0,8);
   if(recent.length === 0){
     listEl.innerHTML = '';
     return;
@@ -1528,7 +1642,8 @@ async function addCashAdjustment(type){
 async function recountCash(){
   const entries = await fetchAllDayEntries();
   const adjustments = await fetchCashAdjustments();
-  const expected = computeCashInHand(entries, adjustments);
+  const stockPayments = await fetchStockPayments();
+  const expected = computeCashInHand(entries, adjustments, stockPayments);
   const countedStr = prompt("Expected cash: " + money(expected) + "\n\nEnter what you actually counted:");
   if(countedStr === null) return;
   const counted = parseFloat(countedStr);
@@ -1548,7 +1663,8 @@ async function loadHistory(){
   try{
     const entries = await fetchAllDayEntries();
     const adjustments = await fetchCashAdjustments();
-    renderCashInHand(entries, adjustments);
+    const stockPayments = await fetchStockPayments();
+    renderCashInHand(entries, adjustments, stockPayments);
 
     if(entries.length === 0){
       listEl.innerHTML = '<div class="empty-state">No entries saved yet.</div>';
@@ -1558,17 +1674,29 @@ async function loadHistory(){
     }
     entries.sort((a,b) => b.date.localeCompare(a.date));
 
+    // group stock payments by date for Cash Out / Online Out columns
+    const payByDate = {};
+    stockPayments.forEach(p => {
+      if(!payByDate[p.date]) payByDate[p.date] = {cash:0, online:0};
+      if(p.mode === 'Cash') payByDate[p.date].cash += num(p.amount);
+      else payByDate[p.date].online += num(p.amount);
+    });
+
     // Cash ledger: ascending order with running cumulative totals
     const ascending = [...entries].sort((a,b) => a.date.localeCompare(b.date));
-    let runCash = 0, runOnline = 0;
+    let runCash = 0, runOnline = 0, runCashOut = 0, runOnlineOut = 0;
     const ledgerEl = document.getElementById('cashLedger');
-    let ledgerHtml = `<div class="cash-table-row head"><span>Date</span><span>Cash</span><span>Online</span><span>Cum. Total</span></div>`;
+    let ledgerHtml = `<div class="cash-table-row head"><span>Date</span><span>Cash In</span><span>Online In</span><span>Cash Out</span><span>Online Out</span><span>Net Cum.</span></div>`;
     ascending.forEach(e => {
+      const pay = payByDate[e.date] || {cash:0, online:0};
       runCash += (e.cash||0);
       runOnline += (e.online||0);
+      runCashOut += pay.cash;
+      runOnlineOut += pay.online;
       const d = new Date(e.date + "T00:00:00");
       const dl = d.toLocaleDateString('en-IN', {day:'2-digit', month:'short'});
-      ledgerHtml += `<div class="cash-table-row"><span>${dl}</span><span>${money(e.cash||0)}</span><span>${money(e.online||0)}</span><span>${money(runCash+runOnline)}</span></div>`;
+      const net = runCash+runOnline-runCashOut-runOnlineOut;
+      ledgerHtml += `<div class="cash-table-row"><span>${dl}</span><span>${money(e.cash||0)}</span><span>${money(e.online||0)}</span><span style="color:var(--red);">${pay.cash?money(pay.cash):'—'}</span><span style="color:var(--red);">${pay.online?money(pay.online):'—'}</span><span>${money(net)}</span></div>`;
     });
     ledgerEl.innerHTML = ledgerHtml || '<div class="empty-state">No entries yet.</div>';
 
@@ -1749,6 +1877,247 @@ async function renderProductSalesChart(){
       plugins: { legend: { display: false } }
     }
   });
+}
+
+// ---------------- STOCK PAYMENTS TAB ----------------
+async function fetchStockPayments(){
+  try{
+    const res = await storageGet('stockpay:log');
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){}
+  return [];
+}
+
+async function saveStockPaymentsList(list){
+  try{ await storageSet('stockpay:log', JSON.stringify(list)); }catch(e){}
+}
+
+let invoiceRows = [{item:'', qty:'', price:''}];
+let catalogDatalistBuilt = false;
+let catalogNameSet = null;
+
+function buildCatalogNameSet(){
+  if(catalogNameSet) return catalogNameSet;
+  catalogNameSet = new Set();
+  CATALOG.forEach(c => c.items.forEach(it => catalogNameSet.add(it.name)));
+  return catalogNameSet;
+}
+
+function populateCatalogDatalist(){
+  if(catalogDatalistBuilt) return;
+  const dl = document.getElementById('catalogItemsList');
+  const names = [];
+  CATALOG.forEach(c => c.items.forEach(it => names.push(it.name)));
+  dl.innerHTML = names.map(n => `<option value="${escapeHtml(n)}"></option>`).join('');
+  catalogDatalistBuilt = true;
+}
+
+function renderInvoiceRows(){
+  const wrap = document.getElementById('invoiceRows');
+  wrap.innerHTML = invoiceRows.map((r, i) => {
+    const amt = (num(r.qty) * num(r.price));
+    return `<div class="invoice-row">
+      <input type="text" list="catalogItemsList" placeholder="Item name" value="${escapeHtml(r.item)}" onchange="updateInvoiceRow(${i},'item',this.value)">
+      <input type="number" placeholder="Qty" inputmode="decimal" value="${r.qty}" oninput="updateInvoiceRow(${i},'qty',this.value)">
+      <input type="number" placeholder="Price" inputmode="decimal" value="${r.price}" oninput="updateInvoiceRow(${i},'price',this.value)">
+      <span class="amt-display">${amt ? money(amt) : '—'}</span>
+      ${invoiceRows.length > 1 ? `<button class="row-del" onclick="removeInvoiceRow(${i})">✕</button>` : '<span></span>'}
+    </div>`;
+  }).join('');
+  updateInvoiceTotalDisplay();
+}
+
+function addInvoiceRow(){
+  invoiceRows.push({item:'', qty:'', price:''});
+  renderInvoiceRows();
+}
+
+function removeInvoiceRow(idx){
+  invoiceRows.splice(idx,1);
+  renderInvoiceRows();
+}
+
+function updateInvoiceRow(idx, field, value){
+  invoiceRows[idx][field] = value;
+  updateInvoiceTotalDisplay();
+  // only refresh the one amount cell + total (avoid re-rendering while typing, which drops focus)
+  const wrap = document.getElementById('invoiceRows');
+  const row = wrap.children[idx];
+  if(row){
+    const amt = num(invoiceRows[idx].qty) * num(invoiceRows[idx].price);
+    row.querySelector('.amt-display').textContent = amt ? money(amt) : '—';
+  }
+}
+
+function computeInvoiceTotal(){
+  return invoiceRows.reduce((s,r) => s + num(r.qty)*num(r.price), 0);
+}
+
+function updateInvoiceTotalDisplay(){
+  document.getElementById('invoiceTotalVal').textContent = money(computeInvoiceTotal());
+}
+
+function shiftPaymentsDate(delta){
+  const input = document.getElementById('paymentsDateInput');
+  const d = new Date(input.value + "T00:00:00");
+  d.setDate(d.getDate()+delta);
+  const iso = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  input.value = iso;
+  renderPaymentsForDate(iso);
+}
+
+function openPaymentsTab(){
+  populateCatalogDatalist();
+  const input = document.getElementById('paymentsDateInput');
+  if(!input.value) input.value = todayISO();
+  input.onchange = () => renderPaymentsForDate(input.value);
+  invoiceRows = [{item:'', qty:'', price:''}];
+  renderInvoiceRows();
+  renderPaymentsForDate(input.value);
+}
+
+// Adds received qty into that date's "Added" stock field for any items whose
+// name exactly matches a catalog product. Non-matching names are left untouched
+// (still recorded in the invoice) so nothing is silently guessed.
+async function applyInvoiceToStock(dateISO, items){
+  const names = buildCatalogNameSet();
+  const matched = items.filter(it => names.has(it.item) && num(it.qty) > 0);
+  const unmatched = items.filter(it => !names.has(it.item));
+  if(matched.length === 0) return { matchedCount: 0, unmatchedNames: unmatched.map(u=>u.item) };
+
+  if(dateISO === currentDate){
+    // update the live in-memory day
+    matched.forEach(m => {
+      cats.forEach(c => c.items.forEach(it => {
+        if(it.name === m.item) it.added = num(it.added) + num(m.qty);
+      }));
+    });
+    renderCats();
+    await saveDaySilent();
+  } else {
+    let dayData = null;
+    try{
+      const res = await storageGet('day:' + fmtDateKey(dateISO));
+      if(res && res.value) dayData = JSON.parse(res.value);
+    }catch(e){}
+    if(!dayData){
+      dayData = { date: dateISO, cats: freshCats(), cash:0, online:0, total:0 };
+    }
+    matched.forEach(m => {
+      (dayData.cats||[]).forEach(c => (c.items||[]).forEach(it => {
+        if(it.name === m.item) it.added = num(it.added) + num(m.qty);
+      }));
+    });
+    try{ await storageSet('day:' + fmtDateKey(dateISO), JSON.stringify(dayData)); }catch(e){}
+  }
+  return { matchedCount: matched.length, unmatchedNames: unmatched.map(u=>u.item) };
+}
+
+async function saveDaySilent(){
+  // Persist the current in-memory day without disturbing the main Save button's status message.
+  try{
+    const cash = num(document.getElementById('cashInput').value);
+    const online = num(document.getElementById('onlineInput').value);
+    const data = { date: currentDate, cats: cats, total: totalSales(), cash: cash, online: online };
+    await storageSet('day:' + fmtDateKey(currentDate), JSON.stringify(data));
+  }catch(e){}
+}
+
+async function addStockPayment(){
+  const distributor = document.getElementById('payDistributor').value.trim();
+  const mode = document.getElementById('payMode').value;
+  const note = document.getElementById('payNote').value.trim();
+  const date = document.getElementById('paymentsDateInput').value || todayISO();
+
+  const validRows = invoiceRows
+    .map(r => ({ item: r.item.trim(), qty: num(r.qty), price: num(r.price) }))
+    .filter(r => r.item && (r.qty > 0 || r.price > 0));
+
+  if(!distributor){ alert("Enter a distributor / supplier name."); return; }
+  if(validRows.length === 0){ alert("Add at least one item with a qty/price."); return; }
+
+  const total = validRows.reduce((s,r) => s + r.qty*r.price, 0);
+  const itemSummary = validRows.map(r => r.item).join(', ');
+
+  const list = await fetchStockPayments();
+  list.push({
+    id: Date.now() + "-" + Math.floor(Math.random()*1000),
+    date, ts: new Date().toISOString(),
+    distributor, item: itemSummary, items: validRows,
+    amount: total, mode, note
+  });
+  await saveStockPaymentsList(list);
+
+  const result = await applyInvoiceToStock(date, validRows);
+
+  document.getElementById('payDistributor').value = "";
+  document.getElementById('payNote').value = "";
+  invoiceRows = [{item:'', qty:'', price:''}];
+  renderInvoiceRows();
+
+  renderPaymentsForDate(date);
+
+  if(result.matchedCount > 0){
+    let msg = result.matchedCount + " item(s) added to " + (date===currentDate?"today's":date+"'s") + " stock automatically.";
+    if(result.unmatchedNames.length) msg += "\n'" + result.unmatchedNames.join("', '") + "' didn't match a catalog product name exactly, so only the invoice was recorded for them.";
+    alert(msg);
+  } else if(result.unmatchedNames.length){
+    alert("Invoice saved. None of the item names matched your catalog exactly, so stock wasn't auto-updated — use the exact product name (pick from the suggestions as you type) if you want that to happen next time.");
+  }
+}
+
+async function deleteStockPayment(id){
+  if(!confirm("Remove this payment entry?")) return;
+  const list = await fetchStockPayments();
+  const updated = list.filter(p => p.id !== id);
+  await saveStockPaymentsList(updated);
+  renderPaymentsForDate(document.getElementById('paymentsDateInput').value);
+}
+
+async function renderPaymentsForDate(dateISO){
+  const listEl = document.getElementById('paymentsList');
+  listEl.innerHTML = '<div class="empty-state">Loading…</div>';
+  const all = await fetchStockPayments();
+  const dayPayments = all.filter(p => p.date === dateISO).sort((a,b) => (a.ts||"").localeCompare(b.ts||""));
+
+  let cashOut = 0, onlineOut = 0;
+  if(dayPayments.length === 0){
+    listEl.innerHTML = '<div class="empty-state">No stock payments logged for this date.</div>';
+  } else {
+    listEl.innerHTML = dayPayments.map(p => {
+      if(p.mode === 'Cash') cashOut += num(p.amount); else onlineOut += num(p.amount);
+      const itemLines = (p.items||[]).map(it => `${escapeHtml(it.item)} — ${it.qty} × ${money(it.price)}`).join('<br>');
+      return `<div class="pay-row">
+        <span class="mode-tag ${p.mode.toLowerCase()}">${p.mode}</span>
+        <span class="info"><span class="dist">${escapeHtml(p.distributor)}</span>${itemLines ? '<br><span class="item">'+itemLines+'</span>' : (p.item ? '<br><span class="item">'+escapeHtml(p.item)+'</span>' : '')}${p.note ? '<br><span class="item">'+escapeHtml(p.note)+'</span>' : ''}</span>
+        <span class="amt">${money(p.amount)}</span>
+        <button class="del-btn" onclick="deleteStockPayment('${p.id}')">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('payCashOutVal').textContent = money(cashOut);
+  document.getElementById('payOnlineOutVal').textContent = money(onlineOut);
+
+  // Day summary: sales in vs stock out
+  let dayData = null;
+  try{
+    const res = await storageGet('day:' + fmtDateKey(dateISO));
+    if(res && res.value) dayData = JSON.parse(res.value);
+  }catch(e){}
+  const cashIn = dayData ? num(dayData.cash) : 0;
+  const onlineIn = dayData ? num(dayData.online) : 0;
+  const netCash = cashIn - cashOut;
+  const netOnline = onlineIn - onlineOut;
+
+  document.getElementById('paymentsDaySummary').innerHTML = `
+    <div class="day-summary-row"><span class="lbl">Cash In (Sales)</span><span>${money(cashIn)}</span></div>
+    <div class="day-summary-row"><span class="lbl">Cash Out (Stock)</span><span style="color:var(--red);">${money(cashOut)}</span></div>
+    <div class="day-summary-row"><span class="lbl">Online In (Sales)</span><span>${money(onlineIn)}</span></div>
+    <div class="day-summary-row"><span class="lbl">Online Out (Stock)</span><span style="color:var(--red);">${money(onlineOut)}</span></div>
+    <div class="day-summary-row"><span class="lbl">Net Cash Movement</span><span>${money(netCash)}</span></div>
+    <div class="day-summary-row"><span class="lbl">Net Online Movement</span><span>${money(netOnline)}</span></div>
+  `;
 }
 
 // init
