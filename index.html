@@ -128,7 +128,7 @@
     overflow:hidden;
   }
   .cat-header{
-    display:flex;justify-space-between;align-items:center;
+    display:flex;justify-content:space-between;align-items:center;
     padding:11px 14px;
     background:#F5F2E9;
     cursor:pointer;
@@ -166,8 +166,8 @@
   }
   .qty-grid{
     display:grid;
-    grid-template-columns:repeat(5, 1fr);
-    gap:5px;
+    grid-template-columns:repeat(6, 1fr);
+    gap:4px;
   }
   .price-grid{
     display:grid;
@@ -176,15 +176,16 @@
     margin-top:7px;
   }
   .qty-box label{
-    font-size:9.5px;text-transform:uppercase;letter-spacing:0.03em;
+    font-size:9px;text-transform:uppercase;letter-spacing:0.02em;
     color:var(--ink-soft);font-weight:600;display:block;margin-bottom:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .qty-box input{
     width:100%;
     font-family:'IBM Plex Mono';
-    font-size:14px;
+    font-size:13.5px;
     text-align:center;
-    padding:6px 3px;
+    padding:6px 2px;
     border:1px solid var(--line);
     border-radius:6px;
     background:#fdfcf9;
@@ -193,7 +194,8 @@
   .qty-box.mrp input{background:var(--gold-soft);border-color:#EAD9AE;}
   .qty-box.agent input{background:#EFEAE0;border-color:#DCD3C0;}
   .qty-box.home input{background:#F0E6EE;border-color:#DCC5D6;}
-  .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;}
+  .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;font-weight:700;}
+  .qty-box.leftover input{background:#E3F2FD;border-color:#BBDEFB;font-weight:700;color:#0D47A1;}
 
   .item-foot{
     display:flex;justify-content:space-between;
@@ -540,12 +542,20 @@
       <label class="field-label">Date</label>
       <input type="date" id="dateInput">
 
-      <!-- QUICK BULK TEXT ENTRY FEATURE -->
-      <div style="margin-top: 14px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #faf9f5;">
-        <label class="field-label" style="color: var(--green);">⚡ Quick Bulk Text Entry ("Stock Pay")</label>
-        <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 6px;">Type line by line (e.g. <code>milk 25</code> or <code>curd 10</code>):</p>
-        <textarea id="quickBulkInput" class="bulk-box" rows="3" placeholder="milk 25&#10;curd 10&#10;paneer 15"></textarea>
-        <button class="copy-btn" style="background:var(--green); color:#fff; border:none; margin-top:6px;" onclick="applyQuickBulkText()">Apply Bulk Quantities</button>
+      <!-- OPTION B: QUICK BULK LEFTOVER ENTRY FEATURE -->
+      <div style="margin-top: 14px; margin-bottom: 12px; border: 1px solid #BBDEFB; border-radius: 8px; padding: 12px; background: #E3F2FD;">
+        <label class="field-label" style="color: #0D47A1;">🌙 Option B: Quick Bulk "Leftover" Text Entry</label>
+        <p style="font-size:11.5px; color:#1565C0; margin:0 0 6px;">Type remaining unsold packets at night (e.g. <code>tm 8</code> or <code>curd 12</code>) — <b>Sold</b> calculates automatically!</p>
+        <textarea id="quickBulkLeftoverInput" class="bulk-box" rows="2" placeholder="tm 8&#10;fcm 3&#10;curd 12"></textarea>
+        <button class="copy-btn" style="background:#0D47A1; color:#fff; border:none; margin-top:6px;" onclick="applyQuickBulkLeftoverText()">Calculate Sold from Leftovers</button>
+      </div>
+
+      <!-- QUICK BULK SOLD ENTRY FEATURE -->
+      <div style="margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #faf9f5;">
+        <label class="field-label" style="color: var(--green);">⚡ Quick Bulk "Sold" Text Entry</label>
+        <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 6px;">Type line by line if entering direct sold qty (e.g. <code>milk 25</code> or <code>curd 10</code>):</p>
+        <textarea id="quickBulkInput" class="bulk-box" rows="2" placeholder="milk 25&#10;curd 10"></textarea>
+        <button class="copy-btn" style="background:var(--green); color:#fff; border:none; margin-top:6px;" onclick="applyQuickBulkText()">Apply Sold Quantities</button>
       </div>
 
       <!-- DYNAMIC PRODUCT ADDITION FEATURE -->
@@ -572,7 +582,7 @@
       </div>
 
       <div class="legend">
-        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold to customers &nbsp;·&nbsp; <b>Home</b> = used at home, not sold &nbsp;·&nbsp; <b>Order</b> = qty to order for tomorrow &nbsp;·&nbsp; <b>Closing</b> auto-calculated. Tap a category to expand.
+        <b>Opening</b> = start stock &nbsp;·&nbsp; <b>Added</b> = new stock &nbsp;·&nbsp; <b>Leftover</b> = remaining packets at night &nbsp;·&nbsp; <b>Sold</b> = auto-calculated ($Opening + Added - Home - Leftover$) &nbsp;·&nbsp; <b>Home</b> = home use.
       </div>
       <input type="text" class="search-box" id="searchBox" placeholder="Search a product…" oninput="onSearch()">
 
@@ -904,7 +914,6 @@ let CATALOG = [
   {"category": "OTHERS", "items": [{"name": "ICE CREAM CUP", "mrp": 20, "agent": 15}, {"name": "WATER BOTTLE 1L", "mrp": 20, "agent": 15}]}
 ];
 
-// Alias mapping for stock payment bill items
 const ALIAS_MAP = {
   "TM": "TONNED MILK 500ML",
   "TM 500ML": "TONNED MILK 500ML",
@@ -920,21 +929,14 @@ const ALIAS_MAP = {
   "200GR CURD CUPS": "CURD 200 G CUP",
   "500GR CURD CUPS": "S.T.M CURD 500G CUPS",
   "1KG CURD DISPO": "STM CURD 1 KG DISPO",
-  "1/2KG CURD CUPS": "S.T.M CURD 500G CUPS",
   "LASSI SACHET": "LASSI SACHET 180 GMS",
   "VANILA GLASS": "VANILA LASSI GLASS",
   "JUNNU": "JUNNU BIG",
   "JUNNU 50GR": "JUNNU 50GMS CUP",
   "JUNNU 100GR": "JUNNU 100GMS CUP",
-  "JUNNU SMALL": "JUNNU SMALL",
-  "JUNNU BIG": "JUNNU BIG",
   "200GMS PANEER": "PANNEER 200 GRMS",
   "500GMS PANEER": "PANNEER 500 GRMS",
-  "BASUNDI 50GR": "BASUNDHI 50 GMS(HOMEPACK)12",
-  "DTCM TETRA": "DTCM TETRA 180 ML (APS)",
   "DOODHPEDA": "DOODH PEDA(MAP) 200 GMS",
-  "DOODHPEDA 20GR": "DOODH PEDA 20GMS",
-  "DOODHPEDA 200GR": "DOODH PEDA(MAP) 200 GMS",
   "KALAKAND": "KALAKAND (MAP)200 GMS",
   "MILKCAKE": "MILK CAKE (MAP)200 GMS",
   "MALAI LADDU": "MALAI LADDU (MAP)150GMS",
@@ -943,46 +945,15 @@ const ALIAS_MAP = {
   "KAJU BARFI": "KAJU BARFI 200 GMS",
   "BADAM BARFI": "BADAM BARFI 200GMS",
   "MYSOREPAK": "MYSORE PAK 200 GMS",
-  "KAJU BITES": "KAJU BITEES 200G",
-  "JOWAR LADDU": "JOWR LADDU 200 GMS",
-  "KORRA LADDU": "KORRALADU 200 GMS",
-  "MIXED MILLET LADDU": "MIXED MILLET LADDU 200 GMS",
-  "S.L KALAKAND": "SUGARLESS KALAKAND (MAP)200 GMS",
-  "S.L RAGILADDU": "SUGAR LESS RAGI LADDU 200G",
-  "S.L SUNNUNDA": "SUGAR LESS SUNNUNDALU 200G",
-  "GULABJAM 100GR": "GULABJAM 100 GMS",
-  "RASAGULLA 100GR": "GULABJAM 100 GMS",
-  "BADAM MILK POWDER": "BADAM MILK POWDER 200GMS",
   "CHO CUP CAKES": "CHOCOLATE CUP CAKE 20GMS",
   "VEN CUP CAKES": "VENILA CUP CAKE 20GMS",
   "ORANGE BAR CAKES": "ORANGE BAR CAKE",
   "PINEAPPLE BAR CAKES": "PINE APPLE BAR CK 32G",
-  "CUP CAKES (CHO-5 & VAN -2)": "CUP CAKES (CHO-5 & VAN -2)",
-  "BAR CAKES (PIN -5 & ORA - 5)": "BAR CAKES (PIN -5 & ORA - 5)",
-  "NUT BADAM": "SF NUT BADAM 200ML",
-  "MULTI BADAM": "SFM CHOCOLATE MILK",
-  "GLASS BADAM": "S F MILK ( DISPO)",
-  "PP BADAM": "S F MILK ( PP)",
   "100GR C.BUTTER": "COOKING BUTTER 100 GMS",
   "500GR C.BUTTER": "C BUTTER 500GMS",
   "100ML B.GHEE JAR": "B.GHEE 100ML JAR",
   "200ML B.GHEE JAR": "B.GHEE 200ML JAR",
-  "500ML B.GHEE JAR": "B. GHEE 500ML JAR",
-  "500ML B.GHEE SACHET": "BUFFELOGHEE 500ML",
-  "1LTR B.GHEE SACHET": "BUFFELOGHEE 1000ML (4 PACK)",
-  "100ML C.GHEE JAR": "COW GHEE 100ML JARS",
-  "200ML C.GHEE JAR": "COW GHEE 200ML JARS(60)",
-  "500ML C.GHEE SACHET": "COWGHEE 500ML (8 PACK)",
-  "200ML D.GHEE SACHET": "BGHEE 200ML DINING",
-  "RUSK 55GR": "RUSK 55GMS PACK(40)",
-  "CHILLI POWDER 50GR": "CHILLI POWDER(50GR)",
-  "TURMERIC POWDER 50GR": "TURMERIC POWDER(50G)",
-  "CHICKEN MASALA 8GR": "CHIKEN MASALA ( 8 G)",
-  "GARAM MASALA 8GR": "GARAM MASALA (8 G)",
-  "SAMBAR MASALA 8GR": "SABAR MASALA (8 G)",
-  "RAGI ALMOND COOKIES": "RAGI ALMOND COOKIES100G",
-  "JOWAR CASHEW COOKIES": "JOWAR CASHEW COOKIES 100G",
-  "PLUM CAKE": "PLUM CAKE"
+  "500ML B.GHEE JAR": "B. GHEE 500ML JAR"
 };
 
 function resolveCatalogName(rawName) {
@@ -997,128 +968,12 @@ function resolveCatalogName(rawName) {
   return matchedName || trimmed;
 }
 
-// ========================================================
-// 📦 HISTORICAL BILL DATA SEEDER
-// ========================================================
 const SEED_DATA = {
-  "2026-07-30": {
-    cash: 2731, online: 0, total: 2731,
-    items: {
-      "TONNED MILK 500ML": { sold: 6, agent: 57.85 },
-      "PANNEER 200 GRMS": { sold: 10, agent: 80 },
-      "PANNEER 500 GRMS": { sold: 8, agent: 198 }
-    }
-  },
-  "2026-07-31": {
-    cash: 1426, online: 0, total: 1426,
-    items: {
-      "TONNED MILK 500ML": { sold: 10, agent: 57.85 },
-      "FULLCREAMILK 500ML": { sold: 6, agent: 73.6 },
-      "TONNEDMILK 170ML": { sold: 30, agent: 8.35 },
-      "JUNNU BIG": { sold: 1, agent: 155 }
-    }
-  },
-  "2026-08-01": {
-    cash: 10000, online: 0, total: 10000,
-    items: {
-      "TONNED MILK 500ML": { sold: 36, agent: 57.85 },
-      "FULLCREAMILK 500ML": { sold: 18, agent: 73.6 },
-      "STM 500 ML(SANGAM PREMIUM)": { sold: 4, agent: 61.75 },
-      "TONNEDMILK 170ML": { sold: 120, agent: 8.35 },
-      "CURD 450GMS SACHET": { sold: 24, agent: 61 },
-      "CURD 120 GMS SATCHET": { sold: 168, agent: 7.6 },
-      "DOODH PEDA(MAP) 200 GMS": { sold: 3, agent: 81 },
-      "STM CURD 1 KG DISPO": { sold: 2, agent: 88 },
-      "S.T.M CURD 500G CUPS": { sold: 4, agent: 44 },
-      "GULABJAM 100 GMS": { sold: 6, agent: 18.5 },
-      "PANNEER 200 GRMS": { sold: 10, agent: 80 },
-      "CUP CAKES (CHO-5 & VAN -2)": { sold: 7, agent: 50 },
-      "BAR CAKES (PIN -5 & ORA - 5)": { sold: 10, agent: 52 },
-      "JUNNU SMALL": { sold: 1, agent: 72 },
-      "JUNNU BIG": { sold: 1, agent: 155 }
-    }
-  },
-  "2026-08-02": {
-    cash: 4176, online: 0, total: 4176,
-    items: {
-      "TONNED MILK 500ML": { sold: 50, agent: 57.85 },
-      "TONNEDMILK 170ML": { sold: 30, agent: 8.35 },
-      "CURD 120 GMS SATCHET": { sold: 84, agent: 7.6 },
-      "STM CURD 1 KG DISPO": { sold: 2, agent: 88 },
-      "VANILA LASSI GLASS": { sold: 12, agent: 18.25 }
-    }
-  }
+  "2026-07-30": { cash: 2731, online: 0, total: 2731, items: { "TONNED MILK 500ML": { sold: 6, agent: 57.85 }, "PANNEER 200 GRMS": { sold: 10, agent: 80 }, "PANNEER 500 GRMS": { sold: 8, agent: 198 } } },
+  "2026-07-31": { cash: 1426, online: 0, total: 1426, items: { "TONNED MILK 500ML": { sold: 10, agent: 57.85 }, "FULLCREAMILK 500ML": { sold: 6, agent: 73.6 }, "TONNEDMILK 170ML": { sold: 30, agent: 8.35 }, "JUNNU BIG": { sold: 1, agent: 155 } } },
+  "2026-08-01": { cash: 10000, online: 0, total: 10000, items: { "TONNED MILK 500ML": { sold: 36, agent: 57.85 }, "FULLCREAMILK 500ML": { sold: 18, agent: 73.6 }, "STM 500 ML(SANGAM PREMIUM)": { sold: 4, agent: 61.75 }, "TONNEDMILK 170ML": { sold: 120, agent: 8.35 }, "CURD 450GMS SACHET": { sold: 24, agent: 61 }, "CURD 120 GMS SATCHET": { sold: 168, agent: 7.6 }, "DOODH PEDA(MAP) 200 GMS": { sold: 3, agent: 81 }, "STM CURD 1 KG DISPO": { sold: 2, agent: 88 }, "S.T.M CURD 500G CUPS": { sold: 4, agent: 44 }, "GULABJAM 100 GMS": { sold: 6, agent: 18.5 }, "PANNEER 200 GRMS": { sold: 10, agent: 80 }, "CUP CAKES (CHO-5 & VAN -2)": { sold: 7, agent: 50 }, "BAR CAKES (PIN -5 & ORA - 5)": { sold: 10, agent: 52 }, "JUNNU SMALL": { sold: 1, agent: 72 }, "JUNNU BIG": { sold: 1, agent: 155 } } },
+  "2026-08-02": { cash: 4176, online: 0, total: 4176, items: { "TONNED MILK 500ML": { sold: 50, agent: 57.85 }, "TONNEDMILK 170ML": { sold: 30, agent: 8.35 }, "CURD 120 GMS SATCHET": { sold: 84, agent: 7.6 }, "STM CURD 1 KG DISPO": { sold: 2, agent: 88 }, "VANILA LASSI GLASS": { sold: 12, agent: 18.25 } } }
 };
-
-const MOOSAPET_BULK_ITEMS = [
-  { item: "TM 500ML", qty: 12, price: 57.85 },
-  { item: "STM", qty: 6, price: 61.75 },
-  { item: "FCM", qty: 6, price: 73.6 },
-  { item: "GOLD PLUS", qty: 6, price: 75.4 },
-  { item: "STM 150ML", qty: 30, price: 8.35 },
-  { item: "125GR CURD", qty: 168, price: 7.6 },
-  { item: "450GR CURD", qty: 12, price: 61 },
-  { item: "900GR CURD", qty: 6, price: 55.5 },
-  { item: "100GR CURD CUPS", qty: 16, price: 8 },
-  { item: "200GR CURD CUPS", qty: 6, price: 17.5 },
-  { item: "500GR CURD CUPS", qty: 6, price: 46 },
-  { item: "1KG CURD DISPO", qty: 3, price: 88 },
-  { item: "LASSI SACHET", qty: 30, price: 10.4 },
-  { item: "BUTTERMILK", qty: 60, price: 7.65 },
-  { item: "VANILA GLASS", qty: 12, price: 18.5 },
-  { item: "JUNNU 50GR", qty: 8, price: 9 },
-  { item: "JUNNU 100GR", qty: 9, price: 17.25 },
-  { item: "BASUNDI 50GR", qty: 24, price: 11 },
-  { item: "DTCM TETRA", qty: 1, price: 350 },
-  { item: "DOODHPEDA 20GR", qty: 30, price: 8.9 },
-  { item: "DOODHPEDA 200GR", qty: 5, price: 81 },
-  { item: "KALAKAND", qty: 5, price: 81 },
-  { item: "MILKCAKE", qty: 2, price: 90 },
-  { item: "MALAI LADDU", qty: 2, price: 79 },
-  { item: "RAGILADDU", qty: 2, price: 88 },
-  { item: "SUNNUNDA", qty: 2, price: 112 },
-  { item: "KAJU BARFI", qty: 1, price: 135 },
-  { item: "BADAM BARFI", qty: 1, price: 114 },
-  { item: "MYSOREPAK", qty: 1, price: 78 },
-  { item: "KAJU BITES", qty: 1, price: 182 },
-  { item: "JOWAR LADDU", qty: 1, price: 88 },
-  { item: "KORRA LADDU", qty: 1, price: 88 },
-  { item: "MIXED MILLET LADDU", qty: 1, price: 88 },
-  { item: "S.L KALAKAND", qty: 2, price: 106 },
-  { item: "S.L RAGILADDU", qty: 2, price: 112 },
-  { item: "S.L SUNNUNDA", qty: 2, price: 112 },
-  { item: "GULABJAM 100GR", qty: 6, price: 18.5 },
-  { item: "RASAGULLA 100GR", qty: 6, price: 18.5 },
-  { item: "BADAM MILK POWDER", qty: 2, price: 63 },
-  { item: "CHO CUP CAKES", qty: 5, price: 50 },
-  { item: "VEN CUP CAKES", qty: 5, price: 50 },
-  { item: "ORANGE BAR CAKES", qty: 2, price: 52 },
-  { item: "PINEAPPLE BAR CAKES", qty: 2, price: 52 },
-  { item: "NUT BADAM", qty: 2, price: 600 },
-  { item: "MULTI BADAM", qty: 2, price: 480 },
-  { item: "GLASS BADAM", qty: 2, price: 550 },
-  { item: "PP BADAM", qty: 2, price: 480 },
-  { item: "100GR C.BUTTER", qty: 10, price: 62 },
-  { item: "500GR C.BUTTER", qty: 10, price: 266 },
-  { item: "100ML B.GHEE JAR", qty: 20, price: 67 },
-  { item: "200ML B.GHEE JAR", qty: 10, price: 123 },
-  { item: "500ML B.GHEE JAR", qty: 8, price: 308 },
-  { item: "500ML B.GHEE SACHET", qty: 8, price: 305 },
-  { item: "1LTR B.GHEE SACHET", qty: 4, price: 610 },
-  { item: "100ML C.GHEE JAR", qty: 20, price: 66 },
-  { item: "200ML C.GHEE JAR", qty: 10, price: 123 },
-  { item: "500ML C.GHEE SACHET", qty: 8, price: 305 },
-  { item: "200ML D.GHEE SACHET", qty: 10, price: 133 },
-  { item: "RUSK 55GR", qty: 40, price: 8.5 },
-  { item: "CHILLI POWDER 50GR", qty: 20, price: 13 },
-  { item: "TURMERIC POWDER 50GR", qty: 20, price: 11 },
-  { item: "CHICKEN MASALA 8GR", qty: 50, price: 2.75 },
-  { item: "GARAM MASALA 8GR", qty: 50, price: 2.9 },
-  { item: "SAMBAR MASALA 8GR", qty: 50, price: 2.75 },
-  { item: "RAGI ALMOND COOKIES", qty: 12, price: 35 },
-  { item: "JOWAR CASHEW COOKIES", qty: 12, price: 35 },
-  { item: "PLUM CAKE", qty: 2, price: 25 }
-];
 
 async function seedHistoricalData() {
   for (const dateISO of Object.keys(SEED_DATA)) {
@@ -1131,112 +986,12 @@ async function seedHistoricalData() {
         if (seed.items[it.name]) {
           it.sold = seed.items[it.name].sold;
           if (seed.items[it.name].agent) it.agent = seed.items[it.name].agent;
+          it.leftover = Math.max(0, num(it.opening) + num(it.added) - num(it.home) - num(it.sold));
         }
       }));
-      const payload = {
-        date: dateISO,
-        cats: dayCats,
-        total: seed.total,
-        cash: seed.cash,
-        online: seed.online
-      };
+      const payload = { date: dateISO, cats: dayCats, total: seed.total, cash: seed.cash, online: seed.online };
       await storageSet(key, JSON.stringify(payload));
     }
-  }
-
-  // Seed Stock Payments Log with resolved official names for all dates
-  const defaultPayments = [
-    {
-      id: "seed-moosapet-29",
-      date: "2026-07-29",
-      ts: "2026-07-29T10:00:00.000Z",
-      distributor: "Moosapet New Parlour",
-      item: "67 Bulk Items Invoice",
-      items: MOOSAPET_BULK_ITEMS.map(it => ({ item: resolveCatalogName(it.item), qty: it.qty, price: it.price })),
-      amount: 37326,
-      mode: "Cash",
-      note: "Bulk Stock Invoice"
-    },
-    {
-      id: "seed-30",
-      date: "2026-07-30",
-      ts: "2026-07-30T10:00:00.000Z",
-      distributor: "Annapurna Dairy Parlour",
-      item: "TM, Paneer 200g & 500g",
-      items: [
-        {item: resolveCatalogName("TM 500ML"), qty:6, price:57.85},
-        {item: resolveCatalogName("200GMS PANEER"), qty:10, price:80},
-        {item: resolveCatalogName("500GMS PANEER"), qty:8, price:198}
-      ],
-      amount: 2731,
-      mode: "Cash",
-      note: "Daily Supplier Invoice"
-    },
-    {
-      id: "seed-31",
-      date: "2026-07-31",
-      ts: "2026-07-31T10:00:00.000Z",
-      distributor: "Annapurna Dairy Parlour",
-      item: "TM, FCM, S.Milk, Junnu",
-      items: [
-        {item: resolveCatalogName("TM 500ML"), qty:10, price:57.85},
-        {item: resolveCatalogName("FULLCREAMILK 500ML"), qty:6, price:73.6},
-        {item: resolveCatalogName("S.MILK"), qty:30, price:8.35},
-        {item: resolveCatalogName("JUNNU"), qty:1, price:155}
-      ],
-      amount: 1426,
-      mode: "Cash",
-      note: "Daily Supplier Invoice"
-    },
-    {
-      id: "seed-01",
-      date: "2026-08-01",
-      ts: "2026-08-01T10:00:00.000Z",
-      distributor: "Annapurna Dairy Parlour",
-      item: "Milk, Curd, Paneer & Sweets Invoice",
-      items: [
-        {item: resolveCatalogName("TM 500ML"), qty:36, price:57.85},
-        {item: resolveCatalogName("FULLCREAMILK 500ML"), qty:18, price:73.6},
-        {item: resolveCatalogName("STM"), qty:4, price:61.75},
-        {item: resolveCatalogName("S.MILK"), qty:120, price:8.35},
-        {item: resolveCatalogName("450GR CURD"), qty:24, price:61},
-        {item: resolveCatalogName("125GR CURD"), qty:168, price:7.6},
-        {item: resolveCatalogName("DOODHPEDA"), qty:3, price:81},
-        {item: resolveCatalogName("1KG CURD DISPO"), qty:2, price:88},
-        {item: resolveCatalogName("1/2KG CURD CUPS"), qty:4, price:44},
-        {item: resolveCatalogName("GULABJAM 100GR"), qty:6, price:18.5},
-        {item: resolveCatalogName("200GMS PANEER"), qty:10, price:80},
-        {item: resolveCatalogName("CUP CAKES (CHO-5 & VAN -2)"), qty:7, price:50},
-        {item: resolveCatalogName("BAR CAKES (PIN -5 & ORA - 5)"), qty:10, price:52},
-        {item: resolveCatalogName("JUNNU SMALL"), qty:1, price:72},
-        {item: resolveCatalogName("JUNNU BIG"), qty:1, price:155}
-      ],
-      amount: 10000,
-      mode: "Cash",
-      note: "Daily Supplier Invoice"
-    },
-    {
-      id: "seed-02",
-      date: "2026-08-02",
-      ts: "2026-08-02T10:00:00.000Z",
-      distributor: "Annapurna Dairy Parlour",
-      item: "TM, S.Milk, Curd & Lassi",
-      items: [
-        {item: resolveCatalogName("TM 500ML"), qty:50, price:57.85},
-        {item: resolveCatalogName("S.MILK"), qty:30, price:8.35},
-        {item: resolveCatalogName("125GR CURD"), qty:84, price:7.6},
-        {item: resolveCatalogName("1KG CURD DISPO"), qty:2, price:88},
-        {item: resolveCatalogName("VANILA GLASS"), qty:12, price:18.25}
-      ],
-      amount: 4176,
-      mode: "Cash",
-      note: "Daily Supplier Invoice"
-    }
-  ];
-
-  await saveStockPaymentsList(defaultPayments);
-  for (const p of defaultPayments) {
-    await applyInvoiceToStock(p.date, p.items);
   }
 }
 
@@ -1276,7 +1031,7 @@ async function loadCustomCatalog() {
 function freshCats(){
   return CATALOG.map(c => ({
     category: c.category,
-    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, home:0, order:0, mrp: it.mrp, agent: it.agent }))
+    items: c.items.map(it => ({ name: it.name, opening:0, added:0, leftover:0, sold:0, home:0, order:0, mrp: it.mrp, agent: it.agent }))
   }));
 }
 
@@ -1321,10 +1076,10 @@ window.onSearch = function(){
   renderCats();
 };
 
-// ⚡ QUICK BULK TEXT ENTRY
-window.applyQuickBulkText = function() {
-  const text = document.getElementById('quickBulkInput').value.trim();
-  if(!text) return alert("Please enter stock/sold text first.");
+// 🌙 OPTION B: QUICK BULK LEFTOVER ENTRY
+window.applyQuickBulkLeftoverText = function() {
+  const text = document.getElementById('quickBulkLeftoverInput').value.trim();
+  if(!text) return alert("Please enter leftover stock text first (e.g., tm 8 or curd 12).");
 
   const lines = text.split('\n');
   let applied = 0;
@@ -1334,12 +1089,15 @@ window.applyQuickBulkText = function() {
     if(!trimmed) return;
     const match = trimmed.match(/^(.+?)\s+(\d+(?:\.\d+)?)$/);
     if(match) {
-      const searchName = match[1].trim().toLowerCase();
-      const qty = parseFloat(match[2]);
+      const searchName = match[1].trim();
+      const resolvedName = resolveCatalogName(searchName).toLowerCase();
+      const leftoverQty = parseFloat(match[2]);
 
       cats.forEach(c => c.items.forEach(it => {
-        if(it.name.toLowerCase().includes(searchName) || searchName.includes(it.name.toLowerCase())) {
-          it.sold = (num(it.sold) + qty);
+        if(it.name.toLowerCase() === resolvedName || it.name.toLowerCase().includes(searchName.toLowerCase())) {
+          it.leftover = leftoverQty;
+          const available = num(it.opening) + num(it.added) - num(it.home);
+          it.sold = Math.max(0, available - leftoverQty);
           applied++;
         }
       }));
@@ -1347,11 +1105,48 @@ window.applyQuickBulkText = function() {
   });
 
   if(applied > 0) {
-    alert(`Successfully applied bulk quantities to ${applied} product line(s)!`);
+    alert(`Calculated sold quantities for ${applied} product(s) based on leftovers!`);
+    document.getElementById('quickBulkLeftoverInput').value = '';
+    renderCats();
+  } else {
+    alert("No matching product names found. Try format like: tm 8 or curd 12");
+  }
+};
+
+// ⚡ QUICK BULK SOLD ENTRY
+window.applyQuickBulkText = function() {
+  const text = document.getElementById('quickBulkInput').value.trim();
+  if(!text) return alert("Please enter sold text first.");
+
+  const lines = text.split('\n');
+  let applied = 0;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if(!trimmed) return;
+    const match = trimmed.match(/^(.+?)\s+(\d+(?:\.\d+)?)$/);
+    if(match) {
+      const searchName = match[1].trim();
+      const resolvedName = resolveCatalogName(searchName).toLowerCase();
+      const qty = parseFloat(match[2]);
+
+      cats.forEach(c => c.items.forEach(it => {
+        if(it.name.toLowerCase() === resolvedName || it.name.toLowerCase().includes(searchName.toLowerCase())) {
+          it.sold = (num(it.sold) + qty);
+          const available = num(it.opening) + num(it.added) - num(it.home);
+          it.leftover = Math.max(0, available - it.sold);
+          applied++;
+        }
+      }));
+    }
+  });
+
+  if(applied > 0) {
+    alert(`Applied sold quantities to ${applied} product line(s)!`);
     document.getElementById('quickBulkInput').value = '';
     renderCats();
   } else {
-    alert("No matching product names found. Format like: milk 25 or curd 10");
+    alert("No matching product names found.");
   }
 };
 
@@ -1369,7 +1164,7 @@ window.addNewCatalogProduct = async function() {
     catObj = { category, items: [] };
     cats.push(catObj);
   }
-  catObj.items.push({ name, opening:0, added:0, sold:0, home:0, order:0, mrp, agent });
+  catObj.items.push({ name, opening:0, added:0, leftover:0, sold:0, home:0, order:0, mrp, agent });
 
   let customItems = [];
   try {
@@ -1389,7 +1184,7 @@ window.addNewCatalogProduct = async function() {
 window.resetItemMistake = function(ci, ii) {
   if(confirm("Reset all quantities for this item to 0?")) {
     const it = cats[ci].items[ii];
-    it.sold = 0; it.added = 0; it.home = 0; it.order = 0;
+    it.sold = 0; it.added = 0; it.home = 0; it.order = 0; it.leftover = 0;
     renderCats();
   }
 };
@@ -1406,7 +1201,7 @@ function renderCats(){
     }
     if(q && visibleItems.length === 0) return;
 
-    const soldCount = cat.items.filter(it => num(it.sold) > 0).length;
+    const soldCount = cat.items.filter(it => num(it.sold) > 0 || num(it.leftover) > 0).length;
     const isOpen = q ? true : openCats.has(ci);
 
     const block = document.createElement('div');
@@ -1426,7 +1221,7 @@ function renderCats(){
 
     visibleItems.forEach(({it, ii}) => {
       const opening = num(it.opening), added = num(it.added), sold = num(it.sold), home = num(it.home), mrp = num(it.mrp), agent = num(it.agent);
-      const closing = opening + added - sold - home;
+      const leftover = (it.leftover !== undefined) ? num(it.leftover) : Math.max(0, opening + added - sold - home);
       const amount = sold * mrp;
       const margin = sold * (mrp - agent);
       const div = document.createElement('div');
@@ -1444,6 +1239,10 @@ function renderCats(){
           <div class="qty-box">
             <label>Added</label>
             <input type="number" value="${it.added}" inputmode="decimal" onchange="updateItem(${ci},${ii},'added',this.value)">
+          </div>
+          <div class="qty-box leftover">
+            <label>Leftover</label>
+            <input type="number" value="${leftover}" inputmode="decimal" onchange="updateItem(${ci},${ii},'leftover',this.value)">
           </div>
           <div class="qty-box sold">
             <label>Sold</label>
@@ -1469,7 +1268,7 @@ function renderCats(){
           </div>
         </div>
         <div class="item-foot">
-          <span>Closing: <b>${closing}</b></span>
+          <span>Closing Stock: <b>${leftover}</b></span>
           <span class="amt">${money(amount)}</span>
         </div>
         <div class="item-foot">
@@ -1492,40 +1291,29 @@ function renderCats(){
   updateTotal();
 }
 
-function renderOrderSummary(targetId){
-  const el = document.getElementById(targetId);
-  if(!el) return;
-  const rows = [];
-  cats.forEach(c => c.items.forEach(it => {
-    if(num(it.order) > 0) rows.push({name: it.name, qty: num(it.order)});
-  }));
-  if(rows.length === 0){
-    el.innerHTML = '<h4>Order for tomorrow</h4><div class="empty-order">No items marked to order yet.</div>';
-    return;
-  }
-  el.innerHTML = '<h4>Order for tomorrow (' + rows.length + ' items)</h4>' +
-    rows.map(r => `<div class="order-row"><span>${escapeHtml(r.name)}</span><span>${r.qty}</span></div>`).join('') +
-    '<button class="copy-btn" onclick="copyOrderList()">Copy order list</button>';
-}
-
-window.copyOrderList = function(){
-  const rows = [];
-  cats.forEach(c => c.items.forEach(it => {
-    if(num(it.order) > 0) rows.push(it.name + " — " + num(it.order));
-  }));
-  const text = "Order list (" + currentDate + "):\n" + rows.join("\n");
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>{
-      alert("Order list copied — paste it to your supplier.");
-    }).catch(()=>{ prompt("Copy this order list:", text); });
-  } else {
-    prompt("Copy this order list:", text);
-  }
-};
-
 window.updateItem = function(ci, ii, field, value){
   const v = value===""?0:parseFloat(value);
-  cats[ci].items[ii][field] = isNaN(v)?0:v;
+  const val = isNaN(v)?0:v;
+  const it = cats[ci].items[ii];
+
+  if (field === 'leftover') {
+    it.leftover = val;
+    const available = num(it.opening) + num(it.added) - num(it.home);
+    it.sold = Math.max(0, available - val);
+  } else if (field === 'sold') {
+    it.sold = val;
+    const available = num(it.opening) + num(it.added) - num(it.home);
+    it.leftover = Math.max(0, available - val);
+  } else {
+    it[field] = val;
+    const available = num(it.opening) + num(it.added) - num(it.home);
+    if (it.leftover !== undefined && it.leftover !== 0) {
+      it.sold = Math.max(0, available - num(it.leftover));
+    } else {
+      it.leftover = Math.max(0, available - num(it.sold));
+    }
+  }
+
   renderCats();
 };
 
@@ -1583,6 +1371,7 @@ function mergeIntoCatalogShape(savedCats){
       it.added = num(saved.added);
       it.sold = num(saved.sold);
       it.home = num(saved.home);
+      it.leftover = saved.leftover !== undefined ? num(saved.leftover) : Math.max(0, it.opening + it.added - it.sold - it.home);
       it.order = num(saved.order);
       it.mrp = saved.mrp!==undefined ? num(saved.mrp) : it.mrp;
       it.agent = saved.agent!==undefined ? num(saved.agent) : it.agent;
@@ -1633,7 +1422,8 @@ async function loadDay(dateISO){
       cats.forEach(c => c.items.forEach(it => {
         const prev = lookup[it.name];
         if(prev){
-          it.opening = num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home);
+          const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : (num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home));
+          it.opening = prevClosing;
           it.added = num(prev.order);
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
@@ -1646,7 +1436,7 @@ async function loadDay(dateISO){
 
   openCats = new Set();
   cats.forEach((c, ci) => {
-    if(c.items.some(it => num(it.opening)||num(it.added)||num(it.sold))) openCats.add(ci);
+    if(c.items.some(it => num(it.opening)||num(it.added)||num(it.sold)||num(it.leftover))) openCats.add(ci);
   });
   renderCats();
 }
@@ -1719,7 +1509,7 @@ window.renderStockTab = function(){
   cats.forEach(cat => {
     const rows = cat.items
       .map(it => {
-        const closing = num(it.opening)+num(it.added)-num(it.sold)-num(it.home);
+        const closing = (it.leftover !== undefined) ? num(it.leftover) : (num(it.opening)+num(it.added)-num(it.sold)-num(it.home));
         return {name: it.name, closing, order: num(it.order)};
       })
       .filter(r => !q || r.name.toLowerCase().includes(q));
@@ -2455,7 +2245,6 @@ function openChartsTab(){
   renderProductSalesChart();
 }
 
-// Executive Day-wise Item Sold Bar Chart
 window.renderItemWiseBarChart = async function(){
   const from = document.getElementById('itemWiseChartFrom').value;
   const to = document.getElementById('itemWiseChartTo').value;
@@ -2742,6 +2531,8 @@ async function applyInvoiceToStock(dateISO, items){
       cats.forEach(c => c.items.forEach(it => {
         if(it.name === m.resolvedName) {
           it.added = num(it.added) + m.qty;
+          const available = num(it.opening) + num(it.added) - num(it.home);
+          it.leftover = Math.max(0, available - num(it.sold));
           matchedCount++;
         }
       }));
@@ -2761,6 +2552,8 @@ async function applyInvoiceToStock(dateISO, items){
       (dayData.cats||[]).forEach(c => (c.items||[]).forEach(it => {
         if(it.name === m.resolvedName) {
           it.added = num(it.added) + m.qty;
+          const available = num(it.opening) + num(it.added) - num(it.home);
+          it.leftover = Math.max(0, available - num(it.sold));
           matchedCount++;
         }
       }));
