@@ -1144,70 +1144,99 @@ async function seedHistoricalData() {
     }
   }
 
-  // Seed Stock Payments Log including Moosapet New Parlour Bill (29-07-2026)
-  const existingPay = await fetchStockPayments();
-  if (existingPay.length === 0) {
-    const defaultPayments = [
-      {
-        id: "seed-moosapet-29",
-        date: "2026-07-29",
-        ts: "2026-07-29T10:00:00.000Z",
-        distributor: "Moosapet New Parlour",
-        item: "67 Bulk Items Invoice",
-        items: MOOSAPET_BULK_ITEMS,
-        amount: 37326,
-        mode: "Cash",
-        note: "Bulk Stock Invoice"
-      },
-      {
-        id: "seed-30",
-        date: "2026-07-30",
-        ts: "2026-07-30T10:00:00.000Z",
-        distributor: "Annapurna Dairy Parlour",
-        item: "TM, Paneer 200g & 500g",
-        items: [{item:"TM 500ML", qty:6, price:57.85}, {item:"PANNEER 200 GRMS", qty:10, price:80}, {item:"PANNEER 500 GRMS", qty:8, price:198}],
-        amount: 2731,
-        mode: "Cash",
-        note: "Daily Supplier Invoice"
-      },
-      {
-        id: "seed-31",
-        date: "2026-07-31",
-        ts: "2026-07-31T10:00:00.000Z",
-        distributor: "Annapurna Dairy Parlour",
-        item: "TM, FCM, S.Milk, Junnu",
-        items: [{item:"TM 500ML", qty:10, price:57.85}, {item:"FULLCREAMILK 500ML", qty:6, price:73.6}, {item:"TONNEDMILK 170ML", qty:30, price:8.35}, {item:"JUNNU BIG", qty:1, price:155}],
-        amount: 1426,
-        mode: "Cash",
-        note: "Daily Supplier Invoice"
-      },
-      {
-        id: "seed-01",
-        date: "2026-08-01",
-        ts: "2026-08-01T10:00:00.000Z",
-        distributor: "Annapurna Dairy Parlour",
-        item: "Milk, Curd, Paneer & Sweets Invoice",
-        items: [{item:"TM 500ML", qty:36, price:57.85}, {item:"FULLCREAMILK 500ML", qty:18, price:73.6}, {item:"STM 500 ML(SANGAM PREMIUM)", qty:4, price:61.75}, {item:"TONNEDMILK 170ML", qty:120, price:8.35}, {item:"CURD 450GMS SACHET", qty:24, price:61}, {item:"CURD 120 GMS SATCHET", qty:168, price:7.6}, {item:"DOODH PEDA(MAP) 200 GMS", qty:3, price:81}, {item:"STM CURD 1 KG DISPO", qty:2, price:88}, {item:"S.T.M CURD 500G CUPS", qty:4, price:44}, {item:"GULABJAM 100 GMS", qty:6, price:18.5}, {item:"PANNEER 200 GRMS", qty:10, price:80}, {item:"CUP CAKES (CHO-5 & VAN -2)", qty:7, price:50}, {item:"BAR CAKES (PIN -5 & ORA - 5)", qty:10, price:52}, {item:"JUNNU SMALL", qty:1, price:72}, {item:"JUNNU BIG", qty:1, price:155}],
-        amount: 10000,
-        mode: "Cash",
-        note: "Daily Supplier Invoice"
-      },
-      {
-        id: "seed-02",
-        date: "2026-08-02",
-        ts: "2026-08-02T10:00:00.000Z",
-        distributor: "Annapurna Dairy Parlour",
-        item: "TM, S.Milk, Curd & Lassi",
-        items: [{item:"TM 500ML", qty:50, price:57.85}, {item:"TONNEDMILK 170ML", qty:30, price:8.35}, {item:"CURD 120 GMS SATCHET", qty:84, price:7.6}, {item:"STM CURD 1 KG DISPO", qty:2, price:88}, {item:"VANILA LASSI GLASS", qty:12, price:18.25}],
-        amount: 4176,
-        mode: "Cash",
-        note: "Daily Supplier Invoice"
-      }
-    ];
-    await saveStockPaymentsList(defaultPayments);
-    for (const p of defaultPayments) {
-      await applyInvoiceToStock(p.date, p.items);
+  // Seed Stock Payments Log with resolved official names for all dates
+  const defaultPayments = [
+    {
+      id: "seed-moosapet-29",
+      date: "2026-07-29",
+      ts: "2026-07-29T10:00:00.000Z",
+      distributor: "Moosapet New Parlour",
+      item: "67 Bulk Items Invoice",
+      items: MOOSAPET_BULK_ITEMS.map(it => ({ item: resolveCatalogName(it.item), qty: it.qty, price: it.price })),
+      amount: 37326,
+      mode: "Cash",
+      note: "Bulk Stock Invoice"
+    },
+    {
+      id: "seed-30",
+      date: "2026-07-30",
+      ts: "2026-07-30T10:00:00.000Z",
+      distributor: "Annapurna Dairy Parlour",
+      item: "TM, Paneer 200g & 500g",
+      items: [
+        {item: resolveCatalogName("TM 500ML"), qty:6, price:57.85},
+        {item: resolveCatalogName("200GMS PANEER"), qty:10, price:80},
+        {item: resolveCatalogName("500GMS PANEER"), qty:8, price:198}
+      ],
+      amount: 2731,
+      mode: "Cash",
+      note: "Daily Supplier Invoice"
+    },
+    {
+      id: "seed-31",
+      date: "2026-07-31",
+      ts: "2026-07-31T10:00:00.000Z",
+      distributor: "Annapurna Dairy Parlour",
+      item: "TM, FCM, S.Milk, Junnu",
+      items: [
+        {item: resolveCatalogName("TM 500ML"), qty:10, price:57.85},
+        {item: resolveCatalogName("FULLCREAMILK 500ML"), qty:6, price:73.6},
+        {item: resolveCatalogName("S.MILK"), qty:30, price:8.35},
+        {item: resolveCatalogName("JUNNU"), qty:1, price:155}
+      ],
+      amount: 1426,
+      mode: "Cash",
+      note: "Daily Supplier Invoice"
+    },
+    {
+      id: "seed-01",
+      date: "2026-08-01",
+      ts: "2026-08-01T10:00:00.000Z",
+      distributor: "Annapurna Dairy Parlour",
+      item: "Milk, Curd, Paneer & Sweets Invoice",
+      items: [
+        {item: resolveCatalogName("TM 500ML"), qty:36, price:57.85},
+        {item: resolveCatalogName("FULLCREAMILK 500ML"), qty:18, price:73.6},
+        {item: resolveCatalogName("STM"), qty:4, price:61.75},
+        {item: resolveCatalogName("S.MILK"), qty:120, price:8.35},
+        {item: resolveCatalogName("450GR CURD"), qty:24, price:61},
+        {item: resolveCatalogName("125GR CURD"), qty:168, price:7.6},
+        {item: resolveCatalogName("DOODHPEDA"), qty:3, price:81},
+        {item: resolveCatalogName("1KG CURD DISPO"), qty:2, price:88},
+        {item: resolveCatalogName("1/2KG CURD CUPS"), qty:4, price:44},
+        {item: resolveCatalogName("GULABJAM 100GR"), qty:6, price:18.5},
+        {item: resolveCatalogName("200GMS PANEER"), qty:10, price:80},
+        {item: resolveCatalogName("CUP CAKES (CHO-5 & VAN -2)"), qty:7, price:50},
+        {item: resolveCatalogName("BAR CAKES (PIN -5 & ORA - 5)"), qty:10, price:52},
+        {item: resolveCatalogName("JUNNU SMALL"), qty:1, price:72},
+        {item: resolveCatalogName("JUNNU BIG"), qty:1, price:155}
+      ],
+      amount: 10000,
+      mode: "Cash",
+      note: "Daily Supplier Invoice"
+    },
+    {
+      id: "seed-02",
+      date: "2026-08-02",
+      ts: "2026-08-02T10:00:00.000Z",
+      distributor: "Annapurna Dairy Parlour",
+      item: "TM, S.Milk, Curd & Lassi",
+      items: [
+        {item: resolveCatalogName("TM 500ML"), qty:50, price:57.85},
+        {item: resolveCatalogName("S.MILK"), qty:30, price:8.35},
+        {item: resolveCatalogName("125GR CURD"), qty:84, price:7.6},
+        {item: resolveCatalogName("1KG CURD DISPO"), qty:2, price:88},
+        {item: resolveCatalogName("VANILA GLASS"), qty:12, price:18.25}
+      ],
+      amount: 4176,
+      mode: "Cash",
+      note: "Daily Supplier Invoice"
     }
+  ];
+
+  await saveStockPaymentsList(defaultPayments);
+  for (const p of defaultPayments) {
+    await applyInvoiceToStock(p.date, p.items);
   }
 }
 
@@ -2757,7 +2786,11 @@ window.addStockPayment = async function(){
   const date = document.getElementById('paymentsDateInput').value || todayISO();
 
   const validRows = invoiceRows
-    .map(r => ({ item: r.item.trim(), qty: num(r.qty), price: num(r.price) }))
+    .map(r => ({
+      item: resolveCatalogName(r.item.trim()),
+      qty: num(r.qty),
+      price: num(r.price)
+    }))
     .filter(r => r.item && (r.qty > 0 || r.price > 0));
 
   if(!distributor){ alert("Enter a distributor / supplier name."); return; }
@@ -2844,13 +2877,14 @@ async function renderPaymentsForDate(dateISO){
   } else {
     listEl.innerHTML = dayPayments.map(p => {
       if(p.mode === 'Cash') cashOut += num(p.amount); else onlineOut += num(p.amount);
-      const itemLines = (p.items||[]).slice(0, 5).map(it => `${escapeHtml(it.item)} — ${it.qty} × ${money(it.price)}`).join('<br>');
-      const extraCount = (p.items||[]).length > 5 ? `<br><i>+ ${(p.items.length - 5)} more items...</i>` : '';
+      const itemsList = p.items && p.items.length ? p.items : [{item: p.item, qty: 1, price: p.amount}];
+      const itemLines = itemsList.slice(0, 5).map(it => `${escapeHtml(resolveCatalogName(it.item))} — ${it.qty} × ${money(it.price)}`).join('<br>');
+      const extraCount = itemsList.length > 5 ? `<br><i>+ ${(itemsList.length - 5)} more items...</i>` : '';
       return `<div class="pay-row">
         <span class="mode-tag ${p.mode.toLowerCase()}">${p.mode}</span>
         <span class="info">
           <span class="dist">${escapeHtml(p.distributor)}</span>
-          ${itemLines ? '<br><span class="item">'+itemLines+extraCount+'</span>' : (p.item ? '<br><span class="item">'+escapeHtml(p.item)+'</span>' : '')}
+          ${itemLines ? '<br><span class="item">'+itemLines+extraCount+'</span>' : (p.item ? '<br><span class="item">'+escapeHtml(resolveCatalogName(p.item))+'</span>' : '')}
           ${p.note ? '<br><span class="item">'+escapeHtml(p.note)+'</span>' : ''}
         </span>
         <span class="amt">${money(p.amount)}</span>
