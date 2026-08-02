@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sangam / Annapurna Dairy — Daily Ledger</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#35634A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
@@ -2288,7 +2290,9 @@ async function renderPaymentsForDate(dateISO){
     <div class="day-summary-row"><span class="lbl">Net Online Movement</span><span>${money(netOnline)}</span></div>
   `;
 }
-
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
 // Start application
 boot();
 </script>
