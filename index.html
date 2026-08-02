@@ -941,6 +941,7 @@ const ALIAS_MAP = {
   "MILKCAKE": "MILK CAKE (MAP)200 GMS",
   "MALAI LADDU": "MALAI LADDU (MAP)150GMS",
   "RAGILADDU": "RAGILADDU 200 GMS",
+  "RAGI LADDU": "RAGILADDU 200 GMS",
   "SUNNUNDA": "SUNNUNDA",
   "KAJU BARFI": "KAJU BARFI 200 GMS",
   "BADAM BARFI": "BADAM BARFI 200GMS",
@@ -1040,9 +1041,9 @@ function todayISO(){
   const d = new Date();
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
-function prevDateISO(dISO){
+function shiftDateISO(dISO, deltaDays){
   const d = new Date(dISO + "T00:00:00");
-  d.setDate(d.getDate()-1);
+  d.setDate(d.getDate() + deltaDays);
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 function money(n){
@@ -1380,6 +1381,7 @@ function mergeIntoCatalogShape(savedCats){
   return base;
 }
 
+// 🔄 SMART MULTI-DAY ROLLING STOCK LOADER
 async function loadDay(dateISO){
   currentDate = dateISO;
   document.getElementById('dateInput').value = dateISO;
@@ -1408,12 +1410,18 @@ async function loadDay(dateISO){
     document.getElementById('cashInput').value = loaded.cash || "";
     document.getElementById('onlineInput').value = loaded.online || "";
   } else {
+    // Search backward up to 30 days to find the latest recorded day's closing stock!
     let prevCats = null;
-    try{
-      const prevKey = 'day:' + fmtDateKey(prevDateISO(dateISO));
-      const prevRes = await storageGet(prevKey);
-      if(prevRes && prevRes.value) prevCats = JSON.parse(prevRes.value).cats;
-    } catch(e){ prevCats = null; }
+    for(let i = 1; i <= 30; i++){
+      try{
+        const prevKey = 'day:' + fmtDateKey(shiftDateISO(dateISO, -i));
+        const prevRes = await storageGet(prevKey);
+        if(prevRes && prevRes.value){
+          prevCats = JSON.parse(prevRes.value).cats;
+          break; // Found the most recent active day!
+        }
+      } catch(e){}
+    }
 
     cats = freshCats();
     if(prevCats && prevCats.length){
@@ -1424,7 +1432,6 @@ async function loadDay(dateISO){
         if(prev){
           const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : (num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home));
           it.opening = prevClosing;
-          it.added = num(prev.order);
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
         }
@@ -1748,7 +1755,7 @@ async function loadKiranaDay(dateISO){
     document.getElementById('kiranaReceivedInput').value = "";
     let prevBal = 0;
     try{
-      const prevKey = 'kirana:day:' + currentShopIdx + ':' + fmtDateKey(prevDateISO(dateISO));
+      const prevKey = 'kirana:day:' + currentShopIdx + ':' + fmtDateKey(shiftDateISO(dateISO, -1));
       const pres = await storageGet(prevKey);
       if(pres && pres.value) prevBal = num(JSON.parse(pres.value).balanceDue);
     }catch(e){}
