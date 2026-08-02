@@ -1,0 +1,21 @@
+{
+  "name": "Annapurna Dairy & Foods",
+  "short_name": "Annapurna Ledger",
+  "description": "Daily Stock & Sales Ledger",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FAFAF6",
+  "theme_color": "#35634A",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050158.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050158.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
