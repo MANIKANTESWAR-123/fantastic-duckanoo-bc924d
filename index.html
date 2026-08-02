@@ -1895,12 +1895,20 @@ async function saveStockPaymentsList(list){
 let invoiceRows = [{item:'', qty:'', price:''}];
 let catalogDatalistBuilt = false;
 let catalogNameSet = null;
+let catalogPriceMap = null;
 
 function buildCatalogNameSet(){
   if(catalogNameSet) return catalogNameSet;
   catalogNameSet = new Set();
   CATALOG.forEach(c => c.items.forEach(it => catalogNameSet.add(it.name)));
   return catalogNameSet;
+}
+
+function buildCatalogPriceMap(){
+  if(catalogPriceMap) return catalogPriceMap;
+  catalogPriceMap = {};
+  CATALOG.forEach(c => c.items.forEach(it => { catalogPriceMap[it.name] = it.agent; }));
+  return catalogPriceMap;
 }
 
 function populateCatalogDatalist(){
@@ -1939,6 +1947,17 @@ function removeInvoiceRow(idx){
 
 function updateInvoiceRow(idx, field, value){
   invoiceRows[idx][field] = value;
+
+  if(field === 'item'){
+    const priceMap = buildCatalogPriceMap();
+    const name = value.trim();
+    if(priceMap[name] !== undefined){
+      invoiceRows[idx].price = priceMap[name]; // auto-fetch agent (cost) price for a matching catalog item
+    }
+    renderInvoiceRows(); // re-render so the price box shows the fetched value
+    return;
+  }
+
   updateInvoiceTotalDisplay();
   // only refresh the one amount cell + total (avoid re-rendering while typing, which drops focus)
   const wrap = document.getElementById('invoiceRows');
