@@ -162,8 +162,8 @@
   }
   .qty-grid{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:7px;
+    grid-template-columns:repeat(4, 1fr);
+    gap:6px;
   }
   .price-grid{
     display:grid;
@@ -188,6 +188,7 @@
   }
   .qty-box.mrp input{background:var(--gold-soft);border-color:#EAD9AE;}
   .qty-box.agent input{background:#EFEAE0;border-color:#DCD3C0;}
+  .qty-box.home input{background:#F0E6EE;border-color:#DCC5D6;}
   .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;}
 
   .item-foot{
@@ -346,7 +347,7 @@
       <input type="date" id="dateInput">
 
       <div class="legend">
-        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold &nbsp;·&nbsp; <b>Closing</b> auto-calculated, carries to tomorrow's opening. Tap a category to expand it.
+        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold to customers &nbsp;·&nbsp; <b>Home</b> = used at home, not sold &nbsp;·&nbsp; <b>Closing</b> auto-calculated, carries to tomorrow's opening. Tap a category to expand it.
       </div>
       <input type="text" class="search-box" id="searchBox" placeholder="Search a product…" oninput="onSearch()">
 
@@ -393,110 +394,24 @@
 </div>
 
 <script>
-const CATALOG = [{"category": "MILK SECTION", "items": [{"name": "FCM GOLD PLUS 500 ML", "mrp": 82, "agent": 75.4}, {"name": "FULLCREAMILK 500ML", "mrp": 80, "agent": 73.6}, {"name": "STM 500 ML(SANGAM PREMIUM)", "mrp": 68, "agent": 61.75}, {"name": "TEA SPECIAL 500 ML", "mrp": 78, "agent": 71.6}, {"name": "TONNED MILK 500ML", "mrp": 64, "agent": 57.85}, {"name": "TONNEDMILK 170ML (5 pack)", "mrp": 50, "agent": 41.75}, {"name": "DTM500ML", "mrp": 56, "agent": 51.35}]}, {"category": "CURD SECTION", "items": [{"name": "CURD 120 GMS SATCHET", "mrp": 10, "agent": 7.6}, {"name": "CURD 200 G PACK", "mrp": 15, "agent": 13}, {"name": "CURD 450GMS SACHET", "mrp": 84, "agent": 61}, {"name": "CURD SACHEET 900 GMS", "mrp": 70, "agent": 55.5}, {"name": "S.T.M. CURD CUP100G", "mrp": 10, "agent": 8}, {"name": "CURD 200 G CUP", "mrp": 20, "agent": 17.5}, {"name": "S.T.M CURD 500G CUPS", "mrp": 55, "agent": 46}, {"name": "S.T.M CURD 400G CUPS", "mrp": 38, "agent": 34}, {"name": "STM CURD 1 KG DISPO", "mrp": 115, "agent": 88}, {"name": "S.T.M.CURD 10 LIT (DISPO BUCKET)", "mrp": 780, "agent": 710}, {"name": "S.T.M.CURD 5 KG (DISPO BUCKET)", "mrp": 400, "agent": 360}, {"name": "TM CURD 10 KG DISPO", "mrp": 750, "agent": 660}, {"name": "TM CURD DISPO 5 KG", "mrp": 390, "agent": 340}]}, {"category": "BUTTER MILK & LASSI", "items": [{"name": "BUTTERMILK", "mrp": 9, "agent": 7.6}, {"name": "JEERA BUTTER MILK", "mrp": 15, "agent": 10}, {"name": "LASSI SACHET 180 GMS", "mrp": 12, "agent": 10.4}, {"name": "LASSI (WHITE)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(MANGO)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(PINEAPPLE)", "mrp": 25, "agent": 18.25}, {"name": "SABJA LASSI", "mrp": 22, "agent": 18.75}, {"name": "SWEETLASSI(STRAWBERRY)", "mrp": 25, "agent": 18.25}]}, {"category": "PANNER", "items": [{"name": "PANNER 100 GRMS", "mrp": 49, "agent": 42.5}, {"name": "PANNEER 200 GRMS", "mrp": 85, "agent": 70}, {"name": "PANNEER 500 GRMS", "mrp": 190, "agent": 168}, {"name": "PANNEER 1 KG", "mrp": 380, "agent": 337}, {"name": "JUNNU 100GMS CUP", "mrp": 22, "agent": 17.25}, {"name": "JUNNU 50GMS CUP", "mrp": 12, "agent": 9}, {"name": "CREAM 1000 ML PACK", "mrp": 200, "agent": 180}]}, {"category": "TETRA MILK", "items": [{"name": "DTCM TETRA 180 ML (APS)", "mrp": 13, "agent": 11.65}, {"name": "DTM (TETRA) 180 ML", "mrp": 13, "agent": 11.65}, {"name": "TETRA T.M.(3%) 1 LIT PACK(12)", "mrp": 64, "agent": 58.5}, {"name": "E LIFE BUFFELOW (TM 500ML)(CARTON)", "mrp": 29, "agent": 26.4}]}, {"category": "BI -PRODUCTS", "items": [{"name": "SUGARLESSKOVA", "mrp": 400, "agent": 380}, {"name": "BASUNDI FAMILY PACK 300GMS", "mrp": 75, "agent": 64}, {"name": "BASUNDHI 50 GMS(HOMEPACK)12", "mrp": 180, "agent": 132}, {"name": "DOODH PEDA 20GMS", "mrp": 9, "agent": 7.9}, {"name": "DOODH PEDA(MAP) 200 GMS", "mrp": 100, "agent": 81}, {"name": "BADAM BARFI 200GMS", "mrp": 130, "agent": 114}, {"name": "BADAM MILK POWDER 200GMS", "mrp": 80, "agent": 63}, {"name": "GULABJAM 100 GMS", "mrp": 22, "agent": 18.5}, {"name": "GULABJAM 400 GMS", "mrp": 80, "agent": 71}, {"name": "GULAB JAMUN 500 G", "mrp": 100, "agent": 90}, {"name": "JOWR LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU BARFI 200 GMS", "mrp": 150, "agent": 135}, {"name": "KALAKAND (MAP)200 GMS", "mrp": 100, "agent": 81}, {"name": "SUGARLESS KALAKAND (MAP)200 GMS", "mrp": 120, "agent": 106}, {"name": "MYSORE PAK 200 GMS", "mrp": 120, "agent": 106}, {"name": "RAGILADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "SUNNUNDA", "mrp": 120, "agent": 112}, {"name": "KORRALADU 200 GMS", "mrp": 100, "agent": 88}, {"name": "MALAI LADDU (MAP)150GMS", "mrp": 95, "agent": 79}, {"name": "MIXED MILLET LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU STICKS 120 G", "mrp": 75, "agent": 68}, {"name": "KAJU STICKS 200 G", "mrp": 110, "agent": 100}, {"name": "KAJU BITEES 200G", "mrp": 200, "agent": 182}, {"name": "ORANGE KAJU BITES 200", "mrp": 200, "agent": 182}, {"name": "CHOCOLATE KAJU 200G", "mrp": 200, "agent": 182}, {"name": "BADAM RAKI 200G", "mrp": 200, "agent": 180}, {"name": "ATTA LADDU 200 G", "mrp": 200, "agent": 180}, {"name": "CHANA LADDU 200G", "mrp": 200, "agent": 180}, {"name": "MILK CAKE (MAP)200 GMS", "mrp": 110, "agent": 90}]}, {"category": "CUP CAKE &BAR CAKE", "items": [{"name": "CHOCOLATE CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "ORANGE BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "PINE APPLE BAR CK 32G", "mrp": 10, "agent": 8.6}]}, {"category": "BADAM MILK SECTION", "items": [{"name": "SF NUT BADAM 200ML", "mrp": 35, "agent": 25}, {"name": "SFM CHOCOLATE MILK", "mrp": 35, "agent": 25}, {"name": "S F MILK ( DISPO)", "mrp": 30, "agent": 22}, {"name": "S F MILK ( PP)", "mrp": 30, "agent": 20}, {"name": "SF KESAR PISTA 200ML", "mrp": 30, "agent": 22}, {"name": "SF PINAPPLE 200 ML", "mrp": 30, "agent": 22}, {"name": "SF PISTA CHIO 200ML", "mrp": 30, "agent": 22}, {"name": "SF STRAWBERRY 200ML", "mrp": 30, "agent": 22}]}, {"category": "MILK SHAKES", "items": [{"name": "MILKSHAKE DOUBLE CHOCOLATE", "mrp": 30, "agent": 23}, {"name": "BUTTER SCOTCH MILK SHAKE", "mrp": 30, "agent": 23}, {"name": "VANILLA MILK SHAKE", "mrp": 30, "agent": 23}]}, {"category": "BUTTER SECTION", "items": [{"name": "P.T BUTTER 500GMS", "mrp": 280, "agent": 264}, {"name": "P.T BUTTER 100 GMS", "mrp": 65, "agent": 55}, {"name": "C BUTTER 500GMS", "mrp": 285, "agent": 266}, {"name": "C.BUTER 5 KG CARTONS", "mrp": 285, "agent": 266}, {"name": "COOKING BUTTER 100 GMS", "mrp": 70, "agent": 61}, {"name": "COW/BUTTER 20KG", "mrp": 11000, "agent": 10700}, {"name": "WHITEBUTTER 20KG", "mrp": 11000, "agent": 10700}]}, {"category": "CHIKKIS SECTION", "items": [{"name": "PEANUTCHIKKI18 GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "SESAM CHIKKI18GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "PEANUTCHIKKI90 GMS PKT", "mrp": 250, "agent": 190}, {"name": "SESAM CHKII90GMS PKT", "mrp": 250, "agent": 190}]}, {"category": "GHEE SECTION", "items": [{"name": "BUFFELOGHEE200ML", "mrp": 145, "agent": 125}, {"name": "BUFFELOGHEE 500ML", "mrp": 345, "agent": 305}, {"name": "BUFFELOGHEE 1000ML (4 PACK)", "mrp": 690, "agent": 610}, {"name": "BUFFELOGHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "BUFFELOGHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "BUFFELOGHEE 50ML", "mrp": 40, "agent": 33}, {"name": "B.GHEE 100ML JAR", "mrp": 78, "agent": 67}, {"name": "B.GHEE 200ML JAR", "mrp": 145, "agent": 123}, {"name": "B. GHEE 500ML JAR", "mrp": 350, "agent": 308}, {"name": "B.GHEE 1000ML JAR", "mrp": 700, "agent": 610}, {"name": "B. GHEE 5L JAR", "mrp": 3350, "agent": 3050}, {"name": "BGHEE 200ML DINING", "mrp": 155, "agent": 133}, {"name": "BGHEE 500ML DINING", "mrp": 355, "agent": 317}, {"name": "BUFFELOGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 100ML JARS", "mrp": 78, "agent": 66}, {"name": "COW GHEE 200ML JARS(60)", "mrp": 145, "agent": 123}, {"name": "COW GHEE 500ML JARS(08JARS)", "mrp": 350, "agent": 310}, {"name": "COW GHEE 1000 ML JARS(4)", "mrp": 700, "agent": 611}, {"name": "COWGHEE 500ML (8 PACK)", "mrp": 345, "agent": 303}, {"name": "COWGHEE 5KG JAR", "mrp": 3350, "agent": 3050}, {"name": "COWGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COWGHEE1000ML (POUCH)", "mrp": 690, "agent": 602}, {"name": "COWGHEE200ML (PACK)", "mrp": 140, "agent": 121}, {"name": "HIGH AROMA GHEE 100ML JAR", "mrp": 88, "agent": 73}, {"name": "HIGH AROMA GHEE 200ML JAR", "mrp": 165, "agent": 140}, {"name": "HIGH AROMA GHEE 500ML JAR", "mrp": 355, "agent": 320}, {"name": "HIGH AROMA GHEE 1000ML JAR", "mrp": 710, "agent": 630}, {"name": "HIGH AROMA GHEE 5L JAR", "mrp": 3500, "agent": 3200}, {"name": "HIGH AROMA GHEE 15 KG JAR", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "COW GHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "COW GHEE 50ML", "mrp": 38, "agent": 34}]}, {"category": "CHEKODI & MURKULU", "items": [{"name": "CHAKODI 100GMS", "mrp": 30, "agent": 24}, {"name": "CHAKODI 200GMS", "mrp": 60, "agent": 48}, {"name": "CHAKODI 500GMS", "mrp": 150, "agent": 120}, {"name": "MURUKU LONG100GMS", "mrp": 30, "agent": 24}, {"name": "MURUKU LONG200GMS", "mrp": 60, "agent": 48}, {"name": "MURUKU LONG500GMS", "mrp": 150, "agent": 120}, {"name": "KARA BOONDHI 100GMS", "mrp": 30, "agent": 24}, {"name": "KARA BOONDHI 200GMS", "mrp": 60, "agent": 48}, {"name": "KARA BOONDHI 500GMS", "mrp": 150, "agent": 120}, {"name": "CORN FLAXES MIXTURE 100GMS", "mrp": 30, "agent": 24}, {"name": "CORN FLAXES MIXTURE 200GMS", "mrp": 60, "agent": 48}, {"name": "CORN FLAXES MIXTURE 500GMS", "mrp": 150, "agent": 120}, {"name": "JEERA SODA 200 ML", "mrp": 15, "agent": 13}, {"name": "LEMON GINGER 200 ML", "mrp": 15, "agent": 13}, {"name": "ORNNGE CRUSH 200 ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-200ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-300ML", "mrp": 20, "agent": 16.75}, {"name": "MANGO MAGIC-600ML", "mrp": 35, "agent": 29.75}, {"name": "MANGO MAGIC-1000ML", "mrp": 60, "agent": 50}, {"name": "MANGO MAGIC-2000ML", "mrp": 110, "agent": 90}, {"name": "ULAVACHARU-100GMS", "mrp": 35, "agent": 30}, {"name": "ULAVACHARU-250GMS", "mrp": 80, "agent": 70}, {"name": "ULAVACHARU-500GMS", "mrp": 155, "agent": 135}, {"name": "ULAVACHARU-1000GMS", "mrp": 290, "agent": 245}, {"name": "RUSK 55GMS PACK(40)", "mrp": 10, "agent": 8.5}, {"name": "RUSK 200GMS PACK(20)", "mrp": 35, "agent": 26}]}, {"category": "SPICES", "items": [{"name": "CHILLI POWDER(50GR)", "mrp": 20, "agent": 13}, {"name": "CHILLI POWDER(100GR)", "mrp": 40, "agent": 26}, {"name": "CHILLI POWDER(200GR)", "mrp": 75, "agent": 49}, {"name": "TURMERIC POWDER(50G)", "mrp": 20, "agent": 11}, {"name": "TURMERIC POWDER(100GR)", "mrp": 35, "agent": 22}, {"name": "SABAR MASALA (8 G)", "mrp": 5, "agent": 2.75}, {"name": "SABAR MASALA (50 G)", "mrp": 20, "agent": 16}, {"name": "GARAM MASALA (8 G)", "mrp": 5, "agent": 2.9}, {"name": "GARAM MASALA (50 G)", "mrp": 35, "agent": 20}, {"name": "CHIKEN MASALA ( 8 G)", "mrp": 5, "agent": 2.75}]}, {"category": "COOKIES", "items": [{"name": "ATTA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "ATTA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "ATTA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "MULTI GRAIN COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "MULTI GRAIN COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "MULTI GRAIN COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SWEETS & SALT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SWEETS & SALT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SWEETS & SALT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "AJWAIN COOKIES 20 G", "mrp": 250, "agent": 200}, {"name": "AJWAIN COOKIES 50 G", "mrp": 200, "agent": 170}, {"name": "AJWAIN COOKIES 100 G", "mrp": 276, "agent": 228}, {"name": "BUTTER SCOTCH COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER SCOTCH COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER SCOTCH COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COCONUT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COCONUT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COCONUT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COFFEE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COFFEE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COFFEE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "CHOCOLATE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "CHOCOLATE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "CHOCOLATE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "BUTTER COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "HONEY OATS COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "HONEY OATS COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "HONEY OATS COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SPICY MASALA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SPICY MASALA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SPICY MASALA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "RAGI ALMOND COOKIES100G", "mrp": 40, "agent": 35}, {"name": "JOWAR CASHEW COOKIES 100G", "mrp": 40, "agent": 35}, {"name": "SUGAR LESS RAGI LADDU 200G", "mrp": 130, "agent": 112}, {"name": "SUGAR LESS SUNNUNDALU 200G", "mrp": 130, "agent": 112}]}];
-
-function getConfig(){
-  const repo = localStorage.getItem('ledgerRepo') || "";
-  const branch = localStorage.getItem('ledgerBranch') || "main";
-  const token = localStorage.getItem('ledgerToken') || "";
-  return { repo, branch, token };
-}
-
-function saveBackendUrl(){
-  const repo = document.getElementById('repoInput').value.trim();
-  const branch = document.getElementById('branchInput').value.trim() || "main";
-  const token = document.getElementById('tokenInput').value.trim();
-  const statusEl = document.getElementById('setupStatus');
-  if(!repo.includes('/')){
-    statusEl.textContent = "Repo should look like username/repo-name.";
-    return;
-  }
-  if(!token){
-    statusEl.textContent = "Paste your access token.";
-    return;
-  }
-  localStorage.setItem('ledgerRepo', repo);
-  localStorage.setItem('ledgerBranch', branch);
-  localStorage.setItem('ledgerToken', token);
-  statusEl.textContent = "Saved.";
-  boot();
-}
-
-const DATA_PATH = 'ledger-data.json';
-
-function b64EncodeUnicode(str){
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
-}
-function b64DecodeUnicode(str){
-  return decodeURIComponent(atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-}
-
-async function ghGetFile(){
-  const { repo, branch, token } = getConfig();
-  const url = `https://api.github.com/repos/${repo}/contents/${DATA_PATH}?ref=${encodeURIComponent(branch)}`;
-  const res = await fetch(url, {
-    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
-  });
-  if(res.status === 404) return { data: {}, sha: null };
-  if(!res.ok) throw new Error('GitHub read failed: ' + res.status);
-  const json = await res.json();
-  const content = b64DecodeUnicode(json.content.replace(/\n/g, ''));
-  let data = {};
-  try{ data = JSON.parse(content); } catch(e){ data = {}; }
-  return { data, sha: json.sha };
-}
-
-async function ghPutFile(data, sha){
-  const { repo, branch, token } = getConfig();
-  const url = `https://api.github.com/repos/${repo}/contents/${DATA_PATH}`;
-  const body = {
-    message: 'Update ledger data',
-    content: b64EncodeUnicode(JSON.stringify(data)),
-    branch: branch
-  };
-  if(sha) body.sha = sha;
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if(!res.ok){
-    const errText = await res.text();
-    throw new Error('GitHub save failed: ' + res.status + ' ' + errText);
-  }
-  const json = await res.json();
-  return json.content.sha;
-}
+const CATALOG = [{"category": "MILK SECTION", "items": [{"name": "FCM GOLD PLUS 500 ML", "mrp": 82, "agent": 75.4}, {"name": "FULLCREAMILK 500ML", "mrp": 80, "agent": 73.6}, {"name": "STM 500 ML(SANGAM PREMIUM)", "mrp": 68, "agent": 61.75}, {"name": "TEA SPECIAL 500 ML", "mrp": 78, "agent": 71.6}, {"name": "TONNED MILK 500ML", "mrp": 64, "agent": 57.85}, {"name": "TONNEDMILK 170ML (5 pack)", "mrp": 50, "agent": 41.75}, {"name": "DTM500ML", "mrp": 56, "agent": 51.35}]}, {"category": "CURD SECTION", "items": [{"name": "CURD 120 GMS SATCHET", "mrp": 10, "agent": 7.6}, {"name": "CURD 200 G PACK", "mrp": 15, "agent": 13}, {"name": "CURD 450GMS SACHET", "mrp": 84, "agent": 61}, {"name": "CURD SACHEET 900 GMS", "mrp": 70, "agent": 55.5}, {"name": "S.T.M. CURD CUP100G", "mrp": 10, "agent": 8}, {"name": "CURD 200 G CUP", "mrp": 20, "agent": 17.5}, {"name": "S.T.M CURD 500G CUPS", "mrp": 55, "agent": 46}, {"name": "S.T.M CURD 400G CUPS", "mrp": 38, "agent": 34}, {"name": "STM CURD 1 KG DISPO", "mrp": 115, "agent": 88}, {"name": "S.T.M.CURD 10 LIT (DISPO BUCKET)", "mrp": 780, "agent": 710}, {"name": "S.T.M.CURD 5 KG (DISPO BUCKET)", "mrp": 400, "agent": 360}, {"name": "TM CURD 10 KG DISPO", "mrp": 750, "agent": 660}, {"name": "TM CURD DISPO 5 KG", "mrp": 390, "agent": 340}]}, {"category": "BUTTER MILK & LASSI", "items": [{"name": "BUTTERMILK", "mrp": 9, "agent": 7.6}, {"name": "JEERA BUTTER MILK", "mrp": 15, "agent": 10}, {"name": "LASSI SACHET 180 GMS", "mrp": 12, "agent": 10.4}, {"name": "LASSI (WHITE)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(MANGO)", "mrp": 25, "agent": 18.25}, {"name": "SWEETLASSI(PINEAPPLE)", "mrp": 25, "agent": 18.25}, {"name": "SABJA LASSI", "mrp": 22, "agent": 18.75}, {"name": "SWEETLASSI(STRAWBERRY)", "mrp": 25, "agent": 18.25}]}, {"category": "PANNER", "items": [{"name": "PANNER 100 GRMS", "mrp": 49, "agent": 42.5}, {"name": "PANNEER 200 GRMS", "mrp": 85, "agent": 70}, {"name": "PANNEER 500 GRMS", "mrp": 190, "agent": 168}, {"name": "PANNEER 1 KG", "mrp": 380, "agent": 337}, {"name": "JUNNU 100GMS CUP", "mrp": 22, "agent": 17.25}, {"name": "JUNNU 50GMS CUP", "mrp": 12, "agent": 9}, {"name": "CREAM 1000 ML PACK", "mrp": 200, "agent": 180}]}, {"category": "TETRA MILK", "items": [{"name": "DTCM TETRA 180 ML (APS)", "mrp": 13, "agent": 11.65}, {"name": "DTM (TETRA) 180 ML", "mrp": 13, "agent": 11.65}, {"name": "TETRA T.M.(3%) 1 LIT PACK(12)", "mrp": 64, "agent": 58.5}, {"name": "E LIFE BUFFELOW (TM 500ML)(CARTON)", "mrp": 29, "agent": 26.4}]}, {"category": "BI -PRODUCTS", "items": [{"name": "SUGARLESSKOVA", "mrp": 400, "agent": 380}, {"name": "BASUNDI FAMILY PACK 300GMS", "mrp": 75, "agent": 64}, {"name": "BASUNDHI 50 GMS(HOMEPACK)12", "mrp": 180, "agent": 132}, {"name": "DOODH PEDA 20GMS", "mrp": 9, "agent": 7.9}, {"name": "DOODH PEDA(MAP) 200 GMS", "mrp": 100, "agent": 81}, {"name": "BADAM BARFI 200GMS", "mrp": 130, "agent": 114}, {"name": "BADAM MILK POWDER 200GMS", "mrp": 80, "agent": 63}, {"name": "GULABJAM 100 GMS", "mrp": 22, "agent": 18.5}, {"name": "GULABJAM 400 GMS", "mrp": 80, "agent": 71}, {"name": "GULAB JAMUN 500 G", "mrp": 100, "agent": 90}, {"name": "JOWR LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU BARFI 200 GMS", "mrp": 150, "agent": 135}, {"name": "KALAKAND (MAP)200 GMS", "mrp": 100, "agent": 81}, {"name": "SUGARLESS KALAKAND (MAP)200 GMS", "mrp": 120, "agent": 106}, {"name": "MYSORE PAK 200 GMS", "mrp": 120, "agent": 106}, {"name": "RAGILADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "SUNNUNDA", "mrp": 120, "agent": 112}, {"name": "KORRALADU 200 GMS", "mrp": 100, "agent": 88}, {"name": "MALAI LADDU (MAP)150GMS", "mrp": 95, "agent": 79}, {"name": "MIXED MILLET LADDU 200 GMS", "mrp": 100, "agent": 88}, {"name": "KAJU STICKS 120 G", "mrp": 75, "agent": 68}, {"name": "KAJU STICKS 200 G", "mrp": 110, "agent": 100}, {"name": "KAJU BITEES 200G", "mrp": 200, "agent": 182}, {"name": "ORANGE KAJU BITES 200", "mrp": 200, "agent": 182}, {"name": "CHOCOLATE KAJU 200G", "mrp": 200, "agent": 182}, {"name": "BADAM RAKI 200G", "mrp": 200, "agent": 180}, {"name": "ATTA LADDU 200 G", "mrp": 200, "agent": 180}, {"name": "CHANA LADDU 200G", "mrp": 200, "agent": 180}, {"name": "MILK CAKE (MAP)200 GMS", "mrp": 110, "agent": 90}]}, {"category": "CUP CAKE &BAR CAKE", "items": [{"name": "CHOCOLATE CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA CUP CAKE 20GMS", "mrp": 5, "agent": 4.1}, {"name": "VENILA BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "ORANGE BAR CAKE", "mrp": 10, "agent": 8.9}, {"name": "PINE APPLE BAR CK 32G", "mrp": 10, "agent": 8.6}]}, {"category": "BADAM MILK SECTION", "items": [{"name": "SF NUT BADAM 200ML", "mrp": 35, "agent": 25}, {"name": "SFM CHOCOLATE MILK", "mrp": 35, "agent": 25}, {"name": "S F MILK ( DISPO)", "mrp": 30, "agent": 22}, {"name": "S F MILK ( PP)", "mrp": 30, "agent": 20}, {"name": "SF KESAR PISTA 200ML", "mrp": 30, "agent": 22}, {"name": "SF PINAPPLE 200 ML", "mrp": 30, "agent": 22}, {"name": "SF PISTA CHIO 200ML", "mrp": 30, "agent": 22}, {"name": "SF STRAWBERRY 200ML", "mrp": 30, "agent": 22}]}, {"category": "MILK SHAKES", "items": [{"name": "MILKSHAKE DOUBLE CHOCOLATE", "mrp": 30, "agent": 23}, {"name": "BUTTER SCOTCH MILK SHAKE", "mrp": 30, "agent": 23}, {"name": "VANILLA MILK SHAKE", "mrp": 30, "agent": 23}]}, {"category": "BUTTER SECTION", "items": [{"name": "P.T BUTTER 500GMS", "mrp": 280, "agent": 264}, {"name": "P.T BUTTER 100 GMS", "mrp": 65, "agent": 55}, {"name": "C BUTTER 500GMS", "mrp": 285, "agent": 266}, {"name": "C.BUTER 5 KG CARTONS", "mrp": 285, "agent": 266}, {"name": "COOKING BUTTER 100 GMS", "mrp": 70, "agent": 61}, {"name": "COW/BUTTER 20KG", "mrp": 11000, "agent": 10700}, {"name": "WHITEBUTTER 20KG", "mrp": 11000, "agent": 10700}]}, {"category": "CHIKKIS SECTION", "items": [{"name": "PEANUTCHIKKI18 GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "SESAM CHIKKI18GMS BOTTLE", "mrp": 250, "agent": 200}, {"name": "PEANUTCHIKKI90 GMS PKT", "mrp": 250, "agent": 190}, {"name": "SESAM CHKII90GMS PKT", "mrp": 250, "agent": 190}]}, {"category": "GHEE SECTION", "items": [{"name": "BUFFELOGHEE200ML", "mrp": 145, "agent": 125}, {"name": "BUFFELOGHEE 500ML", "mrp": 345, "agent": 305}, {"name": "BUFFELOGHEE 1000ML (4 PACK)", "mrp": 690, "agent": 610}, {"name": "BUFFELOGHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "BUFFELOGHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "BUFFELOGHEE 50ML", "mrp": 40, "agent": 33}, {"name": "B.GHEE 100ML JAR", "mrp": 78, "agent": 67}, {"name": "B.GHEE 200ML JAR", "mrp": 145, "agent": 123}, {"name": "B. GHEE 500ML JAR", "mrp": 350, "agent": 308}, {"name": "B.GHEE 1000ML JAR", "mrp": 700, "agent": 610}, {"name": "B. GHEE 5L JAR", "mrp": 3350, "agent": 3050}, {"name": "BGHEE 200ML DINING", "mrp": 155, "agent": 133}, {"name": "BGHEE 500ML DINING", "mrp": 355, "agent": 317}, {"name": "BUFFELOGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 100ML JARS", "mrp": 78, "agent": 66}, {"name": "COW GHEE 200ML JARS(60)", "mrp": 145, "agent": 123}, {"name": "COW GHEE 500ML JARS(08JARS)", "mrp": 350, "agent": 310}, {"name": "COW GHEE 1000 ML JARS(4)", "mrp": 700, "agent": 611}, {"name": "COWGHEE 500ML (8 PACK)", "mrp": 345, "agent": 303}, {"name": "COWGHEE 5KG JAR", "mrp": 3350, "agent": 3050}, {"name": "COWGHEE15KG TIN", "mrp": 10700, "agent": 10200}, {"name": "COWGHEE1000ML (POUCH)", "mrp": 690, "agent": 602}, {"name": "COWGHEE200ML (PACK)", "mrp": 140, "agent": 121}, {"name": "HIGH AROMA GHEE 100ML JAR", "mrp": 88, "agent": 73}, {"name": "HIGH AROMA GHEE 200ML JAR", "mrp": 165, "agent": 140}, {"name": "HIGH AROMA GHEE 500ML JAR", "mrp": 355, "agent": 320}, {"name": "HIGH AROMA GHEE 1000ML JAR", "mrp": 710, "agent": 630}, {"name": "HIGH AROMA GHEE 5L JAR", "mrp": 3500, "agent": 3200}, {"name": "HIGH AROMA GHEE 15 KG JAR", "mrp": 10700, "agent": 10200}, {"name": "COW GHEE 15ML", "mrp": 10, "agent": 8.3}, {"name": "COW GHEE 30ML", "mrp": 20, "agent": 16.6}, {"name": "COW GHEE 50ML", "mrp": 38, "agent": 34}]}, {"category": "CHEKODI & MURKULU", "items": [{"name": "CHAKODI 100GMS", "mrp": 30, "agent": 24}, {"name": "CHAKODI 200GMS", "mrp": 60, "agent": 48}, {"name": "CHAKODI 500GMS", "mrp": 150, "agent": 120}, {"name": "MURUKU LONG100GMS", "mrp": 30, "agent": 24}, {"name": "MURUKU LONG200GMS", "mrp": 60, "agent": 48}, {"name": "MURUKU LONG500GMS", "mrp": 150, "agent": 120}, {"name": "KARA BOONDHI 100GMS", "mrp": 30, "agent": 24}, {"name": "KARA BOONDHI 200GMS", "mrp": 60, "agent": 48}, {"name": "KARA BOONDHI 500GMS", "mrp": 150, "agent": 120}, {"name": "CORN FLAXES MIXTURE 100GMS", "mrp": 30, "agent": 24}, {"name": "CORN FLAXES MIXTURE 200GMS", "mrp": 60, "agent": 48}, {"name": "CORN FLAXES MIXTURE 500GMS", "mrp": 150, "agent": 120}, {"name": "JEERA SODA 200 ML", "mrp": 15, "agent": 13}, {"name": "LEMON GINGER 200 ML", "mrp": 15, "agent": 13}, {"name": "ORNNGE CRUSH 200 ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-200ML", "mrp": 15, "agent": 13}, {"name": "MANGO MAGIC-300ML", "mrp": 20, "agent": 16.75}, {"name": "MANGO MAGIC-600ML", "mrp": 35, "agent": 29.75}, {"name": "MANGO MAGIC-1000ML", "mrp": 60, "agent": 50}, {"name": "MANGO MAGIC-2000ML", "mrp": 110, "agent": 90}, {"name": "ULAVACHARU-100GMS", "mrp": 35, "agent": 30}, {"name": "ULAVACHARU-250GMS", "mrp": 80, "agent": 70}, {"name": "ULAVACHARU-500GMS", "mrp": 155, "agent": 135}, {"name": "ULAVACHARU-1000GMS", "mrp": 290, "agent": 245}, {"name": "RUSK 55GMS PACK(40)", "mrp": 10, "agent": 8.5}, {"name": "RUSK 200GMS PACK(20)", "mrp": 35, "agent": 26}]}, {"category": "SPICES", "items": [{"name": "CHILLI POWDER(50GR)", "mrp": 20, "agent": 13}, {"name": "CHILLI POWDER(100GR)", "mrp": 40, "agent": 26}, {"name": "CHILLI POWDER(200GR)", "mrp": 75, "agent": 49}, {"name": "TURMERIC POWDER(50G)", "mrp": 20, "agent": 11}, {"name": "TURMERIC POWDER(100GR)", "mrp": 35, "agent": 22}, {"name": "SABAR MASALA (8 G)", "mrp": 5, "agent": 2.75}, {"name": "SABAR MASALA (50 G)", "mrp": 20, "agent": 16}, {"name": "GARAM MASALA (8 G)", "mrp": 5, "agent": 2.9}, {"name": "GARAM MASALA (50 G)", "mrp": 35, "agent": 20}, {"name": "CHIKEN MASALA ( 8 G)", "mrp": 5, "agent": 2.75}]}, {"category": "COOKIES", "items": [{"name": "ATTA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "ATTA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "ATTA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "MULTI GRAIN COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "MULTI GRAIN COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "MULTI GRAIN COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SWEETS & SALT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SWEETS & SALT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SWEETS & SALT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "AJWAIN COOKIES 20 G", "mrp": 250, "agent": 200}, {"name": "AJWAIN COOKIES 50 G", "mrp": 200, "agent": 170}, {"name": "AJWAIN COOKIES 100 G", "mrp": 276, "agent": 228}, {"name": "BUTTER SCOTCH COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER SCOTCH COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER SCOTCH COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COCONUT COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COCONUT COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COCONUT COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "COFFEE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "COFFEE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "COFFEE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "CHOCOLATE COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "CHOCOLATE COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "CHOCOLATE COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "BUTTER COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "BUTTER COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "BUTTER COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "HONEY OATS COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "HONEY OATS COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "HONEY OATS COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "SPICY MASALA COOKIES 20G", "mrp": 250, "agent": 200}, {"name": "SPICY MASALA COOKIES 50G", "mrp": 200, "agent": 170}, {"name": "SPICY MASALA COOKIES 100G", "mrp": 276, "agent": 228}, {"name": "RAGI ALMOND COOKIES100G", "mrp": 40, "agent": 35}, {"name": "JOWAR CASHEW COOKIES 100G", "mrp": 40, "agent": 35}, {"name": "SUGAR LESS RAGI LADDU 200G", "mrp": 130, "agent": 112}, {"name": "SUGAR LESS SUNNUNDALU 200G", "mrp": 130, "agent": 112}]}, {"category": "OTHERS", "items": [{"name": "ICE CREAM CUP", "mrp": 20, "agent": 15}, {"name": "ICE CREAM FAMILY PACK", "mrp": 150, "agent": 120}, {"name": "WATER BOTTLE 1L", "mrp": 20, "agent": 15}, {"name": "WATER BOTTLE 500ML", "mrp": 10, "agent": 7}, {"name": "BREAD", "mrp": 40, "agent": 32}, {"name": "EGGS (per piece)", "mrp": 7, "agent": 5.5}, {"name": "COLD DRINK 250ML", "mrp": 20, "agent": 16}, {"name": "COLD DRINK 750ML", "mrp": 40, "agent": 33}]}];
 
 async function storageGet(key){
-  const { data } = await ghGetFile();
-  return (data && data[key] !== undefined) ? { value: data[key] } : null;
+  const res = await window.storage.get(key, true);
+  return res && res.value !== undefined ? { value: res.value } : null;
 }
 
 async function storageSet(key, value){
-  const { data, sha } = await ghGetFile();
-  data[key] = value;
-  await ghPutFile(data, sha);
-  return { ok: true };
+  const result = await window.storage.set(key, value, true);
+  return result ? { ok: true } : null;
 }
 
 async function storageList(prefix){
-  const { data } = await ghGetFile();
-  const keys = Object.keys(data || {}).filter(k => k.indexOf(prefix) === 0);
-  return { keys };
+  const res = await window.storage.list(prefix, true);
+  return { keys: (res && res.keys) ? res.keys : [] };
 }
 
 function boot(){
-  const { repo, token } = getConfig();
-  if(!repo || !token){
-    document.getElementById('setupCard').style.display = 'block';
-    document.getElementById('mainApp').style.display = 'none';
-    return;
-  }
   document.getElementById('setupCard').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
   loadDay(todayISO());
@@ -510,7 +425,7 @@ let openCats = new Set();
 function freshCats(){
   return CATALOG.map(c => ({
     category: c.category,
-    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, mrp: it.mrp, agent: it.agent }))
+    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, home:0, mrp: it.mrp, agent: it.agent }))
   }));
 }
 
@@ -581,8 +496,8 @@ function renderCats(){
     itemsWrap.className = 'cat-items';
 
     visibleItems.forEach(({it, ii}) => {
-      const opening = num(it.opening), added = num(it.added), sold = num(it.sold), mrp = num(it.mrp), agent = num(it.agent);
-      const closing = opening + added - sold;
+      const opening = num(it.opening), added = num(it.added), sold = num(it.sold), home = num(it.home), mrp = num(it.mrp), agent = num(it.agent);
+      const closing = opening + added - sold - home;
       const amount = sold * mrp;
       const margin = sold * (mrp - agent);
       const div = document.createElement('div');
@@ -601,6 +516,10 @@ function renderCats(){
           <div class="qty-box sold">
             <label>Sold</label>
             <input type="number" value="${it.sold}" inputmode="decimal" onchange="updateItem(${ci},${ii},'sold',this.value)">
+          </div>
+          <div class="qty-box home">
+            <label>Home</label>
+            <input type="number" value="${it.home}" inputmode="decimal" onchange="updateItem(${ci},${ii},'home',this.value)">
           </div>
         </div>
         <div class="price-grid">
@@ -696,6 +615,7 @@ function mergeIntoCatalogShape(savedCats){
       it.opening = num(saved.opening);
       it.added = num(saved.added);
       it.sold = num(saved.sold);
+      it.home = num(saved.home);
       it.mrp = saved.mrp!==undefined ? num(saved.mrp) : it.mrp;
       it.agent = saved.agent!==undefined ? num(saved.agent) : it.agent;
     }
@@ -733,7 +653,7 @@ async function loadDay(dateISO){
       cats.forEach(c => c.items.forEach(it => {
         const prev = lookup[it.name];
         if(prev){
-          it.opening = num(prev.opening)+num(prev.added)-num(prev.sold);
+          it.opening = num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home);
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
         }
