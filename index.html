@@ -1308,11 +1308,7 @@ window.updateItem = function(ci, ii, field, value){
   } else {
     it[field] = val;
     const available = num(it.opening) + num(it.added) - num(it.home);
-    if (it.leftover !== undefined && it.leftover !== 0) {
-      it.sold = Math.max(0, available - num(it.leftover));
-    } else {
-      it.leftover = Math.max(0, available - num(it.sold));
-    }
+    it.leftover = Math.max(0, available - num(it.sold));
   }
 
   renderCats();
@@ -1381,7 +1377,7 @@ function mergeIntoCatalogShape(savedCats){
   return base;
 }
 
-// 🔄 SMART MULTI-DAY ROLLING STOCK LOADER
+// 🔄 SMART MULTI-DAY ROLLING STOCK LOADER (BUG-FIXED)
 async function loadDay(dateISO){
   currentDate = dateISO;
   document.getElementById('dateInput').value = dateISO;
@@ -1430,8 +1426,10 @@ async function loadDay(dateISO){
       cats.forEach(c => c.items.forEach(it => {
         const prev = lookup[it.name];
         if(prev){
-          const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : (num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home));
+          const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : Math.max(0, num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home));
           it.opening = prevClosing;
+          it.leftover = prevClosing; // FIX: Leftover initially equals Opening stock for a new day!
+          it.sold = 0;
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
         }
