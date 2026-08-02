@@ -6,6 +6,7 @@
 <title>Sangam / Annapurna Dairy — Daily Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
     --bg: #FAFAF6;
@@ -53,16 +54,17 @@
     opacity:0.5;
   }
 
-  .tabs{display:flex;gap:6px;margin:20px 0 18px;}
+  .tabs{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap;}
   .tab-btn{
-    flex:1;
-    padding:10px 10px;
+    flex:1 1 30%;
+    min-width:70px;
+    padding:10px 6px;
     border:1px solid var(--line);
     background:var(--surface);
     border-radius:var(--radius);
     font-family:'IBM Plex Sans';
     font-weight:600;
-    font-size:13px;
+    font-size:12.5px;
     color:var(--ink-soft);
     cursor:pointer;
   }
@@ -162,8 +164,8 @@
   }
   .qty-grid{
     display:grid;
-    grid-template-columns:repeat(4, 1fr);
-    gap:6px;
+    grid-template-columns:repeat(5, 1fr);
+    gap:5px;
   }
   .price-grid{
     display:grid;
@@ -296,6 +298,135 @@
   .no-match{
     text-align:center;color:var(--ink-soft);font-size:13px;padding:16px;
   }
+
+  /* ---- Order box ---- */
+  .qty-box.order input{background:#EDEFF7;border-color:#CBD0E8;}
+  .order-summary{
+    border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:14px;
+    background:#F6F5FB;
+  }
+  .order-summary h4{margin:0 0 8px;font-family:'Fraunces';font-size:14px;font-weight:600;}
+  .order-row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px dashed #DEDCEC;font-family:'IBM Plex Mono';}
+  .order-row:last-child{border-bottom:none;}
+  .copy-btn{
+    margin-top:10px;width:100%;padding:9px;border-radius:8px;border:1px solid #CBD0E8;
+    background:#fff;color:var(--ink);font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;cursor:pointer;
+  }
+  .empty-order{font-size:12px;color:var(--ink-soft);}
+
+  /* ---- Sub tabs ---- */
+  .subtabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .subtab-btn{
+    padding:7px 12px;border:1px solid var(--line);background:var(--surface);border-radius:20px;
+    font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;
+  }
+  .subtab-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  /* ---- Stock badges ---- */
+  .stock-badge{
+    display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;
+    font-family:'IBM Plex Mono';
+  }
+  .stock-red{background:var(--red-soft);color:var(--red);}
+  .stock-yellow{background:var(--gold-soft);color:var(--gold);}
+  .stock-green{background:var(--green-soft);color:var(--green);}
+  .stock-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;
+  }
+  .stock-row:last-child{border-bottom:none;}
+  .stock-row .nm{flex:1;padding-right:10px;}
+  .stock-row .qtywrap{display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono';}
+  .stock-counts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+  .stock-count-box{border-radius:var(--radius);padding:12px;text-align:center;}
+  .stock-count-box.red{background:var(--red-soft);}
+  .stock-count-box.yellow{background:var(--gold-soft);}
+  .stock-count-box.green{background:var(--green-soft);}
+  .stock-count-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:20px;}
+  .stock-count-box .l{font-size:11px;color:var(--ink-soft);text-transform:uppercase;margin-top:2px;}
+  .threshold-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;font-size:12px;}
+  .threshold-row input{
+    width:60px;font-family:'IBM Plex Mono';padding:6px;border:1px solid var(--line);border-radius:6px;text-align:center;
+  }
+
+  /* ---- Sales report ---- */
+  .sales-nav{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+  .sales-nav button{
+    padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:14px;
+  }
+  .sales-row{
+    display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;
+  }
+  .sales-row .qty{font-family:'IBM Plex Mono';font-weight:600;}
+  .sales-row .amt{font-family:'IBM Plex Mono';color:var(--ink-soft);}
+  .range-box{border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px;}
+  .range-inputs{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+  .range-inputs input{flex:1;font-family:'IBM Plex Mono';padding:7px;border:1px solid var(--line);border-radius:6px;}
+  .range-inputs button{padding:8px 12px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-weight:600;font-size:12.5px;cursor:pointer;}
+
+  /* ---- Kirana ---- */
+  .shop-select{
+    width:100%;font-family:'IBM Plex Sans';font-weight:600;font-size:14px;padding:10px;
+    border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:8px;
+  }
+  .rename-link{font-size:11.5px;color:var(--green);cursor:pointer;text-decoration:underline;margin-bottom:10px;display:inline-block;}
+  .kirana-item{
+    display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid #F0EDE3;
+  }
+  .kirana-item:last-child{border-bottom:none;}
+  .kirana-item .nm{flex:1.6;font-size:12.5px;font-weight:600;}
+  .kirana-item input{
+    width:100%;font-family:'IBM Plex Mono';font-size:13px;text-align:center;padding:6px 3px;
+    border:1px solid var(--line);border-radius:6px;background:#fdfcf9;
+  }
+  .kirana-item .qf{flex:1;}
+  .kirana-item .rf{flex:1;}
+  .kirana-item .af{flex:1.1;font-family:'IBM Plex Mono';font-size:12px;text-align:right;color:var(--ink-soft);}
+  .balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .bal-box{border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;}
+  .bal-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:18px;}
+  .bal-box .l{font-size:11px;color:var(--ink-soft);text-transform:uppercase;margin-top:3px;}
+  .bal-box.due{background:var(--red-soft);}
+  .bal-box.clear{background:var(--green-soft);}
+  .kirana-overview-row{
+    display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;cursor:pointer;
+  }
+  .kirana-overview-row:last-child{border-bottom:none;}
+  .kirana-overview-row:hover{background:var(--green-soft);}
+
+  /* ---- Cash ledger ---- */
+  .cash-table-row{
+    display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:6px;padding:8px 4px;
+    border-bottom:1px solid #F0EDE3;font-size:12px;font-family:'IBM Plex Mono';align-items:center;
+  }
+  .cash-table-row.head{font-weight:700;color:var(--ink-soft);font-family:'IBM Plex Sans';font-size:11px;text-transform:uppercase;}
+  .cash-table-row:last-child{border-bottom:none;}
+
+  /* ---- Cash in hand ---- */
+  .cash-hand-box{
+    text-align:center;padding:14px;border-radius:var(--radius);background:var(--gold-soft);border:1px solid #EAD9AE;
+  }
+  .cash-hand-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:26px;color:var(--ink);}
+  .cash-hand-box .l{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;margin-top:4px;letter-spacing:0.03em;}
+  .cash-hand-actions{display:flex;gap:8px;margin-top:12px;}
+  .cash-hand-actions .copy-btn{margin-top:0;}
+  .cash-adj-row{
+    display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid #F0EDE3;font-size:12px;font-family:'IBM Plex Mono';
+  }
+  .cash-adj-row:last-child{border-bottom:none;}
+  .cash-adj-row .tag{
+    font-family:'IBM Plex Sans';font-weight:600;font-size:10.5px;text-transform:uppercase;padding:1px 7px;border-radius:10px;margin-right:6px;
+  }
+  .cash-adj-row .tag.deposit{background:var(--green-soft);color:var(--green);}
+  .cash-adj-row .tag.withdraw{background:var(--red-soft);color:var(--red);}
+  .cash-adj-row .tag.recount{background:#EDEFF7;color:#4A4E7A;}
+
+  /* ---- Charts ---- */
+  .chart-wrap{position:relative;height:220px;margin-top:6px;}
+  .chart-wrap.tall{height:340px;}
+  .range-inputs select{
+    flex:1;font-family:'IBM Plex Sans';font-size:13px;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  }
 </style>
 </head>
 <body>
@@ -337,7 +468,11 @@
 
   <div class="tabs">
     <button class="tab-btn active" id="tabTodayBtn" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" id="tabStockBtn" onclick="switchTab('stock')">Stock</button>
+    <button class="tab-btn" id="tabSalesBtn" onclick="switchTab('sales')">Sales</button>
+    <button class="tab-btn" id="tabKiranaBtn" onclick="switchTab('kirana')">Kirana</button>
     <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">History</button>
+    <button class="tab-btn" id="tabChartsBtn" onclick="switchTab('charts')">📊 Charts</button>
   </div>
 
   <!-- TODAY TAB -->
@@ -347,7 +482,7 @@
       <input type="date" id="dateInput">
 
       <div class="legend">
-        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold to customers &nbsp;·&nbsp; <b>Home</b> = used at home, not sold &nbsp;·&nbsp; <b>Closing</b> auto-calculated, carries to tomorrow's opening. Tap a category to expand it.
+        <b>Opening</b> = stock at start of day &nbsp;·&nbsp; <b>Added</b> = new stock received &nbsp;·&nbsp; <b>Sold</b> = qty sold to customers &nbsp;·&nbsp; <b>Home</b> = used at home, not sold &nbsp;·&nbsp; <b>Order</b> = qty to order for tomorrow &nbsp;·&nbsp; <b>Closing</b> auto-calculated, carries to tomorrow's opening. Tap a category to expand it.
       </div>
       <input type="text" class="search-box" id="searchBox" placeholder="Search a product…" oninput="onSearch()">
 
@@ -361,6 +496,7 @@
         <span>Total Margin (MRP − Agent, on sold)</span>
         <span class="margin" id="totalMarginVal" style="font-weight:700;">₹0</span>
       </div>
+      <div class="order-summary" id="orderSummaryToday"></div>
     </div>
 
     <div class="card">
@@ -383,11 +519,148 @@
     <div class="shared-note">Saved entries are shared — you and your friend both see the same ledger.</div>
   </div>
 
+  <!-- STOCK TAB -->
+  <div id="stockTab" style="display:none;">
+    <div class="card">
+      <div class="stock-counts" id="stockCounts"></div>
+      <div class="threshold-row">
+        <span>Red below</span><input type="number" id="redBelowInput" value="5">
+        <span>Yellow up to</span><input type="number" id="yellowBelowInput" value="15">
+        <button class="copy-btn" style="width:auto;margin:0;padding:6px 10px;" onclick="saveThresholds()">Save</button>
+      </div>
+      <input type="text" class="search-box" id="stockSearchBox" placeholder="Search a product…" oninput="renderStockTab()">
+      <div id="stockBody"></div>
+    </div>
+    <div class="order-summary" id="orderSummaryStockTab"></div>
+  </div>
+
+  <!-- SALES TAB -->
+  <div id="salesTab" style="display:none;">
+    <div class="card">
+      <label class="field-label">Sales for date</label>
+      <div class="sales-nav">
+        <button onclick="shiftSalesDate(-1)">‹</button>
+        <input type="date" id="salesDateInput" style="flex:1;">
+        <button onclick="shiftSalesDate(1)">›</button>
+      </div>
+      <div id="salesSummary" style="margin-bottom:10px;"></div>
+      <div id="salesBody"></div>
+    </div>
+    <div class="range-box">
+      <label class="field-label">Total sold over a date range</label>
+      <div class="range-inputs">
+        <input type="date" id="rangeFromInput">
+        <input type="date" id="rangeToInput">
+        <button onclick="computeRangeSales()">Go</button>
+      </div>
+      <div id="rangeResult"></div>
+    </div>
+  </div>
+
+  <!-- KIRANA TAB -->
+  <div id="kiranaTab" style="display:none;">
+    <div class="card">
+      <label class="field-label">All 15 shops — balance due</label>
+      <div id="kiranaOverview"><div class="empty-state">Loading…</div></div>
+    </div>
+    <div class="card">
+      <label class="field-label">Shop</label>
+      <select class="shop-select" id="shopSelect" onchange="onShopChange()"></select>
+      <span class="rename-link" onclick="renameCurrentShop()">Rename this shop</span>
+      <label class="field-label">Date</label>
+      <input type="date" id="kiranaDateInput">
+      <input type="text" class="search-box" id="kiranaSearchBox" placeholder="Search a product…" oninput="renderKiranaItems()" style="margin-top:10px;">
+      <div id="kiranaBody"></div>
+      <div class="total-line">
+        <span class="lbl">Day's Supply Total</span>
+        <span class="val" id="kiranaTotalVal">₹0</span>
+      </div>
+      <div class="split-grid">
+        <div class="split-box cash">
+          <label>Received Today</label>
+          <span class="cur">₹</span><input type="number" id="kiranaReceivedInput" placeholder="0" inputmode="decimal" oninput="updateKiranaBalance()">
+        </div>
+        <div class="split-box online" style="background:#F5F2E9;border-color:var(--line);">
+          <label>Opening Balance</label>
+          <span class="cur">₹</span><span id="kiranaOpeningVal" style="font-family:'IBM Plex Mono';font-weight:600;font-size:20px;">0</span>
+        </div>
+      </div>
+      <div class="balance-grid">
+        <div class="bal-box due" id="kiranaBalBox">
+          <div class="n" id="kiranaBalVal">₹0</div>
+          <div class="l">Balance Due</div>
+        </div>
+        <div class="bal-box">
+          <div class="n" id="kiranaItemCount">0</div>
+          <div class="l">Items Supplied</div>
+        </div>
+      </div>
+      <button class="save-btn" id="kiranaSaveBtn" onclick="saveKiranaDay()">Save Shop Entry</button>
+      <div class="status-msg" id="kiranaStatusMsg"></div>
+    </div>
+  </div>
+
   <!-- HISTORY TAB -->
   <div id="historyTab" style="display:none;">
     <div class="period-summary" id="periodSummary"></div>
+    <div class="card" style="padding:14px;">
+      <label class="field-label">Cash in Hand (your mixed pile)</label>
+      <div class="cash-hand-box">
+        <div class="n" id="cashHandVal">₹0</div>
+        <div class="l">Expected cash with you right now</div>
+      </div>
+      <div class="cash-hand-actions">
+        <button class="copy-btn" onclick="addCashAdjustment('deposit')">Bank deposit</button>
+        <button class="copy-btn" onclick="addCashAdjustment('withdraw')">Withdrawal</button>
+        <button class="copy-btn" style="background:var(--ink);color:#fff;" onclick="recountCash()">Count now</button>
+      </div>
+      <div id="cashAdjustList"></div>
+    </div>
+    <div class="card" style="padding:14px;">
+      <label class="field-label">Cash Ledger (running total)</label>
+      <div id="cashLedger"></div>
+    </div>
     <div class="card" style="padding:6px 14px;">
       <div id="historyList"><div class="empty-state">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- CHARTS TAB -->
+  <div id="chartsTab" style="display:none;">
+    <div class="card">
+      <label class="field-label">Day-wise Sales (Cash vs Online)</label>
+      <div class="range-inputs" style="margin-bottom:10px;">
+        <input type="date" id="dayChartFrom">
+        <input type="date" id="dayChartTo">
+        <button onclick="renderDaySalesChart()">Update</button>
+      </div>
+      <div class="chart-wrap"><canvas id="dayChartCanvas"></canvas></div>
+      <div class="empty-state" id="dayChartEmpty" style="display:none;">No sales entries in this range.</div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Product-wise Sales</label>
+      <div class="range-inputs" style="margin-bottom:8px;">
+        <input type="date" id="prodChartFrom">
+        <input type="date" id="prodChartTo">
+      </div>
+      <div class="range-inputs">
+        <select id="prodChartCategory"><option value="">All Categories</option></select>
+        <select id="prodChartMetric">
+          <option value="qty">By Qty Sold</option>
+          <option value="amt">By Sales Amount</option>
+        </select>
+      </div>
+      <div class="range-inputs">
+        <select id="prodChartTopN">
+          <option value="10">Top 10</option>
+          <option value="15" selected>Top 15</option>
+          <option value="25">Top 25</option>
+        </select>
+        <button onclick="renderProductSalesChart()">Update</button>
+      </div>
+      <div class="chart-wrap tall"><canvas id="prodChartCanvas"></canvas></div>
+      <div class="empty-state" id="prodChartEmpty" style="display:none;">No sales in this range.</div>
     </div>
   </div>
   </div>
@@ -414,6 +687,7 @@ async function storageList(prefix){
 function boot(){
   document.getElementById('setupCard').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
+  loadStockSettings();
   loadDay(todayISO());
 }
 
@@ -425,7 +699,7 @@ let openCats = new Set();
 function freshCats(){
   return CATALOG.map(c => ({
     category: c.category,
-    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, home:0, mrp: it.mrp, agent: it.agent }))
+    items: c.items.map(it => ({ name: it.name, opening:0, added:0, sold:0, home:0, order:0, mrp: it.mrp, agent: it.agent }))
   }));
 }
 
@@ -449,11 +723,15 @@ function escapeHtml(s){
 }
 
 function switchTab(tab){
-  document.getElementById('todayTab').style.display = tab==='today' ? 'block':'none';
-  document.getElementById('historyTab').style.display = tab==='history' ? 'block':'none';
-  document.getElementById('tabTodayBtn').classList.toggle('active', tab==='today');
-  document.getElementById('tabHistoryBtn').classList.toggle('active', tab==='history');
+  ['today','stock','sales','kirana','history','charts'].forEach(t => {
+    document.getElementById(t+'Tab').style.display = (tab===t) ? 'block':'none';
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Btn').classList.toggle('active', tab===t);
+  });
   if(tab==='history') loadHistory();
+  if(tab==='stock') renderStockTab();
+  if(tab==='sales') openSalesTab();
+  if(tab==='kirana') openKiranaTab();
+  if(tab==='charts') openChartsTab();
 }
 
 function toggleCat(ci){
@@ -521,6 +799,10 @@ function renderCats(){
             <label>Home</label>
             <input type="number" value="${it.home}" inputmode="decimal" onchange="updateItem(${ci},${ii},'home',this.value)">
           </div>
+          <div class="qty-box order">
+            <label>Order</label>
+            <input type="number" value="${it.order||0}" inputmode="decimal" onchange="updateItem(${ci},${ii},'order',this.value)">
+          </div>
         </div>
         <div class="price-grid">
           <div class="qty-box mrp">
@@ -552,7 +834,39 @@ function renderCats(){
     body.innerHTML = '<div class="no-match">No products match "' + escapeHtml(q) + '"</div>';
   }
 
+  renderOrderSummary('orderSummaryToday');
   updateTotal();
+}
+
+function renderOrderSummary(targetId){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  const rows = [];
+  cats.forEach(c => c.items.forEach(it => {
+    if(num(it.order) > 0) rows.push({name: it.name, qty: num(it.order)});
+  }));
+  if(rows.length === 0){
+    el.innerHTML = '<h4>Order for tomorrow</h4><div class="empty-order">No items marked to order yet.</div>';
+    return;
+  }
+  el.innerHTML = '<h4>Order for tomorrow (' + rows.length + ' items)</h4>' +
+    rows.map(r => `<div class="order-row"><span>${escapeHtml(r.name)}</span><span>${r.qty}</span></div>`).join('') +
+    '<button class="copy-btn" onclick="copyOrderList()">Copy order list</button>';
+}
+
+function copyOrderList(){
+  const rows = [];
+  cats.forEach(c => c.items.forEach(it => {
+    if(num(it.order) > 0) rows.push(it.name + " — " + num(it.order));
+  }));
+  const text = "Order list (" + currentDate + "):\n" + rows.join("\n");
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      alert("Order list copied — paste it to your supplier.");
+    }).catch(()=>{ prompt("Copy this order list:", text); });
+  } else {
+    prompt("Copy this order list:", text);
+  }
 }
 
 function updateItem(ci, ii, field, value){
@@ -616,6 +930,7 @@ function mergeIntoCatalogShape(savedCats){
       it.added = num(saved.added);
       it.sold = num(saved.sold);
       it.home = num(saved.home);
+      it.order = num(saved.order);
       it.mrp = saved.mrp!==undefined ? num(saved.mrp) : it.mrp;
       it.agent = saved.agent!==undefined ? num(saved.agent) : it.agent;
     }
@@ -654,6 +969,7 @@ async function loadDay(dateISO){
         const prev = lookup[it.name];
         if(prev){
           it.opening = num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home);
+          it.added = num(prev.order); // yesterday's order becomes today's expected delivery — adjust if actual differs
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
         }
@@ -699,26 +1015,562 @@ async function saveDay(){
   setTimeout(()=>{ statusMsg.textContent=""; }, 3000);
 }
 
+// ---------------- STOCK TAB ----------------
+let stockSettings = { redBelow: 5, yellowBelow: 15 };
+
+async function loadStockSettings(){
+  try{
+    const res = await storageGet('settings:stock');
+    if(res && res.value) stockSettings = JSON.parse(res.value);
+  }catch(e){}
+  document.getElementById('redBelowInput').value = stockSettings.redBelow;
+  document.getElementById('yellowBelowInput').value = stockSettings.yellowBelow;
+}
+
+async function saveThresholds(){
+  stockSettings.redBelow = num(document.getElementById('redBelowInput').value) || 5;
+  stockSettings.yellowBelow = num(document.getElementById('yellowBelowInput').value) || 15;
+  try{ await storageSet('settings:stock', JSON.stringify(stockSettings)); }catch(e){}
+  renderStockTab();
+}
+
+function stockClass(closing){
+  if(closing < stockSettings.redBelow) return 'stock-red';
+  if(closing <= stockSettings.yellowBelow) return 'stock-yellow';
+  return 'stock-green';
+}
+function stockLabel(closing){
+  if(closing < stockSettings.redBelow) return closing<=0 ? 'Out of stock' : 'Low';
+  if(closing <= stockSettings.yellowBelow) return 'Medium';
+  return 'In stock';
+}
+
+function renderStockTab(){
+  const body = document.getElementById('stockBody');
+  const q = document.getElementById('stockSearchBox').value.trim().toLowerCase();
+  body.innerHTML = "";
+  let red=0, yellow=0, green=0;
+
+  cats.forEach(cat => {
+    const rows = cat.items
+      .map(it => {
+        const closing = num(it.opening)+num(it.added)-num(it.sold)-num(it.home);
+        return {name: it.name, closing, order: num(it.order)};
+      })
+      .filter(r => !q || r.name.toLowerCase().includes(q));
+    if(rows.length === 0) return;
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div style="font-family:'Fraunces';font-weight:600;font-size:13.5px;margin:12px 0 4px;">${escapeHtml(cat.category)}</div>`;
+    rows.forEach(r => {
+      const cls = stockClass(r.closing);
+      if(cls==='stock-red') red++; else if(cls==='stock-yellow') yellow++; else green++;
+      const row = document.createElement('div');
+      row.className = 'stock-row';
+      row.innerHTML = `
+        <span class="nm">${escapeHtml(r.name)}</span>
+        <span class="qtywrap">
+          <span>${r.closing}</span>
+          <span class="stock-badge ${cls}">${stockLabel(r.closing)}</span>
+        </span>
+      `;
+      wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+
+  if(body.innerHTML === "" && q){
+    body.innerHTML = '<div class="no-match">No products match "' + escapeHtml(q) + '"</div>';
+  }
+
+  document.getElementById('stockCounts').innerHTML = `
+    <div class="stock-count-box red"><div class="n">${red}</div><div class="l">Out / Low</div></div>
+    <div class="stock-count-box yellow"><div class="n">${yellow}</div><div class="l">Medium</div></div>
+    <div class="stock-count-box green"><div class="n">${green}</div><div class="l">In Stock</div></div>
+  `;
+  renderOrderSummary('orderSummaryStockTab');
+}
+
+// ---------------- SALES TAB ----------------
+function shiftSalesDate(delta){
+  const input = document.getElementById('salesDateInput');
+  const d = new Date(input.value + "T00:00:00");
+  d.setDate(d.getDate()+delta);
+  const iso = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  input.value = iso;
+  loadSalesReport(iso);
+}
+
+function openSalesTab(){
+  const input = document.getElementById('salesDateInput');
+  if(!input.value) input.value = currentDate || todayISO();
+  input.onchange = () => loadSalesReport(input.value);
+  loadSalesReport(input.value);
+}
+
+async function loadSalesReport(dateISO){
+  const body = document.getElementById('salesBody');
+  const summary = document.getElementById('salesSummary');
+  body.innerHTML = '<div class="empty-state">Loading…</div>';
+  let dayData = null;
+  try{
+    const res = await storageGet('day:' + fmtDateKey(dateISO));
+    if(res && res.value) dayData = JSON.parse(res.value);
+  }catch(e){}
+
+  if(!dayData){
+    body.innerHTML = '<div class="empty-state">No entry saved for this date.</div>';
+    summary.innerHTML = '';
+    return;
+  }
+
+  let totalQty = 0, totalAmt = 0, itemCount = 0;
+  body.innerHTML = "";
+  (dayData.cats||[]).forEach(c => {
+    const rows = (c.items||[]).filter(it => num(it.sold) > 0);
+    if(rows.length === 0) return;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div style="font-family:'Fraunces';font-weight:600;font-size:13.5px;margin:12px 0 4px;">${escapeHtml(c.category)}</div>`;
+    rows.forEach(it => {
+      const sold = num(it.sold), mrp = num(it.mrp);
+      const amt = sold*mrp;
+      totalQty += sold; totalAmt += amt; itemCount++;
+      const row = document.createElement('div');
+      row.className = 'sales-row';
+      row.innerHTML = `<span>${escapeHtml(it.name)}</span><span class="qty">${sold}</span><span class="amt">${money(amt)}</span>`;
+      wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+
+  if(itemCount === 0){
+    body.innerHTML = '<div class="empty-state">No products sold on this date.</div>';
+  }
+  summary.innerHTML = `<div class="period-summary" style="grid-template-columns:1fr 1fr;">
+    <div class="stat-box"><div class="n">${itemCount}</div><div class="l">Products Sold</div></div>
+    <div class="stat-box"><div class="n">${money(totalAmt)}</div><div class="l">Total Sales</div></div>
+  </div>`;
+}
+
+async function computeRangeSales(){
+  const from = document.getElementById('rangeFromInput').value;
+  const to = document.getElementById('rangeToInput').value;
+  const resultEl = document.getElementById('rangeResult');
+  if(!from || !to){ resultEl.innerHTML = '<div class="empty-state">Pick both dates.</div>'; return; }
+  resultEl.innerHTML = '<div class="empty-state">Calculating…</div>';
+  try{
+    const res = await storageList('day:');
+    const keys = (res && res.keys) ? res.keys : [];
+    const tally = {}; // name -> {qty, amt}
+    let grandAmt = 0;
+    for(const k of keys){
+      const dateKey = k.replace('day:','');
+      if(dateKey < fmtDateKey(from) || dateKey > fmtDateKey(to)) continue;
+      const r = await storageGet(k);
+      if(!r || !r.value) continue;
+      const d = JSON.parse(r.value);
+      (d.cats||[]).forEach(c => (c.items||[]).forEach(it => {
+        const sold = num(it.sold);
+        if(sold <= 0) return;
+        const amt = sold*num(it.mrp);
+        grandAmt += amt;
+        if(!tally[it.name]) tally[it.name] = {qty:0, amt:0};
+        tally[it.name].qty += sold;
+        tally[it.name].amt += amt;
+      }));
+    }
+    const names = Object.keys(tally).sort((a,b) => tally[b].qty - tally[a].qty);
+    if(names.length === 0){
+      resultEl.innerHTML = '<div class="empty-state">No sales in this range.</div>';
+      return;
+    }
+    resultEl.innerHTML = `<div class="item-foot" style="margin-bottom:6px;"><span>Total Sales</span><span class="amt">${money(grandAmt)}</span></div>` +
+      names.map(n => `<div class="sales-row"><span>${escapeHtml(n)}</span><span class="qty">${tally[n].qty}</span><span class="amt">${money(tally[n].amt)}</span></div>`).join('');
+  }catch(e){
+    resultEl.innerHTML = '<div class="empty-state">Could not calculate range.</div>';
+  }
+}
+
+// ---------------- KIRANA TAB ----------------
+const KIRANA_SHOP_COUNT = 15;
+let kiranaShops = [];
+let currentShopIdx = 0;
+let kiranaCats = [];
+let kiranaOpeningBalance = 0;
+let kiranaShopsLoaded = false;
+
+function defaultKiranaShops(){
+  const arr = [];
+  for(let i=1;i<=KIRANA_SHOP_COUNT;i++) arr.push("Kirana Shop " + i);
+  return arr;
+}
+
+async function loadKiranaShops(){
+  try{
+    const res = await storageGet('kirana:shops');
+    if(res && res.value) kiranaShops = JSON.parse(res.value);
+  }catch(e){}
+  if(!kiranaShops || kiranaShops.length !== KIRANA_SHOP_COUNT) kiranaShops = defaultKiranaShops();
+  kiranaShopsLoaded = true;
+}
+
+async function saveKiranaShops(){
+  try{ await storageSet('kirana:shops', JSON.stringify(kiranaShops)); }catch(e){}
+}
+
+function renameCurrentShop(){
+  const name = prompt("Rename this shop:", kiranaShops[currentShopIdx]);
+  if(name && name.trim()){
+    kiranaShops[currentShopIdx] = name.trim();
+    saveKiranaShops();
+    populateShopSelect();
+    renderKiranaOverview();
+  }
+}
+
+function populateShopSelect(){
+  const sel = document.getElementById('shopSelect');
+  sel.innerHTML = kiranaShops.map((s,i) => `<option value="${i}">${escapeHtml(s)}</option>`).join('');
+  sel.value = currentShopIdx;
+}
+
+async function openKiranaTab(){
+  if(!kiranaShopsLoaded) await loadKiranaShops();
+  populateShopSelect();
+  const dateInput = document.getElementById('kiranaDateInput');
+  if(!dateInput.value) dateInput.value = todayISO();
+  dateInput.onchange = () => loadKiranaDay(dateInput.value);
+  renderKiranaOverview();
+  await loadKiranaDay(dateInput.value);
+}
+
+function onShopChange(){
+  currentShopIdx = num(document.getElementById('shopSelect').value);
+  loadKiranaDay(document.getElementById('kiranaDateInput').value);
+}
+
+function freshKiranaCats(shopRates){
+  return CATALOG.map(c => ({
+    category: c.category,
+    items: c.items.map(it => ({ name: it.name, qty: 0, rate: (shopRates && shopRates[it.name]!==undefined) ? num(shopRates[it.name]) : it.mrp }))
+  }));
+}
+
+function mergeKiranaSaved(savedCats, shopRates){
+  const lookup = {};
+  (savedCats||[]).forEach(c => (c.items||[]).forEach(it => { lookup[it.name] = it; }));
+  const base = freshKiranaCats(shopRates);
+  base.forEach(c => c.items.forEach(it => {
+    const saved = lookup[it.name];
+    if(saved){
+      it.qty = num(saved.qty);
+      it.rate = saved.rate!==undefined ? num(saved.rate) : it.rate;
+    }
+  }));
+  return base;
+}
+
+async function loadKiranaDay(dateISO){
+  const key = 'kirana:day:' + currentShopIdx + ':' + fmtDateKey(dateISO);
+  let shopRates = {};
+  try{
+    const rres = await storageGet('kirana:rates:' + currentShopIdx);
+    if(rres && rres.value) shopRates = JSON.parse(rres.value);
+  }catch(e){}
+
+  let loaded = null;
+  try{
+    const res = await storageGet(key);
+    if(res && res.value) loaded = JSON.parse(res.value);
+  }catch(e){}
+
+  if(loaded){
+    kiranaCats = mergeKiranaSaved(loaded.cats, shopRates);
+    document.getElementById('kiranaReceivedInput').value = loaded.received || "";
+    kiranaOpeningBalance = num(loaded.openingBalance);
+  } else {
+    kiranaCats = freshKiranaCats(shopRates);
+    document.getElementById('kiranaReceivedInput').value = "";
+    // pull previous day's balance due as today's opening balance
+    let prevBal = 0;
+    try{
+      const prevKey = 'kirana:day:' + currentShopIdx + ':' + fmtDateKey(prevDateISO(dateISO));
+      const pres = await storageGet(prevKey);
+      if(pres && pres.value) prevBal = num(JSON.parse(pres.value).balanceDue);
+    }catch(e){}
+    kiranaOpeningBalance = prevBal;
+  }
+  document.getElementById('kiranaSearchBox').value = "";
+  renderKiranaItems();
+}
+
+function updateKiranaItem(ci, ii, field, value){
+  const v = value===""?0:parseFloat(value);
+  kiranaCats[ci].items[ii][field] = isNaN(v)?0:v;
+  renderKiranaItems();
+}
+
+function kiranaTotalAmount(){
+  let t = 0;
+  kiranaCats.forEach(c => c.items.forEach(it => t += num(it.qty)*num(it.rate)));
+  return t;
+}
+
+function renderKiranaItems(){
+  const body = document.getElementById('kiranaBody');
+  const q = document.getElementById('kiranaSearchBox').value.trim().toLowerCase();
+  body.innerHTML = "";
+
+  kiranaCats.forEach((cat, ci) => {
+    let visible = cat.items.map((it,ii) => ({it, ii}));
+    if(q) visible = visible.filter(({it}) => it.name.toLowerCase().includes(q) || num(it.qty) > 0);
+    if(q && visible.length === 0) return;
+
+    const nonZero = cat.items.filter(it => num(it.qty) > 0).length;
+    if(!q && nonZero === 0) return; // collapse empty categories by default in kirana view unless searching
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div style="font-family:'Fraunces';font-weight:600;font-size:13.5px;margin:10px 0 4px;">${escapeHtml(cat.category)}</div>`;
+    visible.forEach(({it, ii}) => {
+      const amt = num(it.qty)*num(it.rate);
+      const row = document.createElement('div');
+      row.className = 'kirana-item';
+      row.innerHTML = `
+        <span class="nm">${escapeHtml(it.name)}</span>
+        <span class="qf"><input type="number" value="${it.qty}" placeholder="qty" inputmode="decimal" onchange="updateKiranaItem(${ci},${ii},'qty',this.value)"></span>
+        <span class="rf"><input type="number" value="${it.rate}" placeholder="rate" inputmode="decimal" onchange="updateKiranaItem(${ci},${ii},'rate',this.value)"></span>
+        <span class="af">${money(amt)}</span>
+      `;
+      wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+
+  if(q && body.innerHTML === ""){
+    body.innerHTML = '<div class="no-match">No products match "' + escapeHtml(q) + '"</div>';
+  } else if(!q && body.innerHTML === ""){
+    body.innerHTML = '<div class="empty-state">Search above to add products for this shop.</div>';
+  }
+
+  updateKiranaBalance();
+}
+
+function updateKiranaBalance(){
+  const total = kiranaTotalAmount();
+  const received = num(document.getElementById('kiranaReceivedInput').value);
+  const balanceDue = Math.round((kiranaOpeningBalance + total - received)*100)/100;
+  const itemCount = kiranaCats.reduce((s,c) => s + c.items.filter(it => num(it.qty)>0).length, 0);
+
+  document.getElementById('kiranaTotalVal').textContent = money(total);
+  document.getElementById('kiranaOpeningVal').textContent = money(kiranaOpeningBalance).replace('₹','');
+  document.getElementById('kiranaBalVal').textContent = money(Math.abs(balanceDue)) + (balanceDue<0 ? ' cr' : '');
+  document.getElementById('kiranaItemCount').textContent = itemCount;
+  const balBox = document.getElementById('kiranaBalBox');
+  balBox.className = 'bal-box ' + (balanceDue > 0.5 ? 'due' : 'clear');
+}
+
+async function saveKiranaDay(){
+  const btn = document.getElementById('kiranaSaveBtn');
+  const statusMsg = document.getElementById('kiranaStatusMsg');
+  btn.disabled = true;
+  statusMsg.textContent = "Saving…";
+  const dateISO = document.getElementById('kiranaDateInput').value;
+  const total = kiranaTotalAmount();
+  const received = num(document.getElementById('kiranaReceivedInput').value);
+  const balanceDue = Math.round((kiranaOpeningBalance + total - received)*100)/100;
+
+  const data = {
+    date: dateISO,
+    shopIdx: currentShopIdx,
+    shopName: kiranaShops[currentShopIdx],
+    cats: kiranaCats,
+    total: total,
+    received: received,
+    openingBalance: kiranaOpeningBalance,
+    balanceDue: balanceDue
+  };
+
+  try{
+    const key = 'kirana:day:' + currentShopIdx + ':' + fmtDateKey(dateISO);
+    await storageSet(key, JSON.stringify(data));
+
+    // persist any custom rates back to this shop's rate list
+    let shopRates = {};
+    try{
+      const rres = await storageGet('kirana:rates:' + currentShopIdx);
+      if(rres && rres.value) shopRates = JSON.parse(rres.value);
+    }catch(e){}
+    kiranaCats.forEach(c => c.items.forEach(it => { shopRates[it.name] = num(it.rate); }));
+    await storageSet('kirana:rates:' + currentShopIdx, JSON.stringify(shopRates));
+
+    // update quick overview index
+    let summary = {};
+    try{
+      const sres = await storageGet('kirana:summary');
+      if(sres && sres.value) summary = JSON.parse(sres.value);
+    }catch(e){}
+    summary[currentShopIdx] = { name: kiranaShops[currentShopIdx], balanceDue: balanceDue, lastDate: dateISO };
+    await storageSet('kirana:summary', JSON.stringify(summary));
+
+    statusMsg.textContent = "Saved — " + kiranaShops[currentShopIdx] + " (" + dateISO + ")";
+    renderKiranaOverview();
+  } catch(e){
+    statusMsg.textContent = "Save failed, try again.";
+  }
+  btn.disabled = false;
+  setTimeout(()=>{ statusMsg.textContent=""; }, 3000);
+}
+
+async function renderKiranaOverview(){
+  const el = document.getElementById('kiranaOverview');
+  if(!kiranaShopsLoaded) await loadKiranaShops();
+  let summary = {};
+  try{
+    const sres = await storageGet('kirana:summary');
+    if(sres && sres.value) summary = JSON.parse(sres.value);
+  }catch(e){}
+
+  el.innerHTML = kiranaShops.map((name, i) => {
+    const s = summary[i];
+    const bal = s ? num(s.balanceDue) : 0;
+    const cls = bal > 0.5 ? 'stock-red' : (bal < -0.5 ? 'stock-green' : 'stock-yellow');
+    const label = bal > 0.5 ? money(bal)+' due' : (bal < -0.5 ? money(-bal)+' cr' : 'clear');
+    return `<div class="kirana-overview-row" onclick="jumpToShop(${i})">
+      <span>${escapeHtml(name)}</span>
+      <span class="stock-badge ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function jumpToShop(i){
+  currentShopIdx = i;
+  document.getElementById('shopSelect').value = i;
+  loadKiranaDay(document.getElementById('kiranaDateInput').value);
+}
+
+async function fetchAllDayEntries(){
+  const res = await storageList('day:');
+  const keys = (res && res.keys) ? res.keys : [];
+  const entries = [];
+  for(const k of keys){
+    try{ const r = await storageGet(k); if(r && r.value) entries.push(JSON.parse(r.value)); } catch(e){}
+  }
+  return entries;
+}
+
+async function fetchCashAdjustments(){
+  try{
+    const res = await storageGet('cash:adjustments');
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){}
+  return [];
+}
+
+async function saveCashAdjustments(list){
+  try{ await storageSet('cash:adjustments', JSON.stringify(list)); }catch(e){}
+}
+
+// Cash-in-hand = last "recount" checkpoint, plus all cash collected since, minus deposits/withdrawals since.
+function computeCashInHand(entries, adjustments){
+  const recounts = adjustments.filter(a => a.type==='recount').sort((a,b) => a.date.localeCompare(b.date) || (a.ts||"").localeCompare(b.ts||""));
+  let baselineDate = null, baselineTs = null, total = 0;
+  if(recounts.length){
+    const last = recounts[recounts.length-1];
+    baselineDate = last.date; baselineTs = last.ts || (last.date+"T23:59:59");
+    total = num(last.amount);
+  }
+  entries.forEach(e => {
+    if(!baselineDate || e.date > baselineDate) total += num(e.cash);
+  });
+  adjustments.forEach(a => {
+    if(a.type === 'recount') return;
+    const ts = a.ts || (a.date+"T12:00:00");
+    if(!baselineTs || ts > baselineTs) total -= num(a.amount);
+  });
+  return Math.round(total*100)/100;
+}
+
+function renderCashInHand(entries, adjustments){
+  const expected = computeCashInHand(entries, adjustments);
+  document.getElementById('cashHandVal').textContent = money(expected);
+
+  const listEl = document.getElementById('cashAdjustList');
+  const recent = [...adjustments].sort((a,b) => (b.ts||b.date).localeCompare(a.ts||a.date)).slice(0,8);
+  if(recent.length === 0){
+    listEl.innerHTML = '';
+    return;
+  }
+  listEl.innerHTML = recent.map(a => {
+    const d = new Date(a.date + "T00:00:00");
+    const dl = d.toLocaleDateString('en-IN', {day:'2-digit', month:'short'});
+    const label = a.type==='deposit' ? 'Deposit' : (a.type==='withdraw' ? 'Withdrawal' : 'Recount');
+    const amtTxt = a.type==='recount' ? ('Counted ' + money(a.amount)) : money(a.amount);
+    return `<div class="cash-adj-row">
+      <span><span class="tag ${a.type}">${label}</span>${dl}${a.note ? ' · '+escapeHtml(a.note) : ''}</span>
+      <span>${amtTxt}</span>
+    </div>`;
+  }).join('');
+}
+
+async function addCashAdjustment(type){
+  const label = type==='deposit' ? 'Amount deposited to bank' : 'Amount withdrawn / used';
+  const amtStr = prompt(label + ":");
+  if(amtStr === null) return;
+  const amt = parseFloat(amtStr);
+  if(isNaN(amt) || amt <= 0){ alert("Enter a valid amount."); return; }
+  const note = prompt("Note (optional):", "") || "";
+  const list = await fetchCashAdjustments();
+  list.push({ date: todayISO(), ts: new Date().toISOString(), type, amount: amt, note });
+  await saveCashAdjustments(list);
+  loadHistory();
+}
+
+async function recountCash(){
+  const entries = await fetchAllDayEntries();
+  const adjustments = await fetchCashAdjustments();
+  const expected = computeCashInHand(entries, adjustments);
+  const countedStr = prompt("Expected cash: " + money(expected) + "\n\nEnter what you actually counted:");
+  if(countedStr === null) return;
+  const counted = parseFloat(countedStr);
+  if(isNaN(counted)){ alert("Enter a valid amount."); return; }
+  const diff = Math.round((counted - expected)*100)/100;
+  const diffMsg = diff===0 ? "Matches exactly." : (diff>0 ? money(diff)+" more than expected." : money(-diff)+" short of expected.");
+  alert("Counted: " + money(counted) + "\nExpected: " + money(expected) + "\n" + diffMsg);
+  adjustments.push({ date: todayISO(), ts: new Date().toISOString(), type:'recount', amount: counted, note: diffMsg });
+  await saveCashAdjustments(adjustments);
+  loadHistory();
+}
+
 async function loadHistory(){
   const listEl = document.getElementById('historyList');
   const summaryEl = document.getElementById('periodSummary');
   listEl.innerHTML = '<div class="empty-state">Loading…</div>';
   try{
-    const res = await storageList('day:');
-    const keys = (res && res.keys) ? res.keys : [];
-    if(keys.length === 0){
+    const entries = await fetchAllDayEntries();
+    const adjustments = await fetchCashAdjustments();
+    renderCashInHand(entries, adjustments);
+
+    if(entries.length === 0){
       listEl.innerHTML = '<div class="empty-state">No entries saved yet.</div>';
       summaryEl.innerHTML = '';
+      document.getElementById('cashLedger').innerHTML = '<div class="empty-state">No entries yet.</div>';
       return;
     }
-    const entries = [];
-    for(const k of keys){
-      try{
-        const r = await storageGet(k);
-        if(r && r.value) entries.push(JSON.parse(r.value));
-      } catch(e){}
-    }
     entries.sort((a,b) => b.date.localeCompare(a.date));
+
+    // Cash ledger: ascending order with running cumulative totals
+    const ascending = [...entries].sort((a,b) => a.date.localeCompare(b.date));
+    let runCash = 0, runOnline = 0;
+    const ledgerEl = document.getElementById('cashLedger');
+    let ledgerHtml = `<div class="cash-table-row head"><span>Date</span><span>Cash</span><span>Online</span><span>Cum. Total</span></div>`;
+    ascending.forEach(e => {
+      runCash += (e.cash||0);
+      runOnline += (e.online||0);
+      const d = new Date(e.date + "T00:00:00");
+      const dl = d.toLocaleDateString('en-IN', {day:'2-digit', month:'short'});
+      ledgerHtml += `<div class="cash-table-row"><span>${dl}</span><span>${money(e.cash||0)}</span><span>${money(e.online||0)}</span><span>${money(runCash+runOnline)}</span></div>`;
+    });
+    ledgerEl.innerHTML = ledgerHtml || '<div class="empty-state">No entries yet.</div>';
 
     const recent = entries.slice(0,7);
     const sumTotal = recent.reduce((s,e)=>s+(e.total||0),0);
@@ -754,6 +1606,149 @@ async function loadHistory(){
   } catch(err){
     listEl.innerHTML = '<div class="empty-state">Could not load history.</div>';
   }
+}
+
+// ---------------- CHARTS TAB ----------------
+let dayChartInstance = null;
+let prodChartInstance = null;
+let chartCategoryPopulated = false;
+
+function isoMinusDays(n){
+  const d = new Date();
+  d.setDate(d.getDate()-n);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function populateChartCategoryFilter(){
+  if(chartCategoryPopulated) return;
+  const sel = document.getElementById('prodChartCategory');
+  CATALOG.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.category; opt.textContent = c.category;
+    sel.appendChild(opt);
+  });
+  chartCategoryPopulated = true;
+}
+
+function openChartsTab(){
+  populateChartCategoryFilter();
+  const dFrom = document.getElementById('dayChartFrom');
+  const dTo = document.getElementById('dayChartTo');
+  if(!dFrom.value) dFrom.value = isoMinusDays(13);
+  if(!dTo.value) dTo.value = todayISO();
+
+  const pFrom = document.getElementById('prodChartFrom');
+  const pTo = document.getElementById('prodChartTo');
+  if(!pFrom.value) pFrom.value = isoMinusDays(29);
+  if(!pTo.value) pTo.value = todayISO();
+
+  renderDaySalesChart();
+  renderProductSalesChart();
+}
+
+async function renderDaySalesChart(){
+  const from = document.getElementById('dayChartFrom').value;
+  const to = document.getElementById('dayChartTo').value;
+  const emptyEl = document.getElementById('dayChartEmpty');
+  if(!from || !to) return;
+
+  const entries = await fetchAllDayEntries();
+  const filtered = entries.filter(e => e.date >= from && e.date <= to).sort((a,b) => a.date.localeCompare(b.date));
+
+  const canvas = document.getElementById('dayChartCanvas');
+  if(dayChartInstance){ dayChartInstance.destroy(); dayChartInstance = null; }
+
+  if(filtered.length === 0){
+    emptyEl.style.display = 'block';
+    canvas.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  canvas.style.display = 'block';
+
+  const labels = filtered.map(e => {
+    const d = new Date(e.date + "T00:00:00");
+    return d.toLocaleDateString('en-IN', {day:'2-digit', month:'short'});
+  });
+  const cashData = filtered.map(e => num(e.cash));
+  const onlineData = filtered.map(e => num(e.online));
+
+  dayChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Cash', data: cashData, backgroundColor: '#B9862E', stack: 's' },
+        { label: 'Online', data: onlineData, backgroundColor: '#35634A', stack: 's' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+      plugins: { legend: { position: 'top', labels: { font: { family: "'IBM Plex Sans'" } } } }
+    }
+  });
+}
+
+async function renderProductSalesChart(){
+  const from = document.getElementById('prodChartFrom').value;
+  const to = document.getElementById('prodChartTo').value;
+  const category = document.getElementById('prodChartCategory').value;
+  const metric = document.getElementById('prodChartMetric').value;
+  const topN = num(document.getElementById('prodChartTopN').value) || 15;
+  const emptyEl = document.getElementById('prodChartEmpty');
+  if(!from || !to) return;
+
+  const entries = await fetchAllDayEntries();
+  const filtered = entries.filter(e => e.date >= from && e.date <= to);
+
+  const tally = {};
+  filtered.forEach(e => (e.cats||[]).forEach(c => {
+    if(category && c.category !== category) return;
+    (c.items||[]).forEach(it => {
+      const sold = num(it.sold);
+      if(sold <= 0) return;
+      const amt = sold * num(it.mrp);
+      if(!tally[it.name]) tally[it.name] = { qty:0, amt:0 };
+      tally[it.name].qty += sold;
+      tally[it.name].amt += amt;
+    });
+  }));
+
+  const canvas = document.getElementById('prodChartCanvas');
+  if(prodChartInstance){ prodChartInstance.destroy(); prodChartInstance = null; }
+
+  const names = Object.keys(tally);
+  if(names.length === 0){
+    emptyEl.style.display = 'block';
+    canvas.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  canvas.style.display = 'block';
+
+  names.sort((a,b) => tally[b][metric] - tally[a][metric]);
+  const top = names.slice(0, topN);
+  const labels = top.map(n => n.length > 22 ? n.slice(0,20)+'…' : n);
+  const data = top.map(n => tally[n][metric]);
+
+  prodChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: metric === 'qty' ? 'Qty Sold' : 'Sales Amount (₹)',
+        data,
+        backgroundColor: '#35634A'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
 }
 
 // init
