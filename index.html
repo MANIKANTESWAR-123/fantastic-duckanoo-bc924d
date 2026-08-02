@@ -976,22 +976,73 @@ const SEED_DATA = {
   "2026-08-02": { cash: 4176, online: 0, total: 4176, items: { "TONNED MILK 500ML": { sold: 50, agent: 57.85 }, "TONNEDMILK 170ML": { sold: 30, agent: 8.35 }, "CURD 120 GMS SATCHET": { sold: 84, agent: 7.6 }, "STM CURD 1 KG DISPO": { sold: 2, agent: 88 }, "VANILA LASSI GLASS": { sold: 12, agent: 18.25 } } }
 };
 
+// 🔄 SEQUENTIAL MULTI-DAY SEEDING CHAIN LOGIC
 async function seedHistoricalData() {
-  for (const dateISO of Object.keys(SEED_DATA)) {
+  const dates = Object.keys(SEED_DATA).sort();
+  let prevCats = null;
+
+  for (const dateISO of dates) {
     const key = 'day:' + fmtDateKey(dateISO);
     const existing = await storageGet(key);
-    if (!existing || !existing.value) {
+    let dayCats;
+
+    if (existing && existing.value) {
+      const loaded = JSON.parse(existing.value);
+      dayCats = mergeIntoCatalogShape(loaded.cats);
+      
+      // Auto-relink chain if opening stock was 0 in older saves
+      if (prevCats) {
+        const lookup = {};
+        prevCats.forEach(c => (c.items || []).forEach(it => { lookup[it.name] = it; }));
+        let updatedChain = false;
+        dayCats.forEach(c => c.items.forEach(it => {
+          const prev = lookup[it.name];
+          if (prev) {
+            const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : Math.max(0, num(prev.opening) + num(prev.added) - num(prev.sold) - num(prev.home));
+            if (num(it.opening) !== prevClosing) {
+              it.opening = prevClosing;
+              const available = num(it.opening) + num(it.added) - num(it.home);
+              it.leftover = Math.max(0, available - num(it.sold));
+              updatedChain = true;
+            }
+          }
+        }));
+        if (updatedChain) {
+          const payload = { date: dateISO, cats: dayCats, total: loaded.total || 0, cash: loaded.cash || 0, online: loaded.online || 0 };
+          await storageSet(key, JSON.stringify(payload));
+        }
+      }
+      prevCats = dayCats;
+    } else {
       const seed = SEED_DATA[dateISO];
-      const dayCats = freshCats();
+      dayCats = freshCats();
+      
+      // Inherit leftovers from previous seeded day as opening stock
+      if (prevCats) {
+        const lookup = {};
+        prevCats.forEach(c => (c.items || []).forEach(it => { lookup[it.name] = it; }));
+        dayCats.forEach(c => c.items.forEach(it => {
+          const prev = lookup[it.name];
+          if (prev) {
+            const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : Math.max(0, num(prev.opening) + num(prev.added) - num(prev.sold) - num(prev.home));
+            it.opening = prevClosing;
+            it.leftover = prevClosing;
+          }
+        }));
+      }
+
       dayCats.forEach(c => c.items.forEach(it => {
         if (seed.items[it.name]) {
           it.sold = seed.items[it.name].sold;
           if (seed.items[it.name].agent) it.agent = seed.items[it.name].agent;
-          it.leftover = Math.max(0, num(it.opening) + num(it.added) - num(it.home) - num(it.sold));
+          const available = num(it.opening) + num(it.added) - num(it.home);
+          it.leftover = Math.max(0, available - num(it.sold));
         }
       }));
+
       const payload = { date: dateISO, cats: dayCats, total: seed.total, cash: seed.cash, online: seed.online };
       await storageSet(key, JSON.stringify(payload));
+      prevCats = dayCats;
     }
   }
 }
@@ -1377,7 +1428,7 @@ function mergeIntoCatalogShape(savedCats){
   return base;
 }
 
-// 🔄 SMART MULTI-DAY ROLLING STOCK LOADER (BUG-FIXED)
+// 🔄 SMART MULTI-DAY ROLLING STOCK LOADER
 async function loadDay(dateISO){
   currentDate = dateISO;
   document.getElementById('dateInput').value = dateISO;
@@ -1428,7 +1479,7 @@ async function loadDay(dateISO){
         if(prev){
           const prevClosing = (prev.leftover !== undefined) ? num(prev.leftover) : Math.max(0, num(prev.opening)+num(prev.added)-num(prev.sold)-num(prev.home));
           it.opening = prevClosing;
-          it.leftover = prevClosing; // FIX: Leftover initially equals Opening stock for a new day!
+          it.leftover = prevClosing; // Leftover initially equals Opening stock for a new day!
           it.sold = 0;
           it.mrp = prev.mrp!==undefined ? num(prev.mrp) : it.mrp;
           it.agent = prev.agent!==undefined ? num(prev.agent) : it.agent;
