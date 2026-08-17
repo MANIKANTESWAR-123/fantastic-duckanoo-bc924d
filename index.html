@@ -1,516 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sangam / Annapurna Dairy — Daily Ledger</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#35634A">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-<style>
-  :root{
-    --bg: #FAFAF6;
-    --surface: #FFFFFF;
-    --ink: #2B2620;
-    --ink-soft: #6B6355;
-    --line: #E1DCCE;
-    --green: #35634A;
-    --green-soft: #E7EFE7;
-    --gold: #B9862E;
-    --gold-soft: #FBF1DE;
-    --red: #A23E3E;
-    --red-soft: #FBEAEA;
-    --radius: 10px;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', system-ui, sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px;}
-
-  header{margin-bottom:18px;}
-  .shop-name{
-    font-family:'Fraunces', serif;
-    font-weight:700;
-    font-size:26px;
-    letter-spacing:-0.01em;
-    margin:0;
-  }
-  .shop-sub{
-    color:var(--ink-soft);
-    font-size:13px;
-    margin-top:2px;
-    letter-spacing:0.02em;
-    text-transform:uppercase;
-  }
-  .header-rule{
-    height:2px;
-    background:repeating-linear-gradient(90deg, var(--green) 0 6px, transparent 6px 10px);
-    margin:14px 0 0;
-    opacity:0.5;
-  }
-
-  .tabs{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap;}
-  .tab-btn{
-    flex:1 1 30%;
-    min-width:70px;
-    padding:10px 6px;
-    border:1px solid var(--line);
-    background:var(--surface);
-    border-radius:var(--radius);
-    font-family:'IBM Plex Sans';
-    font-weight:600;
-    font-size:12.5px;
-    color:var(--ink-soft);
-    cursor:pointer;
-  }
-  .tab-btn.active{
-    background:var(--green);
-    border-color:var(--green);
-    color:#fff;
-  }
-
-  .card{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:18px;
-    margin-bottom:16px;
-  }
-
-  label.field-label{
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-    color:var(--ink-soft);
-    font-weight:600;
-    display:block;
-    margin-bottom:6px;
-  }
-  input[type=date]{
-    font-family:'IBM Plex Mono';
-    font-size:15px;
-    padding:8px 10px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    background:#fff;
-    color:var(--ink);
-  }
-
-  .search-box{
-    width:100%;
-    font-family:'IBM Plex Sans';
-    font-size:14px;
-    padding:10px 12px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    background:#fdfcf9;
-    color:var(--ink);
-    margin-bottom:4px;
-  }
-  .search-box:focus{outline:none;border-color:var(--green);}
-
-  .legend{
-    font-size:11px;color:var(--ink-soft);margin:10px 0 12px;line-height:1.6;
-  }
-  .legend b{color:var(--ink);}
-
-  .cat-block{
-    border:1px solid var(--line);
-    border-radius:8px;
-    margin-bottom:8px;
-    overflow:hidden;
-  }
-  .cat-header{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:11px 14px;
-    background:#F5F2E9;
-    cursor:pointer;
-    user-select:none;
-  }
-  .cat-header .cat-title{
-    font-family:'Fraunces';font-weight:600;font-size:14.5px;
-  }
-  .cat-header .cat-meta{
-    font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono';
-    display:flex;align-items:center;gap:8px;
-  }
-  .cat-chevron{transition:transform 0.15s;display:inline-block;}
-  .cat-block.open .cat-chevron{transform:rotate(90deg);}
-  .cat-items{padding:10px;display:none;}
-  .cat-block.open .cat-items{display:block;}
-
-  .item-card{
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:11px;
-    margin-bottom:8px;
-    background:#fff;
-  }
-  .item-card:last-child{margin-bottom:0;}
-  .item-head{
-    display:flex;align-items:center;gap:6px;margin-bottom:9px;flex-wrap:wrap;
-  }
-  .item-head .item-name{
-    flex:1;
-    font-family:'IBM Plex Sans';
-    font-weight:600;
-    font-size:13.5px;
-    color:var(--ink);
-  }
-  .qty-grid{
-    display:grid;
-    grid-template-columns:repeat(6, 1fr);
-    gap:4px;
-  }
-  .price-grid{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:7px;
-    margin-top:7px;
-  }
-  .qty-box label{
-    font-size:9px;text-transform:uppercase;letter-spacing:0.02em;
-    color:var(--ink-soft);font-weight:600;display:block;margin-bottom:3px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .qty-box input{
-    width:100%;
-    font-family:'IBM Plex Mono';
-    font-size:13.5px;
-    text-align:center;
-    padding:6px 2px;
-    border:1px solid var(--line);
-    border-radius:6px;
-    background:#fdfcf9;
-    color:var(--ink);
-  }
-  .qty-box.mrp input{background:var(--gold-soft);border-color:#EAD9AE;}
-  .qty-box.agent input{background:#EFEAE0;border-color:#DCD3C0;}
-  .qty-box.shoprate input{background:#E0F2FE;border-color:#BAE6FD;font-weight:600;color:#0369A1;}
-  .qty-box.home input{background:#F0E6EE;border-color:#DCC5D6;}
-  .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;font-weight:700;}
-  .qty-box.leftover input{background:#E3F2FD;border-color:#BBDEFB;font-weight:700;color:#0D47A1;}
-
-  .item-foot{
-    display:flex;justify-content:space-between;
-    margin-top:7px;font-size:11.5px;color:var(--ink-soft);
-    font-family:'IBM Plex Mono';
-  }
-  .item-foot .amt{font-weight:700;color:var(--ink);font-size:12.5px;}
-  .item-foot .margin{color:var(--green);}
-
-  .total-line{
-    display:flex;justify-content:space-between;align-items:baseline;
-    padding-top:14px;margin-top:14px;
-    border-top:2px solid var(--ink);
-  }
-  .total-line .lbl{font-family:'Fraunces';font-weight:600;font-size:16px;}
-  .total-line .val{font-family:'IBM Plex Mono';font-weight:700;font-size:22px;}
-
-  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-  .split-box{
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:12px;
-  }
-  .split-box.cash{background:var(--gold-soft);border-color:#EAD9AE;}
-  .split-box.online{background:var(--green-soft);border-color:#CFE1D2;}
-  .split-box label{
-    font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;
-    display:block;margin-bottom:6px;color:var(--ink-soft);
-  }
-  .split-box .cur{font-family:'IBM Plex Mono';font-weight:600;}
-  .split-box input{
-    width:100%;
-    border:none;background:transparent;
-    font-family:'IBM Plex Mono';font-size:20px;font-weight:600;
-    color:var(--ink);padding:2px 0;
-  }
-  .split-box input:focus{outline:none;}
-
-  .balance-note{
-    margin-top:12px;
-    font-size:13px;
-    padding:10px 12px;
-    border-radius:8px;
-    font-weight:500;
-  }
-  .balance-note.ok{background:var(--green-soft);color:var(--green);}
-  .balance-note.off{background:var(--red-soft);color:var(--red);}
-
-  .save-btn{
-    width:100%;
-    padding:14px;
-    background:var(--ink);
-    color:#fff;
-    border:none;
-    border-radius:var(--radius);
-    font-family:'IBM Plex Sans';
-    font-weight:600;
-    font-size:15px;
-    cursor:pointer;
-    margin-top:4px;
-  }
-  .save-btn:disabled{opacity:0.5;}
-
-  .status-msg{
-    text-align:center;
-    font-size:13px;
-    color:var(--ink-soft);
-    margin-top:10px;
-    min-height:16px;
-  }
-
-  .hist-item{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:12px 4px;
-    border-bottom:1px solid #F0EDE3;
-    cursor:pointer;
-  }
-  .hist-item:last-child{border-bottom:none;}
-  .hist-item:hover{background:var(--green-soft);}
-  .hist-date{font-family:'Fraunces';font-weight:600;font-size:15px;}
-  .hist-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
-  .hist-amt{font-family:'IBM Plex Mono';font-weight:700;font-size:16px;text-align:right;}
-  .hist-split{font-size:11px;color:var(--ink-soft);text-align:right;margin-top:2px;font-family:'IBM Plex Mono';}
-  .empty-state{
-    text-align:center;
-    padding:40px 20px;
-    color:var(--ink-soft);
-    font-size:14px;
-  }
-  .period-summary{
-    display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;
-  }
-  .stat-box{
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    padding:12px;text-align:center;
-  }
-  .stat-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:18px;}
-  .stat-box .l{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.03em;margin-top:2px;}
-
-  .shared-note{
-    font-size:12px;color:var(--ink-soft);text-align:center;margin-top:18px;
-    padding-top:14px;border-top:1px solid var(--line);
-  }
-  .no-match{
-    text-align:center;color:var(--ink-soft);font-size:13px;padding:16px;
-  }
-
-  /* ---- Order box ---- */
-  .qty-box.order input{background:#EDEFF7;border-color:#CBD0E8;}
-  .order-summary{
-    border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:14px;
-    background:#F6F5FB;
-  }
-  .order-summary h4{margin:0 0 8px;font-family:'Fraunces';font-size:14px;font-weight:600;}
-  .order-row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px dashed #DEDCEC;font-family:'IBM Plex Mono';}
-  .order-row:last-child{border-bottom:none;}
-  .copy-btn{
-    margin-top:10px;width:100%;padding:9px;border-radius:8px;border:1px solid #CBD0E8;
-    background:#fff;color:var(--ink);font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;cursor:pointer;
-  }
-
-  /* ---- Sales report ---- */
-  .sales-nav{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
-  .sales-nav button{
-    padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:14px;
-  }
-  .sales-row{
-    display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;
-  }
-  .sales-row .qty{font-family:'IBM Plex Mono';font-weight:600;}
-  .sales-row .amt{font-family:'IBM Plex Mono';color:var(--ink-soft);}
-  .range-box{border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px;}
-  .range-inputs{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
-  .range-inputs input{flex:1;font-family:'IBM Plex Mono';padding:7px;border:1px solid var(--line);border-radius:6px;}
-  .range-inputs button{padding:8px 12px;border-radius:8px;border:none;background:var(--ink);color:#fff;font-weight:600;font-size:12.5px;cursor:pointer;}
-
-  /* ---- Kirana ---- */
-  .shop-select{
-    width:100%;font-family:'IBM Plex Sans';font-weight:600;font-size:14px;padding:10px;
-    border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:8px;
-  }
-  .rename-link{font-size:11.5px;color:var(--green);cursor:pointer;text-decoration:underline;margin-bottom:10px;display:inline-block;}
-  .kirana-item{
-    display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid #F0EDE3;
-  }
-  .kirana-item:last-child{border-bottom:none;}
-  .kirana-item .nm{flex:1.6;font-size:12.5px;font-weight:600;}
-  .kirana-item input{
-    width:100%;font-family:'IBM Plex Mono';font-size:13px;text-align:center;padding:6px 3px;
-    border:1px solid var(--line);border-radius:6px;background:#fdfcf9;
-  }
-  .kirana-item .qf{flex:1;}
-  .kirana-item .rf{flex:1;}
-  .kirana-item .af{flex:1.1;font-family:'IBM Plex Mono';font-size:12px;text-align:right;color:var(--ink-soft);}
-  .balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-  .bal-box{border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;}
-  .bal-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:18px;}
-  .bal-box .l{font-size:11px;color:var(--ink-soft);text-transform:uppercase;margin-top:3px;}
-  .bal-box.due{background:var(--red-soft);}
-  .bal-box.clear{background:var(--green-soft);}
-  .kirana-overview-row{
-    display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid #F0EDE3;font-size:13px;cursor:pointer;
-  }
-  .kirana-overview-row:last-child{border-bottom:none;}
-  .kirana-overview-row:hover{background:var(--green-soft);}
-
-  /* ---- Cash ledger ---- */
-  .cash-table-row{
-    display:grid;grid-template-columns:0.9fr 1fr 1fr 1fr 1fr 1.1fr;gap:4px;padding:8px 2px;
-    border-bottom:1px solid #F0EDE3;font-size:10.5px;font-family:'IBM Plex Mono';align-items:center;
-    min-width:520px;
-  }
-  .cash-table-row.head{font-weight:700;color:var(--ink-soft);font-family:'IBM Plex Sans';font-size:9px;text-transform:uppercase;}
-  .cash-table-row:last-child{border-bottom:none;}
-  #cashLedger{overflow-x:auto;}
-
-  /* ---- Cash in hand ---- */
-  .cash-hand-box{
-    text-align:center;padding:14px;border-radius:var(--radius);background:var(--gold-soft);border:1px solid #EAD9AE;
-  }
-  .cash-hand-box .n{font-family:'IBM Plex Mono';font-weight:700;font-size:26px;color:var(--ink);}
-  .cash-hand-box .l{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;margin-top:4px;letter-spacing:0.03em;}
-  .cash-hand-actions{display:flex;gap:8px;margin-top:12px;}
-  .cash-hand-actions .copy-btn{margin-top:0;}
-  .cash-adj-row{
-    display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid #F0EDE3;font-size:12px;font-family:'IBM Plex Mono';
-  }
-  .cash-adj-row:last-child{border-bottom:none;}
-  .cash-adj-row .tag{
-    font-family:'IBM Plex Sans';font-weight:600;font-size:10.5px;text-transform:uppercase;padding:1px 7px;border-radius:10px;margin-right:6px;
-  }
-  .cash-adj-row .tag.deposit{background:var(--green-soft);color:var(--green);}
-  .cash-adj-row .tag.withdraw{background:var(--red-soft);color:var(--red);}
-  .cash-adj-row .tag.recount{background:#EDEFF7;color:#4A4E7A;}
-
-  /* ---- Charts ---- */
-  .chart-wrap{position:relative;height:220px;margin-top:6px;}
-  .chart-wrap.tall{height:340px;}
-  .range-inputs select{
-    flex:1;font-family:'IBM Plex Sans';font-size:13px;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
-  }
-
-  /* ---- Quick Entry & Helpers ---- */
-  .bulk-box {
-    width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #fdfcf9;
-    color: var(--ink);
-  }
-  .action-btn-sm {
-    background: none;
-    border: 1px solid var(--line);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    cursor: pointer;
-    font-family: 'IBM Plex Sans';
-    color: var(--ink-soft);
-  }
-  .action-btn-sm:hover { background: #f0ede3; }
-
-  /* ---- Stock Payments ---- */
-  .pay-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
-  .pay-form input, .pay-form select{
-    font-family:'IBM Plex Sans';font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fdfcf9;
-  }
-  .pay-form-row{display:flex;gap:8px;align-items:center;}
-  .pay-form-row .cur{font-family:'IBM Plex Mono';color:var(--ink-soft);}
-  .pay-form-row input{flex:1.4;}
-  .pay-form-row select{flex:1;}
-
-  .invoice-head-row{
-    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;padding:0 2px;
-    font-size:10.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-top:6px;
-  }
-  .invoice-row{
-    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;align-items:center;margin-bottom:6px;
-  }
-  .invoice-row input{
-    font-family:'IBM Plex Sans';font-size:12.5px;padding:8px 7px;border:1px solid var(--line);border-radius:7px;background:#fdfcf9;width:100%;
-  }
-  .invoice-row .amt-display{
-    font-family:'IBM Plex Mono';font-size:12.5px;text-align:right;color:var(--ink-soft);padding-right:4px;
-  }
-  .invoice-row .row-del{
-    border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0;
-  }
-  .invoice-total-row{
-    display:flex;justify-content:space-between;align-items:center;padding:10px 4px;margin-top:4px;
-    border-top:2px solid var(--ink);font-family:'IBM Plex Mono';font-weight:700;font-size:15px;
-  }
-
-  /* Modal Overlay */
-  .modal-overlay{
-    position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:9999;padding:16px;
-  }
-  .modal-box{
-    background:#fff;border-radius:12px;padding:20px;max-width:420px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  }
-  .modal-title{font-family:'Fraunces';font-size:18px;font-weight:700;margin:0 0 12px;color:var(--ink);}
-  .modal-field{margin-bottom:12px;}
-  .modal-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px;}
-  .modal-field input, .modal-field select{width:100%;padding:9px;font-family:'IBM Plex Sans';font-size:14px;border:1px solid var(--line);border-radius:8px;}
-  .modal-actions{display:flex;gap:8px;margin-top:16px;}
-  .modal-btn{flex:1;padding:10px;border-radius:8px;font-weight:600;font-family:'IBM Plex Sans';cursor:pointer;border:none;}
-  .modal-btn.primary{background:var(--green);color:#fff;}
-  .modal-btn.secondary{background:#EFEAE0;color:var(--ink);}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirana Milk & Curd Distribution Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <div id="mainApp">
-  <header>
-    <h1 class="shop-name">Annapurna Dairy &amp; Foods</h1>
-    <div class="shop-sub">Daily Stock &amp; Sales Ledger — Sangam Rate Chart</div>
-    <div class="header-rule"></div>
-  </header>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
 
-  <div class="tabs">
-    <button class="tab-btn active" id="tabTodayBtn" onclick="switchTab('today')">Today</button>
-    <button class="tab-btn" id="tabSalesBtn" onclick="switchTab('sales')">Sales</button>
-    <button class="tab-btn" id="tabKiranaBtn" onclick="switchTab('kirana')">Kirana</button>
-    <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">History</button>
-    <button class="tab-btn" id="tabChartsBtn" onclick="switchTab('charts')">📊 Charts</button>
-    <button class="tab-btn" id="tabPaymentsBtn" onclick="switchTab('payments')">💰 Stock Pay</button>
+  <div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- Top Header & Date Navigation -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-emerald-400">Kirana Milk & Curd Dispatch Ledger</h1>
+        <p class="text-xs text-slate-400">Track shop-wise deliveries, payment status, daily profit, and product demand</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col">
+          <label class="text-xs text-slate-400 font-medium">Selected Date & Day</label>
+          <input type="date" id="ledgerDate" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500" onchange="loadDateData()">
+        </div>
+        <div class="bg-slate-700 px-4 py-2 rounded-lg text-center mt-3.5">
+          <span id="dayLabel" class="text-sm font-semibold text-emerald-300 uppercase tracking-wider">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Rates Configuration (Collapsible Accordion) -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+      <div class="p-4 bg-slate-750 flex justify-between items-center cursor-pointer border-b border-slate-700" onclick="toggleRateSettings()">
+        <span class="font-semibold text-sm text-slate-200 flex items-center gap-2">
+          ⚙️ Product Price Master (Agent Cost, Selling Rate & MRP)
+        </span>
+        <button id="rateToggleText" class="text-xs text-emerald-400 font-semibold uppercase">Edit Rates</button>
+      </div>
+      
+      <div id="rateSettingsBody" class="p-5 hidden grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 bg-slate-850">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Daily Metrics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-medium">Total Day Revenue</span>
+        <p class="text-xl font-bold text-white mt-1" id="metricRevenue">₹0.00</p>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-medium">Total Day Profit</span>
+        <p class="text-xl font-bold text-emerald-400 mt-1" id="metricProfit">₹0.00</p>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-medium">Pending Collection</span>
+        <p class="text-xl font-bold text-rose-400 mt-1" id="metricPending">₹0.00</p>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-medium">Total Milk Units (L)</span>
+        <p class="text-xl font-bold text-sky-400 mt-1" id="metricMilkUnits">0 L</p>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-medium">Total Curd Units (Units/Kg)</span>
+        <p class="text-xl font-bold text-amber-400 mt-1" id="metricCurdUnits">0</p>
+      </div>
+    </div>
+
+    <!-- Entry Form -->
+    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="formTitle" class="text-lg font-semibold text-white">Add Shop Entry</h2>
+        <button type="button" onclick="resetForm()" class="text-xs text-slate-400 hover:text-white underline">Clear Form</button>
+      </div>
+      
+      <form id="entryForm" onsubmit="handleSaveEntry(event)" class="space-y-4">
+        <input type="hidden" id="editEntryId" value="">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Kirana / Shop Name</label>
+            <input type="text" id="shopName" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Sri Balaji Kirana">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Payment Status</label>
+            <select id="paymentStatus" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Not Paid</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Notes / Remarks (Optional)</label>
+            <input type="text" id="entryNotes" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Morning / Evening delivery">
+          </div>
+        </div>
+
+        <!-- Product Quantities Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-700">
+          <!-- Milk Group -->
+          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
+            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">🥛 Milk Section (Liters / Pkts)</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">1. TM (Toned Milk)</label>
+                <input type="number" min="0" step="1" id="qty_tm" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">2. FCM (Full Cream)</label>
+                <input type="number" min="0" step="1" id="qty_fcm" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">3. SMILK (Standard)</label>
+                <input type="number" min="0" step="1" id="qty_smilk" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Curd Group -->
+          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
+            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">🥣 Curd Packets Section</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">1. 450gm Curd</label>
+                <input type="number" min="0" step="1" id="qty_curd450" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">2. SCURD (Special Curd)</label>
+                <input type="number" min="0" step="1" id="qty_scurd" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Bucket Group -->
+          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
+            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">🪣 Curd Buckets Section</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">1. 10 Kg Bucket</label>
+                <input type="number" min="0" step="1" id="qty_bucket10kg" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+              <div class="flex justify-between items-center">
+                <label class="text-xs text-slate-300">2. 5 Kg Bucket</label>
+                <input type="number" min="0" step="1" id="qty_bucket5kg" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="resetForm()" class="px-5 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-600">Reset</button>
+          <button type="submit" id="saveButton" class="px-6 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 shadow-lg">Save Shop Dispatch</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Shop Wise Ledger Table -->
+    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
+      <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+        <h2 class="text-md font-semibold text-white">Daily Shop Dispatch Register</h2>
+        <span id="entryCountBadge" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">0 Shops</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-750 text-xs uppercase text-slate-400 border-b border-slate-700">
+            <tr>
+              <th class="p-3">Shop Name</th>
+              <th class="p-3">Milk (TM / FCM / SM)</th>
+              <th class="p-3">Curd (450g / SC)</th>
+              <th class="p-3">Buckets (10k / 5k)</th>
+              <th class="p-3 text-right">Bill Total</th>
+              <th class="p-3 text-right">Shop Profit</th>
+              <th class="p-3 text-center">Status</th>
+              <th class="p-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="shopTableBody" class="divide-y divide-slate-700">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Day-Wise Demand Analysis Chart -->
+    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-md font-semibold text-white">Weekly / Day-Wise Demand Analysis</h2>
+          <p class="text-xs text-slate-400">Compare overall daily milk & curd volume demand across days</p>
+        </div>
+      </div>
+      <div class="w-full h-72">
+        <canvas id="demandBarChart"></canvas>
+      </div>
+    </div>
+
   </div>
 
-  <!-- TODAY TAB -->
-  <div id="todayTab">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-        <div>
-          <label class="field-label">Date</label>
-          <input type="date" id="dateInput">
-        </div>
-        <button class="action-btn-sm" style="background:var(--red-soft); color:var(--red); border-color:#F5C6CB; padding:8px 10px;" onclick="forceResetDatabaseToAug5()">🧹 Force Reset Database to Aug 5</button>
-      </div>
+  <script>
+    // Product default schema
+    const DEFAULT_PRODUCTS = {
+      tm: { name: 'TM Milk (1L)', mrp: 56, agent: 48, sell: 52, type: 'milk' },
+      fcm: { name: 'FCM Milk (1L)', mrp: 70, agent: 60, sell: 65, type: 'milk' },
+      smilk: { name: 'SMILK (1L)', mrp: 62, agent: 53, sell: 58, type: 'milk' },
+      curd450: { name: '450gm Curd', mrp: 35, agent: 27, sell: 31, type: 'curd' },
+      scurd: { name: 'SCURD Packet', mrp: 40, agent: 31, sell: 36, type: 'curd' },
+      bucket10kg: { name: '10kg Bucket', mrp: 750, agent: 620, sell: 690, type: 'curd' },
+      bucket5kg: { name: '5kg Bucket', mrp: 390, agent: 320, sell: 360, type: 'curd' },
+    };
 
-      <!-- OPTION B: QUICK BULK LEFTOVER ENTRY FEATURE -->
-      <div style="margin-top: 14px; margin-bottom: 12px; border: 1px solid #BBDEFB; border-radius: 8px; padding: 12px; background: #E3F2FD;">
-        <label class="field-label" style="color: #0D47A1;">🌙 Option B: Quick Bulk "Leftover" Text Entry</label>
-        <p style="font-size:11.5px; color:#1565C0; margin:0 0 6px;">Type remaining unsold packets at night (e.g. <code>tm 8</code> or <code>curd 12</code>) — <b>Sold</b> calculates automatically!</p>
-        <textarea id="quickBulkLeftoverInput" class="bulk-box" rows="2" placeholder="tm 8&#10;fcm 3&#10;curd 12"></textarea>
-        <button class="copy-btn" style="background:#0D47A1; color:#fff; border:none; margin-top:6px;" onclick="applyQuickBulkLeftoverText()">Calculate Sold from Leftovers</button>
-      </div>
+    // Storage Keys
+    const STORAGE_ENTRIES = 'kirana_entries_v2';
+    const STORAGE_PRICES = 'kirana_prices_v2';
 
-      <!-- QUICK BULK SOLD ENTRY FEATURE -->
-      <div style="margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #faf9f5;">
-        <label class="field-label" style="color: var(--green);">⚡ Quick Bulk "Sold" Text Entry</label>
-        <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 6px;">Type line by line if entering direct sold qty (e.g. <code>milk 25</code> or <code>curd 10</code>):</p>
-        <textarea id="quickBulkInput" class="bulk-box" rows="2" placeholder="milk 25&#10;curd 10"></textarea>
-        <button class="copy-btn" style="background:var(--green); color:#fff; 
+    let productRates = JSON.parse(localStorage.getItem(STORAGE_PRICES)) || DEFAULT_PRODUCTS;
+    let allEntries = JSON.parse(localStorage.getItem(STORAGE_ENTRIES)) || [];
+    let demandChart = null;
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('ledgerDate').value = today;
+      renderRateSettings();
+      loadDateData();
+      renderDemandChart();
+    });
+
+    function toggleRateSettings() {
+      const body = document.getElementById('rateSettingsBody');
+      const text = document.getElementById('rateToggleText');
+      const isHidden = body.classList.toggle('hidden');
+      text.innerText = isHidden ? 'Edit Rates' : 'Close Rates';
+    }
+
+    function renderRateSettings() {
+      const container = document.getElementById('rateSettingsBody');
+      container.innerHTML = '';
+
+      Object.keys(productRates).forEach(key => {
+        const item = productRates[key];
+        const card = document.createElement('div');
+        card.className = 'bg-slate-700 p-3 rounded-lg border border-slate-600';
+        card.innerHTML = `
+          <div class="text-xs font-bold text-white mb-2 truncate">${item.name}</div>
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Agent:</span>
+              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-white" value="${item.agent}" onchange="updateRate('${key}', 'agent', this.value)">
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">Selling:</span>
+              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-emerald-300 font-semibold" value="${item.sell}" onchange="updateRate('${key}', 'sell', this.value)">
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">MRP:</span>
+              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-slate-300" value="${item.mrp}" onchange="updateRate('${key}', 'mrp', this.value)">
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateRate(key, field, val) {
+      productRates[key][field] = parseFloat(val) || 0;
+      localStorage.setItem(STORAGE_PRICES, JSON.stringify(productRates));
+      loadDateData();
+      renderDemandChart();
+    }
+
+    function getSelectedDate() {
+      return document.getElementById('ledgerDate').value;
+    }
+
+    function loadDateData() {
+      const selectedDate = getSelectedDate();
+      const dateObj = new Date(selectedDate + 'T00:00:00');
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      document.getElementById('dayLabel').innerText = days[dateObj.getDay()] || '';
+
+      const dayEntries = allEntries.filter(e => e.date === selectedDate);
+      renderTable(dayEntries);
+      calculateMetrics(dayEntries);
+    }
+
+    function handleSaveEntry(e) {
+      e.preventDefault();
+      const selectedDate = getSelectedDate();
+      const editId = document.getElementById('editEntryId').value;
+
+      const entry = {
+        id: editId ? editId : 'id_' + Date.now(),
+        date: selectedDate,
+        shopName: document.getElementById('shopName').value.trim(),
+        paymentStatus: document.getElementById('paymentStatus').value,
+        notes: document.getElementById('entryNotes').value.trim(),
+        items: {
+          tm: parseFloat(document.getElementById('qty_tm').value) || 0,
+          fcm: parseFloat(document.getElementById('qty_fcm').value) || 0,
+          smilk: parseFloat(document.getElementById('qty_smilk').value) || 0,
+          curd450: parseFloat(document.getElementById('qty_curd450').value) || 0,
+          scurd: parseFloat(document.getElementById('qty_scurd').value) || 0,
+          bucket10kg: parseFloat(document.getElementById('qty_bucket10kg').value) || 0,
+          bucket5kg: parseFloat(document.getElementById('qty_bucket5kg').value) || 0,
+        }
+      };
+
+      if (editId) {
+        allEntries = allEntries.map(item => item.id === editId ? entry : item);
+      } else {
+        allEntries.push(entry);
+      }
+
+      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+      resetForm();
+      loadDateData();
+      renderDemandChart();
+    }
+
+    function calculateShopFinancials(items) {
+      let billTotal = 0;
+      let totalCost = 0;
+
+      Object.keys(items).forEach(k => {
+        const qty = items[k] || 0;
+        const rate = productRates[k] || { sell: 0, agent: 0 };
+        billTotal += qty * rate.sell;
+        totalCost += qty * rate.agent;
+      });
+
+      return {
+        billTotal,
+        profit: billTotal - totalCost
+      };
+    }
+
+    function renderTable(entries) {
+      const tbody = document.getElementById('shopTableBody');
+      tbody.innerHTML = '';
+      document.getElementById('entryCountBadge').innerText = `${entries.length} Shops`;
+
+      if (entries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 text-xs">No dispatches recorded for this date.</td></tr>`;
+        return;
+      }
+
+      entries.forEach(entry => {
+        const financials = calculateShopFinancials(entry.items);
+        const isPaid = entry.paymentStatus === 'Paid';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-750 transition-colors';
+        tr.innerHTML = `
+          <td class="p-3">
+            <div class="font-medium text-white">${entry.shopName}</div>
+            ${entry.notes ? `<div class="text-[11px] text-slate-400">${entry.notes}</div>` : ''}
+          </td>
+          <td class="p-3 font-mono text-xs text-sky-300">
+            ${entry.items.tm} / ${entry.items.fcm} / ${entry.items.smilk}
+          </td>
+          <td class="p-3 font-mono text-xs text-amber-300">
+            ${entry.items.curd450} / ${entry.items.scurd}
+          </td>
+          <td class="p-3 font-mono text-xs text-indigo-300">
+            ${entry.items.bucket10kg} / ${entry.items.bucket5kg}
+          </td>
+          <td class="p-3 text-right font-bold text-white">₹${financials.billTotal.toFixed(2)}</td>
+          <td class="p-3 text-right font-semibold text-emerald-400">₹${financials.profit.toFixed(2)}</td>
+          <td class="p-3 text-center">
+            <button onclick="togglePaymentStatus('${entry.id}')" class="px-2.5 py-1 text-[11px] font-semibold rounded-full cursor-pointer transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
+              ${entry.paymentStatus}
+            </button>
+          </td>
+          <td class="p-3 text-center space-x-2">
+            <button onclick="editEntry('${entry.id}')" class="text-xs text-sky-400 hover:text-sky-300 font-medium">Edit</button>
+            <button onclick="deleteEntry('${entry.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateMetrics(entries) {
+      let revenue = 0;
+      let profit = 0;
+      let pending = 0;
+      let milkQty = 0;
+      let curdQty = 0;
+
+      entries.forEach(e => {
+        const { billTotal, profit: shopProfit } = calculateShopFinancials(e.items);
+        revenue += billTotal;
+        profit += shopProfit;
+        if (e.paymentStatus !== 'Paid') {
+          pending += billTotal;
+        }
+
+        milkQty += (e.items.tm + e.items.fcm + e.items.smilk);
+        curdQty += (e.items.curd450 + e.items.scurd + e.items.bucket10kg + e.items.bucket5kg);
+      });
+
+      document.getElementById('metricRevenue').innerText = `₹${revenue.toFixed(2)}`;
+      document.getElementById('metricProfit').innerText = `₹${profit.toFixed(2)}`;
+      document.getElementById('metricPending').innerText = `₹${pending.toFixed(2)}`;
+      document.getElementById('metricMilkUnits').innerText = `${milkQty} L`;
+      document.getElementById('metricCurdUnits').innerText = `${curdQty} Units`;
+    }
+
+    function togglePaymentStatus(id) {
+      allEntries = allEntries.map(e => {
+        if (e.id === id) {
+          return { ...e, paymentStatus: e.paymentStatus === 'Paid' ? 'Unpaid' : 'Paid' };
+        }
+        return e;
+      });
+      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+      loadDateData();
+    }
+
+    function editEntry(id) {
+      const entry = allEntries.find(e => e.id === id);
+      if (!entry) return;
+
+      document.getElementById('editEntryId').value = entry.id;
+      document.getElementById('shopName').value = entry.shopName;
+      document.getElementById('paymentStatus').value = entry.paymentStatus;
+      document.getElementById('entryNotes').value = entry.notes || '';
+
+      document.getElementById('qty_tm').value = entry.items.tm;
+      document.getElementById('qty_fcm').value = entry.items.fcm;
+      document.getElementById('qty_smilk').value = entry.items.smilk;
+      document.getElementById('qty_curd450').value = entry.items.curd450;
+      document.getElementById('qty_scurd').value = entry.items.scurd;
+      document.getElementById('qty_bucket10kg').value = entry.items.bucket10kg;
+      document.getElementById('qty_bucket5kg').value = entry.items.bucket5kg;
+
+      document.getElementById('formTitle').innerText = `Edit Dispatch: ${entry.shopName}`;
+      document.getElementById('saveButton').innerText = 'Update Dispatch';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteEntry(id) {
+      if (confirm('Are you sure you want to remove this shop entry?')) {
+        allEntries = allEntries.filter(e => e.id !== id);
+        localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+        loadDateData();
+        renderDemandChart();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('editEntryId').value = '';
+      document.getElementById('entryForm').reset();
+      document.getElementById('formTitle').innerText = 'Add Shop Entry';
+      document.getElementById('saveButton').innerText = 'Save Shop Dispatch';
+    }
+
+    function renderDemandChart() {
+      const dates = [];
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+
+      const daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const labels = dates.map(dt => {
+        const dObj = new Date(dt + 'T00:00:00');
+        return `${daysShort[dObj.getDay()]} (${dt.slice(5)})`;
+      });
+
+      const milkDemandData = [];
+      const curdDemandData = [];
+
+      dates.forEach(dt => {
+        const daily = allEntries.filter(e => e.date === dt);
+        let m = 0;
+        let c = 0;
+        daily.forEach(entry => {
+          m += (entry.items.tm + entry.items.fcm + entry.items.smilk);
+          c += (entry.items.curd450 + entry.items.scurd + entry.items.bucket10kg + entry.items.bucket5kg);
+        });
+        milkDemandData.push(m);
+        curdDemandData.push(c);
+      });
+
+      const ctx = document.getElementById('demandBarChart').getContext('2d');
+      if (demandChart) demandChart.destroy();
+
+      demandChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Milk Demand (Liters)',
+              data: milkDemandData,
+              backgroundColor: 'rgba(56, 189, 248, 0.8)',
+              borderColor: '#38bdf8',
+              borderWidth: 1,
+              borderRadius: 6
+            },
+            {
+              label: 'Curd Total Units',
+              data: curdDemandData,
+              backgroundColor: 'rgba(251, 191, 36, 0.8)',
+              borderColor: '#fbbf24',
+              borderWidth: 1,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(51, 65, 85, 0.4)' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
