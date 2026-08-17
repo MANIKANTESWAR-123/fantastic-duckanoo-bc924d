@@ -1,800 +1,771 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annapurna Dairy — Daily Stock & Sales Tracker</title>
-    <style>
-        :root {
-            --primary: #1b365d;
-            --primary-light: #2a528a;
-            --accent: #0284c7;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --success: #16a34a;
-            --warning: #eab308;
-            --danger: #dc2626;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1250px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: var(--primary);
-            color: #ffffff;
-            padding: 20px 24px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-        }
-
-        header p {
-            font-size: 0.875rem;
-            color: #cbd5e1;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.28);
-        }
-
-        .nav-btn.active {
-            background: #ffffff;
-            color: var(--primary);
-            border-color: #ffffff;
-        }
-
-        /* Metric KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .kpi-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .kpi-card .label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .kpi-card .value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: 6px;
-        }
-
-        /* Form Card */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-            align-items: end;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .form-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .form-control {
-            padding: 9px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-            background: #fff;
-        }
-
-        .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
-        }
-
-        .form-control[readonly] {
-            background-color: #f1f5f9;
-            color: #475569;
-            font-weight: 600;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-light);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: #fff;
-        }
-
-        .btn-success:hover {
-            filter: brightness(0.95);
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: #fff;
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: #fff;
-            padding: 6px 10px;
-            font-size: 0.75rem;
-        }
-
-        /* Table Design */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f1f5f9;
-            color: var(--text-muted);
-            padding: 12px 10px;
-            font-weight: 600;
-            border-bottom: 2px solid var(--border);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        tr:hover td {
-            background-color: #f8fafc;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-milk { background: #e0f2fe; color: #0369a1; }
-        .badge-curd { background: #fef3c7; color: #b45309; }
-        .badge-paneer { background: #dcfce7; color: #15803d; }
-        .badge-other { background: #f3e8ff; color: #7e22ce; }
-
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: 700; }
-        .text-success { color: var(--success); }
-        .text-primary { color: var(--primary); }
-        .text-danger { color: var(--danger); }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 10px;
-            color: var(--text-muted);
-        }
-
-        /* View Toggle Sections */
-        .tab-section {
-            display: none;
-        }
-
-        .tab-section.active {
-            display: block;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annapurna Dairy — Kirana & Stock Inventory Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'IBM Plex Sans', sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
-<div class="container">
-    <header>
-        <div>
-            <h1>Annapurna Dairy Parlour</h1>
-            <p>Daily Distributor Inward, Sales, Agent Cost & MRP Profit Tracker</p>
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Main Navigation Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Kirana Distribution</h1>
+        <p class="text-xs text-slate-400 mt-1">Shop delivery ledger, custom shop rates, live stock inventory &amp; profit analytics</p>
+      </div>
+
+      <!-- Navigation Tabs & Date Selector -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button type="button" id="tabBtnKirana" onclick="switchMainTab('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
+            🏪 Kirana Deliveries
+          </button>
+          <button type="button" id="tabBtnStock" onclick="switchMainTab('stock')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+            📦 Stock Inventory Master
+          </button>
         </div>
-        <div class="header-actions">
-            <button type="button" class="nav-btn active" id="btnTabDaily" onclick="switchTab('daily')">
-                📋 Daily Entry & Ledger
-            </button>
-            <button type="button" class="nav-btn" id="btnTabStock" onclick="switchTab('stock')">
-                📦 Stock Inventory Master
-            </button>
+
+        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl">
+          <input type="date" id="selectedDate" class="bg-transparent text-xs text-white focus:outline-none mono" onchange="onDateChanged()">
+          <span id="currentDayBadge" class="text-xs font-bold text-emerald-300 uppercase tracking-wider bg-slate-900 px-2 py-0.5 rounded border border-slate-700">--</span>
         </div>
+      </div>
     </header>
 
-    <!-- SECTION 1: DAILY TRANSACTION TRACKER -->
-    <div id="sectionDaily" class="tab-section active">
-        <!-- Top KPI Dashboard -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="label">Total Distributor Bill (Cost)</div>
-                <div class="value" id="kpiDistributorCost">₹0.00</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Total Sales (MRP Revenue)</div>
-                <div class="value" id="kpiSalesRevenue">₹0.00</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Estimated Gross Margin</div>
-                <div class="value text-success" id="kpiGrossProfit">₹0.00</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Total Units Sold Today</div>
-                <div class="value" id="kpiUnitsSold">0</div>
-            </div>
+    <!-- ============================================================= -->
+    <!-- VIEW 1: KIRANA SHOP DELIVERIES & DAILY LEDGER                 -->
+    <!-- ============================================================= -->
+    <div id="viewKirana" class="space-y-6">
+      
+      <!-- Top Metrics Dashboard -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total Sales Today</span>
+          <p class="text-xl font-bold text-white mt-1 mono" id="kpiTotalSales">₹0.00</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Your Profit Today</span>
+          <p class="text-xl font-bold text-emerald-400 mt-1 mono" id="kpiTotalProfit">₹0.00</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-rose-400 font-semibold uppercase tracking-wider">Pending Due (To Collect)</span>
+          <p class="text-xl font-bold text-rose-400 mt-1 mono" id="kpiPendingDue">₹0.00</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-sky-400 font-semibold uppercase tracking-wider">Total Milk Delivered</span>
+          <p class="text-xl font-bold text-sky-300 mt-1 mono" id="kpiMilkVolume">0 Units</p>
+        </div>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Total Curd Delivered</span>
+          <p class="text-xl font-bold text-amber-300 mt-1 mono" id="kpiCurdVolume">0 Units</p>
+        </div>
+      </div>
+
+      <!-- Kirana Shop Entry Form -->
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+          <div>
+            <h2 id="kiranaFormHeading" class="text-base md:text-lg font-bold text-white">Log Kirana Shop Delivery</h2>
+            <p class="text-xs text-slate-400">Enter shop name, delivery quantities &amp; individual shop selling rates</p>
+          </div>
+          <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline">Clear / Reset</button>
         </div>
 
-        <!-- Daily Entry Form -->
-        <div class="card">
-            <div class="card-title">
-                <span>Log Daily Transaction</span>
-                <input type="date" id="entryDate" class="form-control" style="width: auto;">
+        <form id="kiranaDeliveryForm" onsubmit="handleKiranaSubmit(event)" class="space-y-4">
+          <input type="hidden" id="editKiranaId" value="">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
+              <input type="text" id="kiranaShopName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status</label>
+              <select id="kiranaPaymentStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium">
+                <option value="Not Paid" selected class="text-rose-400">Not Paid (Due)</option>
+                <option value="Paid" class="text-emerald-400">Paid (Cleared)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Delivery Notes (Optional)</label>
+              <input type="text" id="kiranaNote" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Morning milk supply">
+            </div>
+          </div>
+
+          <!-- Items Grid: Milk, Curd, Buckets -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            
+            <!-- 1. MILK SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🥛 1. Milk Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
+
+              <!-- TM -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">TM (Toned Milk)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_tm">59.65</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_tm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_tm" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- FCM -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">FCM (Full Cream)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_fcm">75.40</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_fcm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_fcm" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- SMILK -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">SMILK (Small Milk)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_smilk">8.35</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_smilk" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_smilk" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- TEA MILK -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">Tea Milk</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_teamilk">0.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_teamilk" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_teamilk" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
             </div>
 
-            <form id="stockForm" onsubmit="handleAddEntry(event)">
-                <div class="form-grid">
-                    <!-- 1. Category Selection -->
-                    <div class="form-group">
-                        <label for="categorySelect">1. Category</label>
-                        <select id="categorySelect" class="form-control" onchange="populateItems()" required>
-                            <option value="">-- Select Category --</option>
-                            <option value="Milk">Milk (Liters & Pouches)</option>
-                            <option value="Curd">Curd & Dahi</option>
-                            <option value="Paneer">Paneer</option>
-                            <option value="Beverages">Beverages (Lassi, Buttermilk)</option>
-                            <option value="Sweets">Sweets & Desserts</option>
-                        </select>
-                    </div>
+            <!-- 2. CURD PACKETS SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🥣 2. Curd Packets Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
 
-                    <!-- 2. Item Selection -->
-                    <div class="form-group">
-                        <label for="itemSelect">2. Select Item</label>
-                        <select id="itemSelect" class="form-control" onchange="handleItemChange()" required disabled>
-                            <option value="">-- Select Item --</option>
-                        </select>
-                    </div>
-
-                    <!-- 3. Unit -->
-                    <div class="form-group" style="max-width: 90px;">
-                        <label>Unit</label>
-                        <input type="text" id="itemUnit" class="form-control text-center" readonly placeholder="-">
-                    </div>
-
-                    <!-- 4. Default Agent Price -->
-                    <div class="form-group">
-                        <label>Agent Price (₹)</label>
-                        <input type="number" step="0.01" id="agentPrice" class="form-control text-right" placeholder="0.00" required>
-                    </div>
-
-                    <!-- 5. Customer MRP -->
-                    <div class="form-group">
-                        <label>MRP / Sell Price (₹)</label>
-                        <input type="number" step="0.01" id="mrpPrice" class="form-control text-right" placeholder="Add MRP" required>
-                    </div>
-
-                    <!-- 6. Opening Stock -->
-                    <div class="form-group">
-                        <label>Opening Stock</label>
-                        <input type="number" id="openingStock" class="form-control text-right" value="0" min="0">
-                    </div>
-
-                    <!-- 7. Distributor Order / Received Qty -->
-                    <div class="form-group">
-                        <label>Distributor Ordered Qty</label>
-                        <input type="number" id="orderedQty" class="form-control text-right" value="0" min="0" placeholder="0">
-                    </div>
-
-                    <!-- 8. Stock Sold Qty -->
-                    <div class="form-group">
-                        <label>Sold Qty</label>
-                        <input type="number" id="soldQty" class="form-control text-right" value="0" min="0" placeholder="0">
-                    </div>
-
-                    <!-- 9. Submit Button -->
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">+ Add Item Log</button>
-                    </div>
+              <!-- 450GM CURD -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">450gm Curd</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_curd450">61.00</span></span>
                 </div>
-            </form>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_curd450" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_curd450" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- SCURD -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">SCURD (Small Curd)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_scurd">7.60</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_scurd" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_scurd" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. CURD BUCKETS SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🪣 3. Curd Buckets Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
+
+              <!-- 10KG BUCKET -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">10kg STM Green Bucket</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket10kg">680.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_bucket10kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_bucket10kg" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- 5KG BUCKET -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">5kg STM Curd Bucket</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket5kg">0.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_bucket5kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_bucket5kg" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Action & Live Preview -->
+          <div class="flex flex-col md:flex-row justify-between items-center p-3.5 bg-slate-800 rounded-xl border border-slate-700 gap-3">
+            <div class="text-xs text-slate-300 flex items-center gap-4">
+              <span>Bill Total: <strong class="text-white text-sm mono" id="liveBillTotal">₹0.00</strong></span>
+              <span>Your Profit: <strong class="text-emerald-400 text-sm mono" id="liveProfitTotal">₹0.00</strong></span>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+              <button type="button" onclick="resetKiranaForm()" class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold uppercase tracking-wider">Reset</button>
+              <button type="submit" id="saveKiranaBtn" class="flex-1 md:flex-none px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg">Save Shop Dispatch</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Kirana Ledger Register Table -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kirana Delivery Register (<span id="ledgerDateDisplay">--</span>)</h2>
+            <p class="text-xs text-slate-400">Click the status button to toggle between Paid and Not Paid</p>
+          </div>
+          <span id="shopCountBadge" class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono">0 Shops</span>
         </div>
 
-        <!-- Daily Log Data Table -->
-        <div class="card">
-            <div class="card-title">
-                <span>Daily Ledger Records</span>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-secondary" onclick="switchTab('stock')">📦 Check Current Stock</button>
-                    <button class="btn btn-success" onclick="exportToCSV()">Export to Excel (.CSV)</button>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Item Description</th>
-                            <th class="text-center">Unit</th>
-                            <th class="text-right">Agent Price (₹)</th>
-                            <th class="text-right">MRP (₹)</th>
-                            <th class="text-right">Opening</th>
-                            <th class="text-right">Ordered (Inward)</th>
-                            <th class="text-right">Sold</th>
-                            <th class="text-right">Closing Stock</th>
-                            <th class="text-right">Distributor Bill (₹)</th>
-                            <th class="text-right">Sales Revenue (₹)</th>
-                            <th class="text-right">Profit (₹)</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ledgerTableBody"></tbody>
-                </table>
-                <div id="emptyState" class="empty-state">
-                    No entries added for this date yet. Select an item above to start logging.
-                </div>
-            </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Shop Name</th>
+                <th class="p-3">Milk Dispatched (Qty @ Rate)</th>
+                <th class="p-3">Curd Packets (Qty @ Rate)</th>
+                <th class="p-3">Buckets (Qty @ Rate)</th>
+                <th class="p-3 text-right">Total Bill</th>
+                <th class="p-3 text-right text-emerald-400">Profit</th>
+                <th class="p-3 text-center">Status</th>
+                <th class="p-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="kiranaTableBody" class="divide-y divide-slate-800">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      <!-- Day-Wise Demand Analysis Chart -->
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">📊 Day-Wise Demand &amp; Volume Analysis</h2>
+            <p class="text-xs text-slate-400">Track which days have higher demand to optimize procurement</p>
+          </div>
+        </div>
+        <div class="w-full h-72">
+          <canvas id="demandChartCanvas"></canvas>
+        </div>
+      </div>
+
     </div>
 
-    <!-- SECTION 2: LIVE STOCK & INVENTORY SUMMARY -->
-    <div id="sectionStock" class="tab-section">
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="label">Total Products In Catalog</div>
-                <div class="value" id="kpiTotalItems">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Total Inward Purchased</div>
-                <div class="value" id="kpiTotalInward">0 Units</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Total Units Dispatched/Sold</div>
-                <div class="value text-success" id="kpiTotalSold">0 Units</div>
-            </div>
-            <div class="kpi-card">
-                <div class="label">Total Stock Left on Hand</div>
-                <div class="value text-primary" id="kpiTotalOnHand">0 Units</div>
-            </div>
+    <!-- ============================================================= -->
+    <!-- VIEW 2: STOCK INVENTORY MASTER & PRICING EDIT                 -->
+    <!-- ============================================================= -->
+    <div id="viewStock" class="space-y-6 hidden">
+      
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-white">Stock Inventory Master</h2>
+            <p class="text-xs text-slate-400">Edit Agent Buy Cost and MRP directly in the table below. Changes update live calculations.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="exportStockCSV()" class="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white uppercase tracking-wider">
+              Export CSV
+            </button>
+          </div>
         </div>
 
-        <div class="card">
-            <div class="card-title">
-                <span>Current Stock Inventory (All-Time Position)</span>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary" onclick="switchTab('daily')">← Back to Daily Entry</button>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Product Name</th>
-                            <th class="text-center">Unit</th>
-                            <th class="text-right">Default Cost (₹)</th>
-                            <th class="text-right">Default MRP (₹)</th>
-                            <th class="text-right">Total Inward Qty</th>
-                            <th class="text-right">Total Sold Qty</th>
-                            <th class="text-right">Available Stock</th>
-                            <th class="text-right">Estimated Stock Value (₹)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stockTableBody"></tbody>
-                </table>
-            </div>
+        <!-- Master Table with Inline Price & MRP Editing -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Item Code / Key</th>
+                <th class="p-3">Product Name</th>
+                <th class="p-3 text-center">Unit</th>
+                <th class="p-3 text-center">Agent Cost (₹) [Editable]</th>
+                <th class="p-3 text-center">MRP (₹) [Editable]</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stockMasterTableBody" class="divide-y divide-slate-800">
+              <!-- Injected dynamically with editable fields -->
+            </tbody>
+          </table>
         </div>
+      </div>
+
     </div>
-</div>
 
-<script>
-    const PRODUCT_CATALOG = {
-        "Milk": [
-            { name: "TM (Toned Milk)", unit: "LTR", defaultAgentPrice: 59.65, defaultMRP: 62.00 },
-            { name: "FCM (Full Cream Milk)", unit: "LTR", defaultAgentPrice: 75.40, defaultMRP: 80.00 },
-            { name: "STM (Standard Milk)", unit: "LTR", defaultAgentPrice: 63.55, defaultMRP: 68.00 },
-            { name: "Gold Plus (GP)", unit: "LTR", defaultAgentPrice: 77.20, defaultMRP: 82.00 },
-            { name: "S.Milk (STM 150ml Pouch)", unit: "PKT", defaultAgentPrice: 8.35, defaultMRP: 10.00 },
-            { name: "DTCM Tetra Pack", unit: "BOX", defaultAgentPrice: 350.00, defaultMRP: 380.00 }
-        ],
-        "Curd": [
-            { name: "Curd Sachet 125g (S.Curd)", unit: "PKT", defaultAgentPrice: 7.60, defaultMRP: 10.00 },
-            { name: "Curd Pouch 450g", unit: "PKT", defaultAgentPrice: 61.00, defaultMRP: 65.00 },
-            { name: "Curd Pouch 900g", unit: "PKT", defaultAgentPrice: 55.50, defaultMRP: 60.00 },
-            { name: "Curd Cup 100g", unit: "PCS", defaultAgentPrice: 8.00, defaultMRP: 10.00 },
-            { name: "Curd Cup 200g", unit: "PCS", defaultAgentPrice: 17.50, defaultMRP: 20.00 },
-            { name: "Curd Cup 500g", unit: "PCS", defaultAgentPrice: 46.00, defaultMRP: 50.00 },
-            { name: "Curd Disposable Tub 1kg", unit: "PCS", defaultAgentPrice: 88.00, defaultMRP: 95.00 },
-            { name: "Curd Bulk Tub 10kg", unit: "TUB", defaultAgentPrice: 680.00, defaultMRP: 750.00 }
-        ],
-        "Paneer": [
-            { name: "Paneer 200g", unit: "PKT", defaultAgentPrice: 80.00, defaultMRP: 95.00 },
-            { name: "Paneer 500g", unit: "PKT", defaultAgentPrice: 198.00, defaultMRP: 225.00 }
-        ],
-        "Beverages": [
-            { name: "Buttermilk Pouch", unit: "PKT", defaultAgentPrice: 7.20, defaultMRP: 10.00 },
-            { name: "Lassi Sachet", unit: "PKT", defaultAgentPrice: 10.40, defaultMRP: 15.00 },
-            { name: "Vanilla Lassi Glass", unit: "PCS", defaultAgentPrice: 18.25, defaultMRP: 25.00 },
-            { name: "Sabja Lassi", unit: "PCS", defaultAgentPrice: 18.50, defaultMRP: 25.00 }
-        ],
-        "Sweets": [
-            { name: "Junnu Small (50g)", unit: "PCS", defaultAgentPrice: 72.00, defaultMRP: 85.00 },
-            { name: "Junnu Big (100g)", unit: "PCS", defaultAgentPrice: 155.00, defaultMRP: 180.00 },
-            { name: "Basundi Tub", unit: "PCS", defaultAgentPrice: 132.00, defaultMRP: 150.00 },
-            { name: "Doodh Peda 200g Box", unit: "BOX", defaultAgentPrice: 81.00, defaultMRP: 95.00 },
-            { name: "Kalakand Box", unit: "BOX", defaultAgentPrice: 81.00, defaultMRP: 95.00 },
-            { name: "Mysore Pak Box", unit: "BOX", defaultAgentPrice: 78.00, defaultMRP: 90.00 }
-        ]
+  </div>
+
+  <script>
+    // Master Product Catalog Schema
+    const DEFAULT_MASTER_ITEMS = {
+      tm: { name: "TM (Toned Milk)", unit: "LTR", agentPrice: 59.65, mrp: 62.00 },
+      fcm: { name: "FCM (Full Cream Milk)", unit: "LTR", agentPrice: 75.40, mrp: 80.00 },
+      smilk: { name: "SMILK (Small Milk)", unit: "PKT", agentPrice: 8.35, mrp: 10.00 },
+      teamilk: { name: "Tea Milk", unit: "LTR", agentPrice: 0.00, mrp: 0.00 },
+      curd450: { name: "450gm Curd", unit: "PKT", agentPrice: 61.00, mrp: 65.00 },
+      scurd: { name: "SCURD (Small Curd)", unit: "PKT", agentPrice: 7.60, mrp: 10.00 },
+      bucket10kg: { name: "10kg STM Green Bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00 },
+      bucket5kg: { name: "5kg STM Curd Bucket", unit: "BUCKET", agentPrice: 0.00, mrp: 0.00 }
     };
 
-    let inventoryLogs = JSON.parse(localStorage.getItem("annapurna_daily_logs")) || [];
+    const STORAGE_KEY_ITEMS = "annapurna_master_items_v1";
+    const STORAGE_KEY_LOGS = "annapurna_kirana_logs_v1";
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById("entryDate");
-        dateInput.value = today;
-        dateInput.addEventListener("change", renderTable);
-        renderTable();
-        renderStockSummary();
+    let masterItems = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS)) || DEFAULT_MASTER_ITEMS;
+    let kiranaLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
+    let demandChart = null;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("selectedDate").value = today;
+      refreshAgentLabels();
+      loadDateData();
+      renderStockMasterTable();
+      renderDemandChart();
     });
 
-    function switchTab(tab) {
-        const dailySec = document.getElementById("sectionDaily");
-        const stockSec = document.getElementById("sectionStock");
-        const btnDaily = document.getElementById("btnTabDaily");
-        const btnStock = document.getElementById("btnTabStock");
+    // Tab Switching
+    function switchMainTab(tab) {
+      const viewKirana = document.getElementById("viewKirana");
+      const viewStock = document.getElementById("viewStock");
+      const btnK = document.getElementById("tabBtnKirana");
+      const btnS = document.getElementById("tabBtnStock");
 
-        if (tab === 'stock') {
-            dailySec.classList.remove('active');
-            stockSec.classList.add('active');
-            btnDaily.classList.remove('active');
-            btnStock.classList.add('active');
-            renderStockSummary();
-        } else {
-            stockSec.classList.remove('active');
-            dailySec.classList.add('active');
-            btnStock.classList.remove('active');
-            btnDaily.classList.add('active');
-            renderTable();
+      if (tab === "stock") {
+        viewKirana.classList.add("hidden");
+        viewStock.classList.remove("hidden");
+        btnS.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow";
+        btnK.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
+        renderStockMasterTable();
+      } else {
+        viewStock.classList.add("hidden");
+        viewKirana.classList.remove("hidden");
+        btnK.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow";
+        btnS.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
+        loadDateData();
+      }
+    }
+
+    function onDateChanged() {
+      loadDateData();
+    }
+
+    function getSelectedDate() {
+      return document.getElementById("selectedDate").value;
+    }
+
+    function refreshAgentLabels() {
+      Object.keys(masterItems).forEach(k => {
+        const el = document.getElementById(`labelCost_${k}`);
+        if (el) el.innerText = (masterItems[k].agentPrice || 0).toFixed(2);
+      });
+    }
+
+    function loadDateData() {
+      const dateStr = getSelectedDate();
+      const dObj = new Date(dateStr + "T00:00:00");
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[dObj.getDay()] || "";
+
+      document.getElementById("currentDayBadge").innerText = dayName;
+      document.getElementById("ledgerDateDisplay").innerText = `${dateStr} (${dayName})`;
+
+      const dayEntries = kiranaLogs.filter(e => e.date === dateStr);
+      renderKiranaTable(dayEntries);
+      calculateDailyMetrics(dayEntries);
+    }
+
+    function calculateLivePreview() {
+      const items = getFormItemValues();
+      let bill = 0;
+      let profit = 0;
+
+      Object.keys(items).forEach(k => {
+        const q = items[k].qty;
+        const r = items[k].sellRate;
+        const cost = masterItems[k] ? masterItems[k].agentPrice : 0;
+        if (q > 0) {
+          bill += (q * r);
+          profit += (q * (r - cost));
         }
+      });
+
+      document.getElementById("liveBillTotal").innerText = `₹${bill.toFixed(2)}`;
+      document.getElementById("liveProfitTotal").innerText = `₹${profit.toFixed(2)}`;
     }
 
-    function populateItems() {
-        const catSelect = document.getElementById("categorySelect");
-        const itemSelect = document.getElementById("itemSelect");
-        const selectedCat = catSelect.value;
-
-        itemSelect.innerHTML = '<option value="">-- Select Item --</option>';
-
-        if (selectedCat && PRODUCT_CATALOG[selectedCat]) {
-            itemSelect.disabled = false;
-            PRODUCT_CATALOG[selectedCat].forEach((item, index) => {
-                const opt = document.createElement("option");
-                opt.value = index;
-                opt.textContent = `${item.name} (${item.unit})`;
-                itemSelect.appendChild(opt);
-            });
-        } else {
-            itemSelect.disabled = true;
-            resetFields();
-        }
-    }
-
-    function handleItemChange() {
-        const cat = document.getElementById("categorySelect").value;
-        const itemIdx = document.getElementById("itemSelect").value;
-
-        if (cat && itemIdx !== "") {
-            const item = PRODUCT_CATALOG[cat][itemIdx];
-            document.getElementById("itemUnit").value = item.unit;
-            document.getElementById("agentPrice").value = item.defaultAgentPrice.toFixed(2);
-            document.getElementById("mrpPrice").value = item.defaultMRP ? item.defaultMRP.toFixed(2) : "";
-        } else {
-            resetFields();
-        }
-    }
-
-    function resetFields() {
-        document.getElementById("itemUnit").value = "";
-        document.getElementById("agentPrice").value = "";
-        document.getElementById("mrpPrice").value = "";
-        document.getElementById("openingStock").value = "0";
-        document.getElementById("orderedQty").value = "0";
-        document.getElementById("soldQty").value = "0";
-    }
-
-    function handleAddEntry(e) {
-        e.preventDefault();
-        const date = document.getElementById("entryDate").value;
-        const cat = document.getElementById("categorySelect").value;
-        const itemIdx = document.getElementById("itemSelect").value;
-        const item = PRODUCT_CATALOG[cat][itemIdx];
-
-        const agentPrice = parseFloat(document.getElementById("agentPrice").value) || 0;
-        const mrpPrice = parseFloat(document.getElementById("mrpPrice").value) || 0;
-        const opening = parseFloat(document.getElementById("openingStock").value) || 0;
-        const ordered = parseFloat(document.getElementById("orderedQty").value) || 0;
-        const sold = parseFloat(document.getElementById("soldQty").value) || 0;
-
-        const closing = (opening + ordered) - sold;
-        const distributorBill = ordered * agentPrice;
-        const salesRevenue = sold * mrpPrice;
-        const profit = (sold * mrpPrice) - (sold * agentPrice);
-
-        const newLog = {
-            id: Date.now(),
-            date,
-            category: cat,
-            itemName: item.name,
-            unit: item.unit,
-            agentPrice,
-            mrpPrice,
-            opening,
-            ordered,
-            sold,
-            closing,
-            distributorBill,
-            salesRevenue,
-            profit
+    function getFormItemValues() {
+      const keys = ["tm", "fcm", "smilk", "teamilk", "curd450", "scurd", "bucket10kg", "bucket5kg"];
+      const res = {};
+      keys.forEach(k => {
+        res[k] = {
+          qty: parseFloat(document.getElementById(`qty_${k}`).value) || 0,
+          sellRate: parseFloat(document.getElementById(`rate_${k}`).value) || 0
         };
-
-        inventoryLogs.unshift(newLog);
-        localStorage.setItem("annapurna_daily_logs", JSON.stringify(inventoryLogs));
-
-        renderTable();
-        resetFields();
-        document.getElementById("categorySelect").value = "";
-        document.getElementById("itemSelect").disabled = true;
-        document.getElementById("itemSelect").innerHTML = '<option value="">-- Select Item --</option>';
+      });
+      return res;
     }
 
-    function deleteEntry(id) {
-        if (confirm("Are you sure you want to remove this log entry?")) {
-            inventoryLogs = inventoryLogs.filter(item => item.id !== id);
-            localStorage.setItem("annapurna_daily_logs", JSON.stringify(inventoryLogs));
-            renderTable();
+    function handleKiranaSubmit(e) {
+      e.preventDefault();
+      const date = getSelectedDate();
+      const editId = document.getElementById("editKiranaId").value;
+      const shopName = document.getElementById("kiranaShopName").value.trim();
+      const paymentStatus = document.getElementById("kiranaPaymentStatus").value;
+      const note = document.getElementById("kiranaNote").value.trim();
+      const items = getFormItemValues();
+
+      const hasItem = Object.keys(items).some(k => items[k].qty > 0);
+      if (!hasItem) {
+        alert("Please enter a quantity for at least one milk or curd item.");
+        return;
+      }
+
+      const logEntry = {
+        id: editId || ("log_" + Date.now()),
+        date,
+        shopName,
+        paymentStatus,
+        note,
+        items
+      };
+
+      if (editId) {
+        kiranaLogs = kiranaLogs.map(item => item.id === editId ? logEntry : item);
+      } else {
+        kiranaLogs.push(logEntry);
+      }
+
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+      resetKiranaForm();
+      loadDateData();
+      renderDemandChart();
+    }
+
+    function computeFinancials(items) {
+      let bill = 0;
+      let cost = 0;
+
+      Object.keys(items).forEach(k => {
+        const q = items[k].qty || 0;
+        const sellRate = items[k].sellRate || 0;
+        const agentBuy = masterItems[k] ? masterItems[k].agentPrice : 0;
+
+        bill += (q * sellRate);
+        cost += (q * agentBuy);
+      });
+
+      return { bill, profit: bill - cost };
+    }
+
+    function renderKiranaTable(entries) {
+      const tbody = document.getElementById("kiranaTableBody");
+      tbody.innerHTML = "";
+      document.getElementById("shopCountBadge").innerText = `${entries.length} Shops`;
+
+      if (entries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 text-xs">No shop dispatches logged for this date. Enter deliveries above.</td></tr>`;
+        return;
+      }
+
+      entries.forEach(entry => {
+        const fin = computeFinancials(entry.items);
+        const isPaid = entry.paymentStatus === "Paid";
+
+        const milkSummary = [];
+        if (entry.items.tm?.qty > 0) milkSummary.push(`TM: ${entry.items.tm.qty}L @₹${entry.items.tm.sellRate}`);
+        if (entry.items.fcm?.qty > 0) milkSummary.push(`FCM: ${entry.items.fcm.qty}L @₹${entry.items.fcm.sellRate}`);
+        if (entry.items.smilk?.qty > 0) milkSummary.push(`SMILK: ${entry.items.smilk.qty}p @₹${entry.items.smilk.sellRate}`);
+        if (entry.items.teamilk?.qty > 0) milkSummary.push(`Tea: ${entry.items.teamilk.qty}L @₹${entry.items.teamilk.sellRate}`);
+
+        const curdSummary = [];
+        if (entry.items.curd450?.qty > 0) curdSummary.push(`450g: ${entry.items.curd450.qty}p @₹${entry.items.curd450.sellRate}`);
+        if (entry.items.scurd?.qty > 0) curdSummary.push(`SCURD: ${entry.items.scurd.qty}p @₹${entry.items.scurd.sellRate}`);
+
+        const bucketSummary = [];
+        if (entry.items.bucket10kg?.qty > 0) bucketSummary.push(`10kg: ${entry.items.bucket10kg.qty} @₹${entry.items.bucket10kg.sellRate}`);
+        if (entry.items.bucket5kg?.qty > 0) bucketSummary.push(`5kg: ${entry.items.bucket5kg.qty} @₹${entry.items.bucket5kg.sellRate}`);
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3">
+            <div class="font-bold text-white text-xs md:text-sm">${entry.shopName}</div>
+            ${entry.note ? `<div class="text-[10px] text-slate-400 mt-0.5">${entry.note}</div>` : ""}
+          </td>
+          <td class="p-3 mono text-[11px] text-sky-300">${milkSummary.join("<br>") || "—"}</td>
+          <td class="p-3 mono text-[11px] text-amber-300">${curdSummary.join("<br>") || "—"}</td>
+          <td class="p-3 mono text-[11px] text-indigo-300">${bucketSummary.join("<br>") || "—"}</td>
+          <td class="p-3 text-right font-bold text-white mono text-xs md:text-sm">₹${fin.bill.toFixed(2)}</td>
+          <td class="p-3 text-right font-bold text-emerald-400 mono text-xs md:text-sm">₹${fin.profit.toFixed(2)}</td>
+          <td class="p-3 text-center">
+            <button onclick="togglePaymentStatus('${entry.id}')" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
+              ${entry.paymentStatus}
+            </button>
+          </td>
+          <td class="p-3 text-center space-x-2">
+            <button onclick="editKiranaEntry('${entry.id}')" class="text-xs text-sky-400 hover:text-sky-300 font-semibold">Edit</button>
+            <button onclick="deleteKiranaEntry('${entry.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateDailyMetrics(entries) {
+      let sales = 0;
+      let profit = 0;
+      let due = 0;
+      let milkUnits = 0;
+      let curdUnits = 0;
+
+      entries.forEach(e => {
+        const fin = computeFinancials(e.items);
+        sales += fin.bill;
+        profit += fin.profit;
+        if (e.paymentStatus !== "Paid") {
+          due += fin.bill;
         }
+
+        milkUnits += (Number(e.items.tm?.qty || 0) + Number(e.items.fcm?.qty || 0) + Number(e.items.smilk?.qty || 0) + Number(e.items.teamilk?.qty || 0));
+        curdUnits += (Number(e.items.curd450?.qty || 0) + Number(e.items.scurd?.qty || 0) + Number(e.items.bucket10kg?.qty || 0) + Number(e.items.bucket5kg?.qty || 0));
+      });
+
+      document.getElementById("kpiTotalSales").innerText = `₹${sales.toFixed(2)}`;
+      document.getElementById("kpiTotalProfit").innerText = `₹${profit.toFixed(2)}`;
+      document.getElementById("kpiPendingDue").innerText = `₹${due.toFixed(2)}`;
+      document.getElementById("kpiMilkVolume").innerText = `${milkUnits} Units/L`;
+      document.getElementById("kpiCurdVolume").innerText = `${curdUnits} Units`;
     }
 
-    function renderTable() {
-        const tbody = document.getElementById("ledgerTableBody");
-        const emptyState = document.getElementById("emptyState");
-        const selectedDate = document.getElementById("entryDate").value;
-
-        tbody.innerHTML = "";
-
-        const filtered = inventoryLogs.filter(log => log.date === selectedDate);
-
-        let totDistributor = 0;
-        let totSales = 0;
-        let totProfit = 0;
-        let totSoldUnits = 0;
-
-        if (filtered.length === 0) {
-            emptyState.style.display = "block";
-        } else {
-            emptyState.style.display = "none";
-            filtered.forEach(log => {
-                totDistributor += log.distributorBill;
-                totSales += log.salesRevenue;
-                totProfit += log.profit;
-                totSoldUnits += log.sold;
-
-                const tr = document.createElement("tr");
-                let badgeClass = "badge-other";
-                if (log.category === "Milk") badgeClass = "badge-milk";
-                else if (log.category === "Curd") badgeClass = "badge-curd";
-                else if (log.category === "Paneer") badgeClass = "badge-paneer";
-
-                tr.innerHTML = `
-                    <td>${log.date}</td>
-                    <td><span class="badge ${badgeClass}">${log.category}</span></td>
-                    <td class="font-bold text-primary">${log.itemName}</td>
-                    <td class="text-center">${log.unit}</td>
-                    <td class="text-right">₹${log.agentPrice.toFixed(2)}</td>
-                    <td class="text-right font-bold">₹${log.mrpPrice.toFixed(2)}</td>
-                    <td class="text-right">${log.opening}</td>
-                    <td class="text-right font-bold">${log.ordered}</td>
-                    <td class="text-right text-success font-bold">${log.sold}</td>
-                    <td class="text-right font-bold">${log.closing}</td>
-                    <td class="text-right">₹${log.distributorBill.toFixed(2)}</td>
-                    <td class="text-right">₹${log.salesRevenue.toFixed(2)}</td>
-                    <td class="text-right text-success font-bold">₹${log.profit.toFixed(2)}</td>
-                    <td class="text-center">
-                        <button class="btn btn-danger" onclick="deleteEntry(${log.id})">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    function togglePaymentStatus(id) {
+      kiranaLogs = kiranaLogs.map(e => {
+        if (e.id === id) {
+          return { ...e, paymentStatus: e.paymentStatus === "Paid" ? "Not Paid" : "Paid" };
         }
-
-        document.getElementById("kpiDistributorCost").textContent = `₹${totDistributor.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-        document.getElementById("kpiSalesRevenue").textContent = `₹${totSales.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-        document.getElementById("kpiGrossProfit").textContent = `₹${totProfit.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-        document.getElementById("kpiUnitsSold").textContent = totSoldUnits;
+        return e;
+      });
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+      loadDateData();
     }
 
-    function renderStockSummary() {
-        const tbody = document.getElementById("stockTableBody");
-        tbody.innerHTML = "";
+    function editKiranaEntry(id) {
+      const entry = kiranaLogs.find(e => e.id === id);
+      if (!entry) return;
 
-        let totalCatalogCount = 0;
-        let cumulativeInward = 0;
-        let cumulativeSold = 0;
-        let cumulativeOnHand = 0;
+      document.getElementById("editKiranaId").value = entry.id;
+      document.getElementById("kiranaShopName").value = entry.shopName;
+      document.getElementById("kiranaPaymentStatus").value = entry.paymentStatus;
+      document.getElementById("kiranaNote").value = entry.note || "";
 
-        Object.keys(PRODUCT_CATALOG).forEach(cat => {
-            PRODUCT_CATALOG[cat].forEach(prod => {
-                totalCatalogCount++;
-                
-                const matchedLogs = inventoryLogs.filter(l => l.itemName === prod.name);
-                const itemOrdered = matchedLogs.reduce((sum, l) => sum + l.ordered, 0);
-                const itemSold = matchedLogs.reduce((sum, l) => sum + l.sold, 0);
-                const currentStock = itemOrdered - itemSold;
-                const stockValuation = Math.max(0, currentStock) * prod.defaultAgentPrice;
+      const keys = ["tm", "fcm", "smilk", "teamilk", "curd450", "scurd", "bucket10kg", "bucket5kg"];
+      keys.forEach(k => {
+        document.getElementById(`qty_${k}`).value = entry.items[k]?.qty || "";
+        document.getElementById(`rate_${k}`).value = entry.items[k]?.sellRate || "";
+      });
 
-                cumulativeInward += itemOrdered;
-                cumulativeSold += itemSold;
-                cumulativeOnHand += currentStock;
+      document.getElementById("kiranaFormHeading").innerText = `Edit Entry: ${entry.shopName}`;
+      document.getElementById("saveKiranaBtn").innerText = "Update Shop Dispatch";
+      calculateLivePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-                let badgeClass = "badge-other";
-                if (cat === "Milk") badgeClass = "badge-milk";
-                else if (cat === "Curd") badgeClass = "badge-curd";
-                else if (cat === "Paneer") badgeClass = "badge-paneer";
+    function deleteKiranaEntry(id) {
+      if (confirm("Are you sure you want to delete this shop entry?")) {
+        kiranaLogs = kiranaLogs.filter(e => e.id !== id);
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+        loadDateData();
+        renderDemandChart();
+      }
+    }
 
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td><span class="badge ${badgeClass}">${cat}</span></td>
-                    <td class="font-bold text-primary">${prod.name}</td>
-                    <td class="text-center">${prod.unit}</td>
-                    <td class="text-right">₹${prod.defaultAgentPrice.toFixed(2)}</td>
-                    <td class="text-right">₹${prod.defaultMRP.toFixed(2)}</td>
-                    <td class="text-right">${itemOrdered}</td>
-                    <td class="text-right text-success">${itemSold}</td>
-                    <td class="text-right font-bold ${currentStock < 0 ? 'text-danger' : 'text-primary'}">${currentStock}</td>
-                    <td class="text-right font-bold">₹${stockValuation.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+    function resetKiranaForm() {
+      document.getElementById("editKiranaId").value = "";
+      document.getElementById("kiranaDeliveryForm").reset();
+      document.getElementById("kiranaPaymentStatus").value = "Not Paid";
+      document.getElementById("kiranaFormHeading").innerText = "Log Kirana Shop Delivery";
+      document.getElementById("saveKiranaBtn").innerText = "Save Shop Dispatch";
+      calculateLivePreview();
+    }
+
+    // ==========================================
+    // STOCK INVENTORY MASTER INLINE EDITING
+    // ==========================================
+    function renderStockMasterTable() {
+      const tbody = document.getElementById("stockMasterTableBody");
+      tbody.innerHTML = "";
+
+      Object.keys(masterItems).forEach(key => {
+        const item = masterItems[key];
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 mono font-bold text-slate-400 uppercase">${key}</td>
+          <td class="p-3 font-semibold text-white">${item.name}</td>
+          <td class="p-3 text-center text-slate-400 font-medium">${item.unit}</td>
+          <td class="p-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <span class="text-slate-500">₹</span>
+              <input type="number" step="0.05" id="editAgent_${key}" value="${item.agentPrice}" 
+                class="w-24 bg-slate-800 border border-slate-700 text-right text-emerald-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
+            </div>
+          </td>
+          <td class="p-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <span class="text-slate-500">₹</span>
+              <input type="number" step="0.05" id="editMrp_${key}" value="${item.mrp}" 
+                class="w-24 bg-slate-800 border border-slate-700 text-right text-white mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
+            </div>
+          </td>
+          <td class="p-3 text-center">
+            <button type="button" onclick="saveMasterItemRates('${key}')" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
+              Save
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveMasterItemRates(key) {
+      const newAgent = parseFloat(document.getElementById(`editAgent_${key}`).value) || 0;
+      const newMrp = parseFloat(document.getElementById(`editMrp_${key}`).value) || 0;
+
+      masterItems[key].agentPrice = newAgent;
+      masterItems[key].mrp = newMrp;
+
+      localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(masterItems));
+      refreshAgentLabels();
+      calculateLivePreview();
+      alert(`Updated ${masterItems[key].name} pricing: Agent Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
+    }
+
+    function exportStockCSV() {
+      let csv = "Item Key,Product Name,Unit,Agent Cost (INR),MRP (INR)\n";
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        csv += `"${k}","${it.name}","${it.unit}",${it.agentPrice},${it.mrp}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Stock_Master_${new Date().toISOString().split("T")[0]}.csv`;
+      link.click();
+    }
+
+    // Day-Wise Demand Analysis Chart
+    function renderDemandChart() {
+      const dates = [];
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        dates.push(d.toISOString().split("T")[0]);
+      }
+
+      const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const labels = dates.map(dt => {
+        const dObj = new Date(dt + "T00:00:00");
+        return `${daysShort[dObj.getDay()]} (${dt.slice(5)})`;
+      });
+
+      const milkVol = [];
+      const curdVol = [];
+
+      dates.forEach(dt => {
+        const dayRows = kiranaLogs.filter(e => e.date === dt);
+        let m = 0;
+        let c = 0;
+        dayRows.forEach(row => {
+          m += (Number(row.items.tm?.qty || 0) + Number(row.items.fcm?.qty || 0) + Number(row.items.smilk?.qty || 0) + Number(row.items.teamilk?.qty || 0));
+          c += (Number(row.items.curd450?.qty || 0) + Number(row.items.scurd?.qty || 0) + Number(row.items.bucket10kg?.qty || 0) + Number(row.items.bucket5kg?.qty || 0));
         });
+        milkVol.push(m);
+        curdVol.push(c);
+      });
 
-        document.getElementById("kpiTotalItems").textContent = totalCatalogCount;
-        document.getElementById("kpiTotalInward").textContent = `${cumulativeInward} Units`;
-        document.getElementById("kpiTotalSold").textContent = `${cumulativeSold} Units`;
-        document.getElementById("kpiTotalOnHand").textContent = `${cumulativeOnHand} Units`;
-    }
+      const ctx = document.getElementById("demandChartCanvas").getContext("2d");
+      if (demandChart) demandChart.destroy();
 
-    function exportToCSV() {
-        if (inventoryLogs.length === 0) {
-            alert("No data available to export.");
-            return;
+      demandChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Milk Demand (Units / L)",
+              data: milkVol,
+              backgroundColor: "rgba(56, 189, 248, 0.85)",
+              borderColor: "#38bdf8",
+              borderWidth: 1,
+              borderRadius: 6
+            },
+            {
+              label: "Curd Demand (Units / Kg)",
+              data: curdVol,
+              backgroundColor: "rgba(251, 191, 36, 0.85)",
+              borderColor: "#fbbf24",
+              borderWidth: 1,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: "#94a3b8", font: { family: "'IBM Plex Sans'", size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: "rgba(51, 65, 85, 0.2)" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: "rgba(51, 65, 85, 0.3)" }
+            }
+          }
         }
-
-        let csv = "Date,Category,Item,Unit,Agent Price,MRP,Opening Stock,Distributor Ordered Qty,Sold Qty,Closing Stock,Distributor Cost,Sales Revenue,Gross Profit\n";
-        inventoryLogs.forEach(row => {
-            csv += `"${row.date}","${row.category}","${row.itemName}","${row.unit}",${row.agentPrice},${row.mrpPrice},${row.opening},${row.ordered},${row.sold},${row.closing},${row.distributorBill},${row.salesRevenue},${row.profit}\n`;
-        });
-
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Annapurna_Dairy_Sales_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
+      });
     }
-</script>
-
+  </script>
 </body>
 </html>
