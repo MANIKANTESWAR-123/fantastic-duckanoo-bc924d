@@ -20,7 +20,7 @@
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
         <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Kirana Distribution</h1>
-        <p class="text-xs text-slate-400 mt-1">Shop delivery ledger, custom shop rates, live stock inventory &amp; profit analytics</p>
+        <p class="text-xs text-slate-400 mt-1">Shop delivery ledger, custom shop rates, persistent stock inventory &amp; profit analytics</p>
       </div>
 
       <!-- Navigation Tabs & Date Selector -->
@@ -49,11 +49,11 @@
       <!-- Top Metrics Dashboard -->
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total Sales Today</span>
+          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total Sales (Day)</span>
           <p class="text-xl font-bold text-white mt-1 mono" id="kpiTotalSales">₹0.00</p>
         </div>
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-          <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Your Profit Today</span>
+          <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Your Profit (Day)</span>
           <p class="text-xl font-bold text-emerald-400 mt-1 mono" id="kpiTotalProfit">₹0.00</p>
         </div>
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
@@ -61,11 +61,11 @@
           <p class="text-xl font-bold text-rose-400 mt-1 mono" id="kpiPendingDue">₹0.00</p>
         </div>
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-          <span class="text-[11px] text-sky-400 font-semibold uppercase tracking-wider">Total Milk Delivered</span>
+          <span class="text-[11px] text-sky-400 font-semibold uppercase tracking-wider">Milk Delivered</span>
           <p class="text-xl font-bold text-sky-300 mt-1 mono" id="kpiMilkVolume">0 Units</p>
         </div>
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-          <span class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Total Curd Delivered</span>
+          <span class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Curd Delivered</span>
           <p class="text-xl font-bold text-amber-300 mt-1 mono" id="kpiCurdVolume">0 Units</p>
         </div>
       </div>
@@ -75,7 +75,7 @@
         <div class="flex justify-between items-center pb-3 border-b border-slate-800">
           <div>
             <h2 id="kiranaFormHeading" class="text-base md:text-lg font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Enter shop name, delivery quantities &amp; individual shop selling rates</p>
+            <p class="text-xs text-slate-400">Enter delivery quantities &amp; custom selling rates for this shop</p>
           </div>
           <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline">Clear / Reset</button>
         </div>
@@ -86,7 +86,8 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
-              <input type="text" id="kiranaShopName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
+              <input type="text" id="kiranaShopName" list="shopNamesDatalist" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
+              <datalist id="shopNamesDatalist"></datalist>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status</label>
@@ -97,11 +98,11 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Delivery Notes (Optional)</label>
-              <input type="text" id="kiranaNote" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Morning milk supply">
+              <input type="text" id="kiranaNote" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Morning supply, collect evening">
             </div>
           </div>
 
-          <!-- Items Grid: Milk, Curd, Buckets -->
+          <!-- Items Grid: Milk, Curd Packets, Curd Buckets -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             
             <!-- 1. MILK SECTION -->
@@ -115,7 +116,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">TM (Toned Milk)</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_tm">59.65</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_tm">59.65</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_tm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -126,8 +127,8 @@
               <!-- FCM -->
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
-                  <span class="font-medium">FCM (Full Cream)</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_fcm">75.40</span></span>
+                  <span class="font-medium">FCM (Full Cream Milk)</span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_fcm">75.40</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_fcm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -139,7 +140,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">SMILK (Small Milk)</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_smilk">8.35</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_smilk">8.35</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_smilk" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -151,7 +152,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">Tea Milk</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_teamilk">0.00</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_teamilk">0.00</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_teamilk" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -171,7 +172,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">450gm Curd</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_curd450">61.00</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_curd450">61.00</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_curd450" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -183,7 +184,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">SCURD (Small Curd)</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_scurd">7.60</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_scurd">7.60</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_scurd" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -203,7 +204,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">10kg STM Green Bucket</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket10kg">680.00</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_bucket10kg">680.00</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_bucket10kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -215,7 +216,7 @@
               <div class="space-y-1">
                 <div class="flex justify-between text-xs text-slate-300">
                   <span class="font-medium">5kg STM Curd Bucket</span>
-                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket5kg">0.00</span></span>
+                  <span class="text-[10px] text-slate-500">Cost: ₹<span id="labelCost_bucket5kg">0.00</span></span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input type="number" min="0" step="any" id="qty_bucket5kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
@@ -295,7 +296,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
             <h2 class="text-lg font-bold text-white">Stock Inventory Master</h2>
-            <p class="text-xs text-slate-400">Edit Agent Buy Cost and MRP directly in the table below. Changes update live calculations.</p>
+            <p class="text-xs text-slate-400">Edit Agent Buy Cost and MRP directly in the table below. Changes automatically persist on refresh and recalculate all profits.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="exportStockCSV()" class="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white uppercase tracking-wider">
@@ -309,11 +310,14 @@
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
               <tr>
-                <th class="p-3">Item Code / Key</th>
+                <th class="p-3">Item Code</th>
                 <th class="p-3">Product Name</th>
                 <th class="p-3 text-center">Unit</th>
                 <th class="p-3 text-center">Agent Cost (₹) [Editable]</th>
                 <th class="p-3 text-center">MRP (₹) [Editable]</th>
+                <th class="p-3 text-right">Total Units Delivered</th>
+                <th class="p-3 text-right">Total Revenue (₹)</th>
+                <th class="p-3 text-right text-emerald-400">Total Profit (₹)</th>
                 <th class="p-3 text-center">Action</th>
               </tr>
             </thead>
@@ -341,17 +345,54 @@
       bucket5kg: { name: "5kg STM Curd Bucket", unit: "BUCKET", agentPrice: 0.00, mrp: 0.00 }
     };
 
-    const STORAGE_KEY_ITEMS = "annapurna_master_items_v1";
-    const STORAGE_KEY_LOGS = "annapurna_kirana_logs_v1";
+    const STORAGE_KEY_ITEMS = "annapurna_master_items_v2";
+    const STORAGE_KEY_LOGS = "annapurna_kirana_logs_v2";
+    const STORAGE_KEY_LAST_DATE = "annapurna_last_date_v2";
 
-    let masterItems = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS)) || DEFAULT_MASTER_ITEMS;
-    let kiranaLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
+    let masterItems = {};
+    let kiranaLogs = [];
     let demandChart = null;
 
+    // Accurate Local Date Formatter (Avoids UTC midnight shifts)
+    function getTodayLocalDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Load persisted state from localStorage safely
+    function loadStateFromStorage() {
+      try {
+        const storedItems = localStorage.getItem(STORAGE_KEY_ITEMS);
+        masterItems = storedItems ? JSON.parse(storedItems) : JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
+        // Fill any missing keys from defaults
+        Object.keys(DEFAULT_MASTER_ITEMS).forEach(k => {
+          if (!masterItems[k]) masterItems[k] = { ...DEFAULT_MASTER_ITEMS[k] };
+        });
+      } catch (e) {
+        masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
+      }
+
+      try {
+        const storedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+        kiranaLogs = storedLogs ? JSON.parse(storedLogs) : [];
+      } catch (e) {
+        kiranaLogs = [];
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("selectedDate").value = today;
+      loadStateFromStorage();
+
+      // Set default date: retrieve last selected date or today's local date
+      const savedDate = localStorage.getItem(STORAGE_KEY_LAST_DATE);
+      const defaultDate = savedDate || getTodayLocalDate();
+      document.getElementById("selectedDate").value = defaultDate;
+
       refreshAgentLabels();
+      updateShopDatalist();
       loadDateData();
       renderStockMasterTable();
       renderDemandChart();
@@ -380,18 +421,27 @@
     }
 
     function onDateChanged() {
+      const newDate = getSelectedDate();
+      localStorage.setItem(STORAGE_KEY_LAST_DATE, newDate);
       loadDateData();
     }
 
     function getSelectedDate() {
-      return document.getElementById("selectedDate").value;
+      return document.getElementById("selectedDate").value || getTodayLocalDate();
     }
 
     function refreshAgentLabels() {
       Object.keys(masterItems).forEach(k => {
         const el = document.getElementById(`labelCost_${k}`);
-        if (el) el.innerText = (masterItems[k].agentPrice || 0).toFixed(2);
+        if (el) el.innerText = (Number(masterItems[k]?.agentPrice) || 0).toFixed(2);
       });
+    }
+
+    function updateShopDatalist() {
+      const datalist = document.getElementById("shopNamesDatalist");
+      if (!datalist) return;
+      const uniqueShops = Array.from(new Set(kiranaLogs.map(l => l.shopName).filter(Boolean)));
+      datalist.innerHTML = uniqueShops.map(name => `<option value="${name}"></option>`).join('');
     }
 
     function loadDateData() {
@@ -416,7 +466,7 @@
       Object.keys(items).forEach(k => {
         const q = items[k].qty;
         const r = items[k].sellRate;
-        const cost = masterItems[k] ? masterItems[k].agentPrice : 0;
+        const cost = masterItems[k] ? Number(masterItems[k].agentPrice) : 0;
         if (q > 0) {
           bill += (q * r);
           profit += (q * (r - cost));
@@ -469,7 +519,9 @@
         kiranaLogs.push(logEntry);
       }
 
+      // Persist to localStorage
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+      updateShopDatalist();
       resetKiranaForm();
       loadDateData();
       renderDemandChart();
@@ -480,9 +532,9 @@
       let cost = 0;
 
       Object.keys(items).forEach(k => {
-        const q = items[k].qty || 0;
-        const sellRate = items[k].sellRate || 0;
-        const agentBuy = masterItems[k] ? masterItems[k].agentPrice : 0;
+        const q = Number(items[k]?.qty) || 0;
+        const sellRate = Number(items[k]?.sellRate) || 0;
+        const agentBuy = masterItems[k] ? Number(masterItems[k].agentPrice) : 0;
 
         bill += (q * sellRate);
         cost += (q * agentBuy);
@@ -607,6 +659,7 @@
       if (confirm("Are you sure you want to delete this shop entry?")) {
         kiranaLogs = kiranaLogs.filter(e => e.id !== id);
         localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+        updateShopDatalist();
         loadDateData();
         renderDemandChart();
       }
@@ -628,8 +681,28 @@
       const tbody = document.getElementById("stockMasterTableBody");
       tbody.innerHTML = "";
 
+      // Calculate total delivered units, revenue, and profit per item across all dates
+      const itemStats = {};
+      Object.keys(masterItems).forEach(k => {
+        itemStats[k] = { totalQty: 0, totalRevenue: 0, totalProfit: 0 };
+      });
+
+      kiranaLogs.forEach(log => {
+        Object.keys(masterItems).forEach(k => {
+          const q = Number(log.items[k]?.qty) || 0;
+          const sellRate = Number(log.items[k]?.sellRate) || 0;
+          const cost = Number(masterItems[k]?.agentPrice) || 0;
+          if (q > 0) {
+            itemStats[k].totalQty += q;
+            itemStats[k].totalRevenue += (q * sellRate);
+            itemStats[k].totalProfit += (q * (sellRate - cost));
+          }
+        });
+      });
+
       Object.keys(masterItems).forEach(key => {
         const item = masterItems[key];
+        const stats = itemStats[key] || { totalQty: 0, totalRevenue: 0, totalProfit: 0 };
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-800/50 transition";
         tr.innerHTML = `
@@ -650,8 +723,11 @@
                 class="w-24 bg-slate-800 border border-slate-700 text-right text-white mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
             </div>
           </td>
+          <td class="p-3 text-right mono font-bold text-sky-300">${stats.totalQty}</td>
+          <td class="p-3 text-right mono font-bold text-white">₹${stats.totalRevenue.toFixed(2)}</td>
+          <td class="p-3 text-right mono font-bold text-emerald-400">₹${stats.totalProfit.toFixed(2)}</td>
           <td class="p-3 text-center">
-            <button type="button" onclick="saveMasterItemRates('${key}')" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
+            <button type="button" onclick="saveMasterItemRates('${key}')" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
               Save
             </button>
           </td>
@@ -670,20 +746,42 @@
       localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(masterItems));
       refreshAgentLabels();
       calculateLivePreview();
-      alert(`Updated ${masterItems[key].name} pricing: Agent Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
+      loadDateData();
+      renderStockMasterTable();
+      alert(`Saved ${masterItems[key].name}: Cost Price ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
     }
 
     function exportStockCSV() {
-      let csv = "Item Key,Product Name,Unit,Agent Cost (INR),MRP (INR)\n";
+      let csv = "Item Code,Product Name,Unit,Agent Buy Cost (INR),MRP (INR),Total Delivered Qty,Total Billed (INR),Total Profit (INR)\n";
+      
+      const itemStats = {};
+      Object.keys(masterItems).forEach(k => {
+        itemStats[k] = { totalQty: 0, totalRevenue: 0, totalProfit: 0 };
+      });
+
+      kiranaLogs.forEach(log => {
+        Object.keys(masterItems).forEach(k => {
+          const q = Number(log.items[k]?.qty) || 0;
+          const sellRate = Number(log.items[k]?.sellRate) || 0;
+          const cost = Number(masterItems[k]?.agentPrice) || 0;
+          if (q > 0) {
+            itemStats[k].totalQty += q;
+            itemStats[k].totalRevenue += (q * sellRate);
+            itemStats[k].totalProfit += (q * (sellRate - cost));
+          }
+        });
+      });
+
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
-        csv += `"${k}","${it.name}","${it.unit}",${it.agentPrice},${it.mrp}\n`;
+        const stats = itemStats[k];
+        csv += `"${k}","${it.name}","${it.unit}",${it.agentPrice},${it.mrp},${stats.totalQty},${stats.totalRevenue.toFixed(2)},${stats.totalProfit.toFixed(2)}\n`;
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Stock_Master_${new Date().toISOString().split("T")[0]}.csv`;
+      link.download = `Stock_Master_${getSelectedDate()}.csv`;
       link.click();
     }
 
@@ -694,7 +792,10 @@
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(now.getDate() - i);
-        dates.push(d.toISOString().split("T")[0]);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dates.push(`${year}-${month}-${day}`);
       }
 
       const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
