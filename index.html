@@ -1,1983 +1,771 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Annapurna Dairy &amp; Foods — Master Inventory &amp; Daily Ledger</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#35634A">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-<style>
-  :root{
-    --bg: #FAFAF6;
-    --surface: #FFFFFF;
-    --ink: #1E293B;
-    --ink-soft: #64748B;
-    --line: #E2E8F0;
-    --green: #35634A;
-    --green-soft: #E7EFE7;
-    --gold: #B9862E;
-    --gold-soft: #FBF1DE;
-    --red: #A23E3E;
-    --red-soft: #FBEAEA;
-    --sky: #0369A1;
-    --sky-soft: #E0F2FE;
-    --radius: 10px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', system-ui, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:60px;
-  }
-  .wrap{max-width:1100px;margin:0 auto;padding:16px;}
-  header{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:16px 20px;
-    margin-bottom:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:12px;
-  }
-  .shop-name{
-    font-family:'Fraunces', serif;
-    font-weight:700;
-    font-size:22px;
-    color:var(--green);
-  }
-  .shop-sub{
-    color:var(--ink-soft);
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-    margin-top:2px;
-  }
-  .date-box{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    background:#F8FAFC;
-    border:1px solid var(--line);
-    padding:6px 12px;
-    border-radius:8px;
-  }
-  .date-box input{
-    border:none;
-    background:transparent;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:14px;
-    font-weight:600;
-    color:var(--ink);
-    outline:none;
-  }
-  .day-badge{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    background:var(--green-soft);
-    color:var(--green);
-    padding:2px 8px;
-    border-radius:6px;
-  }
-  .tabs{
-    display:flex;
-    gap:6px;
-    margin-bottom:16px;
-    overflow-x:auto;
-    padding-bottom:4px;
-  }
-  .tab-btn{
-    flex:1;
-    min-width:110px;
-    padding:10px 12px;
-    border:1px solid var(--line);
-    background:var(--surface);
-    border-radius:var(--radius);
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:600;
-    font-size:12px;
-    color:var(--ink-soft);
-    cursor:pointer;
-    white-space:nowrap;
-    text-align:center;
-    transition:all 0.15s;
-  }
-  .tab-btn.active{
-    background:var(--green);
-    border-color:var(--green);
-    color:#fff;
-    box-shadow:0 2px 6px rgba(53,99,74,0.25);
-  }
-  .card{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px;
-    margin-bottom:14px;
-  }
-  .card-title{
-    font-family:'Fraunces', serif;
-    font-size:15px;
-    font-weight:700;
-    margin-bottom:10px;
-    color:var(--ink);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .metric-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
-    gap:10px;
-    margin-bottom:14px;
-  }
-  .metric-box{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:12px;
-    text-align:center;
-  }
-  .metric-box .val{
-    font-family:'IBM Plex Mono', monospace;
-    font-weight:700;
-    font-size:18px;
-    color:var(--ink);
-    margin-top:2px;
-  }
-  .metric-box .lbl{
-    font-size:10.5px;
-    color:var(--ink-soft);
-    text-transform:uppercase;
-    letter-spacing:0.03em;
-    font-weight:600;
-  }
-  .mono{font-family:'IBM Plex Mono', monospace;}
-  .search-box{
-    width:100%;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size:13.5px;
-    padding:9px 12px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    background:#FDFCF9;
-    color:var(--ink);
-    margin-bottom:8px;
-    outline:none;
-  }
-  .search-box:focus{border-color:var(--green);}
-  .bulk-box{
-    width:100%;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
-    padding:10px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    background:#FDFCF9;
-    color:var(--ink);
-    outline:none;
-  }
-  .action-btn{
-    padding:8px 14px;
-    border-radius:8px;
-    font-size:12px;
-    font-weight:600;
-    font-family:'IBM Plex Sans', sans-serif;
-    cursor:pointer;
-    border:none;
-    transition:background 0.15s;
-  }
-  .btn-green{background:var(--green);color:#fff;}
-  .btn-green:hover{background:#2A4F3B;}
-  .btn-dark{background:var(--ink);color:#fff;}
-  .btn-light{background:#F1F5F9;color:var(--ink);border:1px solid var(--line);}
-  .btn-red{background:var(--red-soft);color:var(--red);border:1px solid #F5C6CB;}
-  .cat-block{
-    border:1px solid var(--line);
-    border-radius:8px;
-    margin-bottom:8px;
-    overflow:hidden;
-  }
-  .cat-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 14px;
-    background:#F8FAFC;
-    cursor:pointer;
-    user-select:none;
-  }
-  .cat-title{font-family:'Fraunces', serif;font-weight:600;font-size:13.5px;}
-  .cat-meta{font-size:11.5px;color:var(--ink-soft);font-family:'IBM Plex Mono', monospace;}
-  .cat-items{padding:10px;display:none;}
-  .cat-block.open .cat-items{display:block;}
-  .item-card{
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:10px;
-    margin-bottom:8px;
-    background:#fff;
-  }
-  .item-card:last-child{margin-bottom:0;}
-  .item-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    margin-bottom:8px;
-    flex-wrap:wrap;
-  }
-  .item-head .name{font-weight:600;font-size:13px;}
-  .qty-grid{
-    display:grid;
-    grid-template-columns:repeat(6, 1fr);
-    gap:4px;
-  }
-  .price-grid{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:6px;
-    margin-top:6px;
-  }
-  .qty-box label{
-    font-size:8.5px;
-    text-transform:uppercase;
-    letter-spacing:0.02em;
-    color:var(--ink-soft);
-    font-weight:600;
-    display:block;
-    margin-bottom:2px;
-    white-space:nowrap;
-  }
-  .qty-box input{
-    width:100%;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    text-align:center;
-    padding:5px 2px;
-    border:1px solid var(--line);
-    border-radius:6px;
-    background:#FDFCF9;
-    color:var(--ink);
-  }
-  .qty-box.mrp input{background:var(--gold-soft);border-color:#EAD9AE;}
-  .qty-box.agent input{background:#EFEAE0;border-color:#DCD3C0;}
-  .qty-box.shoprate input{background:var(--sky-soft);border-color:#BAE6FD;font-weight:600;color:var(--sky);}
-  .qty-box.sold input{background:var(--green-soft);border-color:#CFE1D2;font-weight:700;}
-  .qty-box.leftover input{background:#E3F2FD;border-color:#BBDEFB;font-weight:700;color:#0D47A1;}
-  .item-foot{
-    display:flex;
-    justify-content:space-between;
-    margin-top:6px;
-    font-size:11px;
-    color:var(--ink-soft);
-    font-family:'IBM Plex Mono', monospace;
-  }
-  .item-foot .amt{font-weight:700;color:var(--ink);}
-  .item-foot .margin{color:var(--green);font-weight:700;}
-  .split-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-top:12px;
-  }
-  .split-box{
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:10px;
-  }
-  .split-box.cash{background:var(--gold-soft);border-color:#EAD9AE;}
-  .split-box.online{background:var(--green-soft);border-color:#CFE1D2;}
-  .split-box label{
-    font-size:11px;
-    font-weight:600;
-    text-transform:uppercase;
-    display:block;
-    margin-bottom:4px;
-    color:var(--ink-soft);
-  }
-  .split-box input{
-    width:100%;
-    border:none;
-    background:transparent;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:18px;
-    font-weight:700;
-    outline:none;
-  }
-  .table-wrap{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:12px;text-align:left;}
-  th{
-    background:#F8FAFC;
-    color:var(--ink-soft);
-    padding:9px 10px;
-    font-weight:600;
-    border-bottom:2px solid var(--line);
-    white-space:nowrap;
-    text-transform:uppercase;
-    font-size:10px;
-  }
-  td{
-    padding:8px 10px;
-    border-bottom:1px solid var(--line);
-    vertical-align:middle;
-  }
-  tr:hover td{background:#F8FAFC;}
-  .badge{
-    display:inline-block;
-    padding:2px 8px;
-    border-radius:12px;
-    font-size:10px;
-    font-weight:700;
-    font-family:'IBM Plex Mono', monospace;
-  }
-  .badge-green{background:var(--green-soft);color:var(--green);}
-  .badge-red{background:var(--red-soft);color:var(--red);}
-  .badge-yellow{background:var(--gold-soft);color:var(--gold);}
-  .modal-overlay{
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-    padding:16px;
-  }
-  .modal-box{
-    background:#fff;
-    border-radius:12px;
-    padding:20px;
-    max-width:440px;
-    width:100%;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  }
-  .modal-field{margin-bottom:12px;}
-  .modal-field label{
-    display:block;
-    font-size:11px;
-    font-weight:700;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-bottom:4px;
-  }
-  .modal-field input, .modal-field select{
-    width:100%;
-    padding:8px 10px;
-    font-size:13px;
-    border:1px solid var(--line);
-    border-radius:6px;
-    outline:none;
-  }
-  .modal-actions{display:flex;gap:8px;margin-top:16px;}
-  .chart-wrap{position:relative;height:240px;margin-top:8px;}
-  .invoice-head{
-    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;padding:0 2px;
-    font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-top:6px;
-  }
-  .invoice-row{
-    display:grid;grid-template-columns:2fr 0.8fr 0.9fr 0.9fr 26px;gap:6px;align-items:center;margin-bottom:6px;
-  }
-  .invoice-row input{
-    padding:6px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#FDFCF9;width:100%;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annapurna Dairy — Kirana & Stock Inventory Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'IBM Plex Sans', sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1 class="shop-name">Annapurna Dairy &amp; Foods</h1>
-      <div class="shop-sub">Sangam Rate Master &amp; Kirana Distribution Ledger</div>
-    </div>
-    <div class="date-box">
-      <input type="date" id="ledgerDate" onchange="onDateChanged()">
-      <span class="day-badge" id="dayBadge">--</span>
-    </div>
-  </header>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
-  <!-- Navigation Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" id="tabTodayBtn" onclick="switchTab('today')">📅 Today Ledger</button>
-    <button class="tab-btn" id="tabStockMasterBtn" onclick="switchTab('stockMaster')">📦 Stock Master</button>
-    <button class="tab-btn" id="tabKiranaBtn" onclick="switchTab('kirana')">🏪 Kirana Shops</button>
-    <button class="tab-btn" id="tabPaymentsBtn" onclick="switchTab('payments')">💰 Stock Pay</button>
-    <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">📜 History &amp; Cash</button>
-    <button class="tab-btn" id="tabChartsBtn" onclick="switchTab('charts')">📊 Charts</button>
-  </div>
+  <div class="max-w-7xl mx-auto space-y-6">
 
-  <!-- ==================================================== -->
-  <!-- TAB 1: TODAY DAILY LEDGER                           -->
-  <!-- ==================================================== -->
-  <div id="todayTab">
-    <div class="metric-grid">
-      <div class="metric-box"><div class="lbl">Total Sales</div><div class="val" id="metricTodaySales">₹0.00</div></div>
-      <div class="metric-box"><div class="lbl">Agent Buy Cost</div><div class="val mono" id="metricTodayCost">₹0.00</div></div>
-      <div class="metric-box"><div class="lbl">Net Daily Profit</div><div class="val" style="color:var(--green);" id="metricTodayProfit">₹0.00</div></div>
-      <div class="metric-box"><div class="lbl">Cash Received</div><div class="val" style="color:var(--gold);" id="metricTodayCash">₹0.00</div></div>
-      <div class="metric-box"><div class="lbl">Online Received</div><div class="val" style="color:var(--sky);" id="metricTodayOnline">₹0.00</div></div>
-    </div>
-
-    <!-- Quick Bulk Leftover Entry -->
-    <div class="card" style="background:#EBF5FB; border-color:#BAE6FD;">
-      <div class="card-title" style="color:#0369A1;">
-        <span>🌙 Quick Leftover Stock Entry (End of Day)</span>
+    <!-- Main Navigation Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Kirana Distribution</h1>
+        <p class="text-xs text-slate-400 mt-1">Shop delivery ledger, custom shop rates, live stock inventory &amp; profit analytics</p>
       </div>
-      <p style="font-size:11px; color:#0284C7; margin-bottom:6px;">
-        Type unsold packets left on shelf (e.g., <code>tm 8</code>, <code>fcm 3</code>, <code>scurd 12</code>) — Sold quantities auto-calculate instantly!
-      </p>
-      <textarea id="quickLeftoverText" class="bulk-box" rows="2" placeholder="tm 8&#10;fcm 3&#10;scurd 12"></textarea>
-      <button class="action-btn btn-green" style="background:#0284C7; margin-top:6px;" onclick="applyQuickLeftoverText()">Calculate Sold from Leftovers</button>
-    </div>
 
-    <!-- Catalog Item Entries Grid -->
-    <div class="card">
-      <div class="card-title">
-        <span>Daily Product Ledger Items</span>
-        <span style="font-size:11px;font-weight:normal;color:var(--ink-soft);">Opening + Inward - Home - Sold = Closing Stock</span>
+      <!-- Navigation Tabs & Date Selector -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button type="button" id="tabBtnKirana" onclick="switchMainTab('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
+            🏪 Kirana Deliveries
+          </button>
+          <button type="button" id="tabBtnStock" onclick="switchMainTab('stock')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+            📦 Stock Inventory Master
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl">
+          <input type="date" id="selectedDate" class="bg-transparent text-xs text-white focus:outline-none mono" onchange="onDateChanged()">
+          <span id="currentDayBadge" class="text-xs font-bold text-emerald-300 uppercase tracking-wider bg-slate-900 px-2 py-0.5 rounded border border-slate-700">--</span>
+        </div>
       </div>
-      <input type="text" class="search-box" id="productSearchBox" placeholder="Search product name (e.g. Milk, Curd, Ghee, Peda)..." oninput="renderTodayCats()">
+    </header>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 1: KIRANA SHOP DELIVERIES & DAILY LEDGER                 -->
+    <!-- ============================================================= -->
+    <div id="viewKirana" class="space-y-6">
       
-      <div id="todayCategoriesContainer"></div>
-
-      <!-- Payment Collection Reconciliation -->
-      <div class="split-grid">
-        <div class="split-box cash">
-          <label>Cash Received Today</label>
-          <span class="mono">₹ </span><input type="number" id="inputCashReceived" placeholder="0" inputmode="decimal" oninput="updateTodayTotals()">
+      <!-- Top Metrics Dashboard -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total Sales Today</span>
+          <p class="text-xl font-bold text-white mt-1 mono" id="kpiTotalSales">₹0.00</p>
         </div>
-        <div class="split-box online">
-          <label>Online Received Today</label>
-          <span class="mono">₹ </span><input type="number" id="inputOnlineReceived" placeholder="0" inputmode="decimal" oninput="updateTodayTotals()">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Your Profit Today</span>
+          <p class="text-xl font-bold text-emerald-400 mt-1 mono" id="kpiTotalProfit">₹0.00</p>
         </div>
-      </div>
-      <div id="balanceReconcileMsg" style="margin-top:10px; font-size:12px; font-weight:600; padding:8px 12px; border-radius:6px;" class="badge-green">Enter cash and online collections</div>
-
-      <button class="action-btn btn-dark" style="width:100%; margin-top:12px; padding:12px;" onclick="saveDayEntry()">💾 Save Day Ledger Entry</button>
-      <div id="saveStatusLabel" style="text-align:center; font-size:12px; color:var(--ink-soft); margin-top:6px; min-height:16px;"></div>
-    </div>
-  </div>
-
-  <!-- ==================================================== -->
-  <!-- TAB 2: STOCK INVENTORY MASTER                       -->
-  <!-- ==================================================== -->
-  <div id="stockMasterTab" style="display:none;">
-    <div class="metric-grid">
-      <div class="metric-box"><div class="lbl">Catalog Products</div><div class="val mono" id="kpiMasterTotalCount">0</div></div>
-      <div class="metric-box"><div class="lbl">Total Units Inward</div><div class="val mono" id="kpiMasterInward">0</div></div>
-      <div class="metric-box"><div class="lbl">Total Units Sold</div><div class="val mono" style="color:var(--green);" id="kpiMasterSold">0</div></div>
-      <div class="metric-box"><div class="lbl">Total Stock On Hand</div><div class="val mono" style="color:var(--sky);" id="kpiMasterOnHand">0</div></div>
-      <div class="metric-box"><div class="lbl">Est. Stock Valuation</div><div class="val mono" style="color:var(--gold);" id="kpiMasterValuation">₹0.00</div></div>
-    </div>
-
-    <!-- Add New Custom Product Card -->
-    <div class="card" style="background:#F8FAFC;">
-      <div class="card-title">➕ Add New Product to Master Catalog</div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        <input type="text" id="newProdName" placeholder="Product Name (e.g. Badam Milk 200ml)" style="flex:2; padding:7px; font-size:12px; border:1px solid var(--line); border-radius:6px;">
-        <select id="newProdCat" style="flex:1.5; padding:7px; font-size:12px; border:1px solid var(--line); border-radius:6px; background:#fff;">
-          <option value="MILK SECTION">MILK SECTION</option>
-          <option value="CURD SECTION">CURD SECTION</option>
-          <option value="BUTTER MILK & LASSI">BUTTER MILK & LASSI</option>
-          <option value="PANNER">PANNER</option>
-          <option value="BI -PRODUCTS">BI -PRODUCTS</option>
-          <option value="CUP CAKE &BAR CAKE">CUP & BAR CAKES</option>
-          <option value="BADAM MILK SECTION">BADAM MILK</option>
-          <option value="GHEE SECTION">GHEE SECTION</option>
-          <option value="COOKIES">COOKIES</option>
-          <option value="SPICES">SPICES</option>
-          <option value="OTHERS">OTHERS</option>
-        </select>
-        <input type="number" id="newProdAgent" placeholder="Agent Cost ₹" style="width:90px; padding:7px; font-size:12px; border:1px solid var(--line); border-radius:6px;">
-        <input type="number" id="newProdMrp" placeholder="MRP ₹" style="width:80px; padding:7px; font-size:12px; border:1px solid var(--line); border-radius:6px;">
-        <input type="number" id="newProdShopRate" placeholder="Shop Rate ₹" style="width:90px; padding:7px; font-size:12px; border:1px solid var(--line); border-radius:6px;">
-        <button class="action-btn btn-green" onclick="addNewCatalogProduct()">Add to Master</button>
-      </div>
-    </div>
-
-    <!-- Master Product Table with Inline Editing -->
-    <div class="card">
-      <div class="card-title">
-        <span>Stock Master &amp; Live Price Matrix</span>
-        <button class="action-btn btn-light" onclick="exportStockMasterCSV()">Export CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Product Name</th>
-              <th style="text-align:center;">Agent Cost (₹)</th>
-              <th style="text-align:center;">MRP (₹)</th>
-              <th style="text-align:center;">Shop Rate (₹)</th>
-              <th style="text-align:right;">Total Inward</th>
-              <th style="text-align:right;">Total Sold</th>
-              <th style="text-align:right;">Stock Left</th>
-              <th style="text-align:right;">Stock Value (₹)</th>
-              <th style="text-align:center;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="stockMasterTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================================================== -->
-  <!-- TAB 3: KIRANA SHOPS LEDGER                          -->
-  <!-- ==================================================== -->
-  <div id="kiranaTab" style="display:none;">
-    <div class="card">
-      <div class="card-title">All 15 Kirana Shops — Balance Status</div>
-      <div id="kiranaShopsOverview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px;"></div>
-    </div>
-
-    <!-- Quick Supply Parser -->
-    <div class="card" style="background:#FAF9F5; border-color:#E2E8F0;">
-      <div class="card-title" style="color:var(--green);">⚡ Kirana Quick Bulk Text Supply</div>
-      <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">
-        Format: Shop Name on line 1, then items (e.g. <code>Mani Kirana\n tm-2\n smilk-3\n scurd-5\n curd big-2</code>):
-      </p>
-      <textarea id="kiranaQuickText" class="bulk-box" rows="3" placeholder="Mani Kirana&#10;tm-2&#10;smilk-3&#10;scurd-5&#10;curd big-2"></textarea>
-      <button class="action-btn btn-green" style="margin-top:6px;" onclick="applyKiranaQuickSupply()">Apply Kirana Supply</button>
-    </div>
-
-    <!-- Active Kirana Shop Delivery Entry -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-        <div style="flex:1; min-width:200px;">
-          <label style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--ink-soft);">Select Kirana Shop</label>
-          <select id="kiranaShopSelect" class="search-box" style="margin-top:4px;" onchange="onKiranaShopChanged()"></select>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-rose-400 font-semibold uppercase tracking-wider">Pending Due (To Collect)</span>
+          <p class="text-xl font-bold text-rose-400 mt-1 mono" id="kpiPendingDue">₹0.00</p>
         </div>
-        <button class="action-btn btn-light" onclick="renameCurrentKiranaShop()">✏️ Rename Shop</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Supplied Product</th>
-              <th style="text-align:center; width:90px;">Qty Supplied</th>
-              <th style="text-align:center; width:100px;">Shop Rate (₹)</th>
-              <th style="text-align:right;">Subtotal</th>
-              <th style="text-align:center; width:40px;"></th>
-            </tr>
-          </thead>
-          <tbody id="kiranaItemsTableBody"></tbody>
-        </table>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-top:2px solid var(--ink); margin-top:10px;">
-        <span style="font-weight:700; font-size:14px;">Today's Supply Bill</span>
-        <span class="mono" style="font-weight:700; font-size:18px;" id="kiranaShopBillTotal">₹0.00</span>
-      </div>
-
-      <div class="split-grid">
-        <div class="split-box cash">
-          <label>Received From Shop Today (₹)</label>
-          <input type="number" id="kiranaPaymentReceived" placeholder="0" inputmode="decimal" oninput="updateKiranaBalanceDisplay()">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-sky-400 font-semibold uppercase tracking-wider">Total Milk Delivered</span>
+          <p class="text-xl font-bold text-sky-300 mt-1 mono" id="kpiMilkVolume">0 Units</p>
         </div>
-        <div class="split-box" style="background:#F8FAFC;">
-          <label>Previous Balance Due (₹)</label>
-          <span class="mono" style="font-size:18px; font-weight:700;" id="kiranaPrevBalance">₹0.00</span>
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
+          <span class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Total Curd Delivered</span>
+          <p class="text-xl font-bold text-amber-300 mt-1 mono" id="kpiCurdVolume">0 Units</p>
         </div>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding:10px; background:#F1F5F9; border-radius:8px;">
-        <span style="font-size:12px; font-weight:700;">Net Balance Due:</span>
-        <span class="badge badge-red" style="font-size:14px;" id="kiranaNetDueBadge">₹0.00 Due</span>
+      <!-- Kirana Shop Entry Form -->
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+          <div>
+            <h2 id="kiranaFormHeading" class="text-base md:text-lg font-bold text-white">Log Kirana Shop Delivery</h2>
+            <p class="text-xs text-slate-400">Enter shop name, delivery quantities &amp; individual shop selling rates</p>
+          </div>
+          <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline">Clear / Reset</button>
+        </div>
+
+        <form id="kiranaDeliveryForm" onsubmit="handleKiranaSubmit(event)" class="space-y-4">
+          <input type="hidden" id="editKiranaId" value="">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
+              <input type="text" id="kiranaShopName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status</label>
+              <select id="kiranaPaymentStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium">
+                <option value="Not Paid" selected class="text-rose-400">Not Paid (Due)</option>
+                <option value="Paid" class="text-emerald-400">Paid (Cleared)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Delivery Notes (Optional)</label>
+              <input type="text" id="kiranaNote" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Morning milk supply">
+            </div>
+          </div>
+
+          <!-- Items Grid: Milk, Curd, Buckets -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            
+            <!-- 1. MILK SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🥛 1. Milk Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
+
+              <!-- TM -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">TM (Toned Milk)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_tm">59.65</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_tm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_tm" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- FCM -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">FCM (Full Cream)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_fcm">75.40</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_fcm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_fcm" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- SMILK -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">SMILK (Small Milk)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_smilk">8.35</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_smilk" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_smilk" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- TEA MILK -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">Tea Milk</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_teamilk">0.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_teamilk" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_teamilk" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. CURD PACKETS SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🥣 2. Curd Packets Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
+
+              <!-- 450GM CURD -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">450gm Curd</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_curd450">61.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_curd450" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_curd450" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- SCURD -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">SCURD (Small Curd)</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_scurd">7.60</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_scurd" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_scurd" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. CURD BUCKETS SECTION -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center justify-between pb-2 border-b border-slate-800">
+                <span>🪣 3. Curd Buckets Section</span>
+                <span class="text-[10px] text-slate-500">Qty | Sell Rate</span>
+              </h3>
+
+              <!-- 10KG BUCKET -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">10kg STM Green Bucket</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket10kg">680.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_bucket10kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_bucket10kg" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+
+              <!-- 5KG BUCKET -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-300">
+                  <span class="font-medium">5kg STM Curd Bucket</span>
+                  <span class="text-[10px] text-slate-500">Agent: ₹<span id="labelCost_bucket5kg">0.00</span></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" step="any" id="qty_bucket5kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                  <input type="number" min="0" step="any" id="rate_bucket5kg" placeholder="Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Action & Live Preview -->
+          <div class="flex flex-col md:flex-row justify-between items-center p-3.5 bg-slate-800 rounded-xl border border-slate-700 gap-3">
+            <div class="text-xs text-slate-300 flex items-center gap-4">
+              <span>Bill Total: <strong class="text-white text-sm mono" id="liveBillTotal">₹0.00</strong></span>
+              <span>Your Profit: <strong class="text-emerald-400 text-sm mono" id="liveProfitTotal">₹0.00</strong></span>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+              <button type="button" onclick="resetKiranaForm()" class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold uppercase tracking-wider">Reset</button>
+              <button type="submit" id="saveKiranaBtn" class="flex-1 md:flex-none px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg">Save Shop Dispatch</button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      <button class="action-btn btn-dark" style="width:100%; margin-top:12px; padding:10px;" onclick="saveKiranaDayEntry()">💾 Save Shop Delivery</button>
-    </div>
-  </div>
-
-  <!-- ==================================================== -->
-  <!-- TAB 4: STOCK PAYMENTS (DISTRIBUTOR INWARD INVOICES) -->
-  <!-- ==================================================== -->
-  <div id="paymentsTab" style="display:none;">
-    <div class="card">
-      <div class="card-title">💰 Distributor Inward &amp; Stock Payment Log</div>
-      
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <input type="text" id="payDistributor" class="search-box" placeholder="Distributor / Supplier Name (e.g. Sangam Dairy)">
-        
-        <div class="invoice-head">
-          <span>Item</span><span>Qty</span><span>Cost Price</span><span>Amount</span><span></span>
-        </div>
-        <div id="invoiceRowsContainer"></div>
-        <button class="action-btn btn-light" onclick="addInvoiceRow()">+ Add Item Row</button>
-
-        <div style="display:flex; justify-content:space-between; font-weight:700; font-family:'IBM Plex Mono'; padding:8px 0; border-top:2px solid var(--ink);">
-          <span>Invoice Total:</span>
-          <span id="invoiceRunningTotal">₹0.00</span>
+      <!-- Kirana Ledger Register Table -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kirana Delivery Register (<span id="ledgerDateDisplay">--</span>)</h2>
+            <p class="text-xs text-slate-400">Click the status button to toggle between Paid and Not Paid</p>
+          </div>
+          <span id="shopCountBadge" class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono">0 Shops</span>
         </div>
 
-        <div style="display:flex; gap:8px;">
-          <select id="payMode" class="search-box" style="flex:1;">
-            <option value="Cash">Cash</option>
-            <option value="Online">Online</option>
-          </select>
-          <input type="text" id="payNote" class="search-box" style="flex:2;" placeholder="Invoice # / Notes">
-        </div>
-        <button class="action-btn btn-green" onclick="saveStockPaymentInvoice()">Save Distributor Invoice</button>
-      </div>
-
-      <datalist id="catalogNamesDatalist"></datalist>
-
-      <!-- Payment Log List -->
-      <div id="paymentsListContainer" style="margin-top:16px;"></div>
-    </div>
-  </div>
-
-  <!-- ==================================================== -->
-  <!-- TAB 5: HISTORY & CASH DRAWER RECONCILIATION         -->
-  <!-- ==================================================== -->
-  <div id="historyTab" style="display:none;">
-    <div class="card">
-      <div class="card-title">💵 Cash in Hand &amp; Drawer Tracker</div>
-      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--gold-soft); padding:14px; border-radius:8px; border:1px solid #EAD9AE; margin-bottom:10px;">
-        <div>
-          <div style="font-size:11px; text-transform:uppercase; color:var(--ink-soft); font-weight:700;">Calculated Cash in Hand</div>
-          <div class="mono" style="font-size:24px; font-weight:700; color:var(--ink);" id="dispCashInHand">₹0.00</div>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button class="action-btn btn-light" onclick="addCashAdjustment('deposit')">Bank Deposit</button>
-          <button class="action-btn btn-light" onclick="addCashAdjustment('withdraw')">Withdrawal</button>
-          <button class="action-btn btn-dark" onclick="recountCashDrawer()">Count Now</button>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Shop Name</th>
+                <th class="p-3">Milk Dispatched (Qty @ Rate)</th>
+                <th class="p-3">Curd Packets (Qty @ Rate)</th>
+                <th class="p-3">Buckets (Qty @ Rate)</th>
+                <th class="p-3 text-right">Total Bill</th>
+                <th class="p-3 text-right text-emerald-400">Profit</th>
+                <th class="p-3 text-center">Status</th>
+                <th class="p-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="kiranaTableBody" class="divide-y divide-slate-800">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
         </div>
       </div>
-      <div id="cashAdjustmentsLog"></div>
-    </div>
 
-    <!-- Historical Ledger Log -->
-    <div class="card">
-      <div class="card-title">📜 Past Ledger Records</div>
-      <div id="historyRecordsList"></div>
-    </div>
-  </div>
-
-  <!-- ==================================================== -->
-  <!-- TAB 6: DEMAND CHARTS & ANALYTICS                    -->
-  <!-- ==================================================== -->
-  <div id="chartsTab" style="display:none;">
-    <div class="card">
-      <div class="card-title">📊 7-Day Product Demand &amp; Volume Analysis</div>
-      <div class="chart-wrap"><canvas id="demandChartCanvas"></canvas></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">💵 Day-Wise Sales Trend (Cash vs. Online)</div>
-      <div class="chart-wrap"><canvas id="salesSplitChartCanvas"></canvas></div>
-    </div>
-  </div>
-</div>
-
-<!-- Quick Sell To Kirana Modal -->
-<div class="modal-overlay" id="quickSupplyModal">
-  <div class="modal-box">
-    <h3 style="font-family:'Fraunces',serif; font-size:16px; font-weight:700; margin-bottom:10px;">🏪 Supply to Kirana Shop</h3>
-    <div class="modal-field">
-      <label>Product Name</label>
-      <input type="text" id="modalProdName" readonly style="background:#F8FAFC; font-weight:600;">
-    </div>
-    <div class="modal-field">
-      <label>Target Kirana Shop</label>
-      <select id="modalShopSelect"></select>
-    </div>
-    <div class="modal-field">
-      <label>Quantity Supplied</label>
-      <input type="number" id="modalSupplyQty" placeholder="e.g. 5" inputmode="decimal">
-    </div>
-    <div class="modal-field">
-      <label>Shop Selling Rate (₹)</label>
-      <input type="number" id="modalSupplyRate" placeholder="Rate" inputmode="decimal">
-    </div>
-    <div class="modal-actions">
-      <button class="action-btn btn-light" style="flex:1;" onclick="closeQuickSupplyModal()">Cancel</button>
-      <button class="action-btn btn-green" style="flex:1;" onclick="confirmQuickSupply()">Confirm Dispatch</button>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, getDocs, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCOrNP6n8oF0h8-n5NJgY2slzVsL3s63Hk",
-  authDomain: "annapurna-dairy-and-foods.firebaseapp.com",
-  projectId: "annapurna-dairy-and-foods",
-  storageBucket: "annapurna-dairy-and-foods.firebasestorage.app",
-  messagingSenderId: "510695796901",
-  appId: "1:510695796901:web:614a9238180d2eada3dd4c",
-  measurementId: "G-53ZC87HFHQ"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const DB_COLLECTION = "ledger_store";
-
-async function storageGet(key){
-  try {
-    const docSnap = await getDoc(doc(db, DB_COLLECTION, key));
-    if(docSnap.exists()) return { value: docSnap.data().value };
-    const local = localStorage.getItem(key);
-    return local ? { value: local } : null;
-  } catch (e) {
-    const local = localStorage.getItem(key);
-    return local ? { value: local } : null;
-  }
-}
-
-async function storageSet(key, value){
-  localStorage.setItem(key, value);
-  try {
-    await setDoc(doc(db, DB_COLLECTION, key), { value: value, updatedAt: new Date().toISOString() });
-    return { ok: true };
-  } catch (e) {
-    return { ok: true };
-  }
-}
-
-async function storageList(prefix){
-  try {
-    const querySnapshot = await getDocs(collection(db, DB_COLLECTION));
-    const keys = [];
-    querySnapshot.forEach(d => { if(!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
-    return { keys };
-  } catch (e) {
-    const keys = Object.keys(localStorage).filter(k => !prefix || k.startsWith(prefix));
-    return { keys };
-  }
-}
-
-// Master Default Catalog (Sangam Rate Chart[cite: 1])
-let MASTER_CATALOG = [
-  {"category": "MILK SECTION", "items": [
-    {"name": "TONNED MILK 500ML", "mrp": 65, "agent": 57.85, "shopRate": 31},
-    {"name": "FULLCREAMILK 500ML", "mrp": 81, "agent": 73.6, "shopRate": 76},
-    {"name": "FCM GOLD PLUS 500 ML", "mrp": 83, "agent": 75.4, "shopRate": 78},
-    {"name": "STM 500 ML(SANGAM PREMIUM)", "mrp": 69, "agent": 61.75, "shopRate": 64},
-    {"name": "TEA SPECIAL 500 ML", "mrp": 79, "agent": 71.6, "shopRate": 74},
-    {"name": "TONNEDMILK 170ML", "mrp": 10, "agent": 8.35, "shopRate": 9},
-    {"name": "DTM500ML", "mrp": 57, "agent": 51.35, "shopRate": 53}
-  ]},
-  {"category": "CURD SECTION", "items": [
-    {"name": "CURD 120 GMS SATCHET", "mrp": 10, "agent": 7.6, "shopRate": 8.5},
-    {"name": "CURD 200 G PACK", "mrp": 15, "agent": 13, "shopRate": 14},
-    {"name": "CURD 450GMS SACHET", "mrp": 84, "agent": 61, "shopRate": 36},
-    {"name": "CURD SACHEET 900 GMS", "mrp": 70, "agent": 55.5, "shopRate": 60},
-    {"name": "S.T.M. CURD CUP100G", "mrp": 10, "agent": 8, "shopRate": 8.5},
-    {"name": "CURD 200 G CUP", "mrp": 20, "agent": 17.5, "shopRate": 18.5},
-    {"name": "S.T.M CURD 500G CUPS", "mrp": 55, "agent": 46, "shopRate": 48},
-    {"name": "S.T.M CURD 400G CUPS", "mrp": 38, "agent": 34, "shopRate": 35.5},
-    {"name": "STM CURD 1 KG DISPO", "mrp": 115, "agent": 88, "shopRate": 95},
-    {"name": "TM CURD 10 KG DISPO", "mrp": 750, "agent": 660, "shopRate": 680},
-    {"name": "TM CURD DISPO 5 KG", "mrp": 390, "agent": 340, "shopRate": 360}
-  ]},
-  {"category": "BUTTER MILK & LASSI", "items": [
-    {"name": "BUTTERMILK", "mrp": 9, "agent": 7.65, "shopRate": 8},
-    {"name": "JEERA BUTTER MILK", "mrp": 15, "agent": 10, "shopRate": 12},
-    {"name": "LASSI SACHET 180 GMS", "mrp": 12, "agent": 10.4, "shopRate": 11},
-    {"name": "LASSI (WHITE)", "mrp": 25, "agent": 18.25, "shopRate": 20},
-    {"name": "SWEETLASSI(MANGO)", "mrp": 25, "agent": 18.25, "shopRate": 20},
-    {"name": "VANILA LASSI GLASS", "mrp": 25, "agent": 18.5, "shopRate": 20},
-    {"name": "SABJA LASSI", "mrp": 22, "agent": 18.5, "shopRate": 20}
-  ]},
-  {"category": "PANNER", "items": [
-    {"name": "PANNEER 200 GRMS", "mrp": 85, "agent": 80, "shopRate": 82},
-    {"name": "PANNEER 500 GRMS", "mrp": 190, "agent": 168, "shopRate": 195},
-    {"name": "PANNEER 1 KG", "mrp": 380, "agent": 337, "shopRate": 350},
-    {"name": "JUNNU 50GMS CUP", "mrp": 12, "agent": 9, "shopRate": 10},
-    {"name": "JUNNU 100GMS CUP", "mrp": 22, "agent": 17.25, "shopRate": 19},
-    {"name": "JUNNU SMALL", "mrp": 80, "agent": 72, "shopRate": 75},
-    {"name": "JUNNU BIG", "mrp": 175, "agent": 155, "shopRate": 160}
-  ]},
-  {"category": "TETRA MILK", "items": [
-    {"name": "DTCM TETRA 180 ML (APS)", "mrp": 380, "agent": 350, "shopRate": 360},
-    {"name": "TETRA T.M.(3%) 1 LIT PACK(12)", "mrp": 64, "agent": 58.5, "shopRate": 60}
-  ]},
-  {"category": "BI -PRODUCTS", "items": [
-    {"name": "BASUNDHI 50 GMS(HOMEPACK)12", "mrp": 15, "agent": 11, "shopRate": 12.5},
-    {"name": "DOODH PEDA 20GMS", "mrp": 10, "agent": 8.9, "shopRate": 9.2},
-    {"name": "DOODH PEDA(MAP) 200 GMS", "mrp": 100, "agent": 81, "shopRate": 85},
-    {"name": "KALAKAND (MAP)200 GMS", "mrp": 100, "agent": 81, "shopRate": 85},
-    {"name": "MILK CAKE (MAP)200 GMS", "mrp": 110, "agent": 90, "shopRate": 95},
-    {"name": "MALAI LADDU (MAP)150GMS", "mrp": 95, "agent": 79, "shopRate": 83},
-    {"name": "RAGILADDU 200 GMS", "mrp": 100, "agent": 88, "shopRate": 90},
-    {"name": "SUNNUNDA", "mrp": 120, "agent": 112, "shopRate": 115},
-    {"name": "KAJU BARFI 200 GMS", "mrp": 150, "agent": 135, "shopRate": 140},
-    {"name": "BADAM BARFI 200GMS", "mrp": 130, "agent": 114, "shopRate": 120},
-    {"name": "MYSORE PAK 200 GMS", "mrp": 100, "agent": 78, "shopRate": 82},
-    {"name": "KAJU BITEES 200G", "mrp": 200, "agent": 182, "shopRate": 188},
-    {"name": "JOWR LADDU 200 GMS", "mrp": 100, "agent": 88, "shopRate": 90},
-    {"name": "KORRALADU 200 GMS", "mrp": 100, "agent": 88, "shopRate": 90},
-    {"name": "MIXED MILLET LADDU 200 GMS", "mrp": 100, "agent": 88, "shopRate": 90},
-    {"name": "SUGARLESS KALAKAND (MAP)200 GMS", "mrp": 120, "agent": 106, "shopRate": 110},
-    {"name": "SUGAR LESS RAGI LADDU 200G", "mrp": 130, "agent": 112, "shopRate": 118},
-    {"name": "SUGAR LESS SUNNUNDALU 200G", "mrp": 130, "agent": 112, "shopRate": 118},
-    {"name": "GULABJAM 100 GMS", "mrp": 22, "agent": 18.5, "shopRate": 20},
-    {"name": "RASAGULLA 100GR", "mrp": 22, "agent": 18.5, "shopRate": 20},
-    {"name": "BADAM MILK POWDER 200GMS", "mrp": 80, "agent": 63, "shopRate": 68},
-    {"name": "ULAVA CHARU 100ML", "mrp": 35, "agent": 25, "shopRate": 27}
-  ]},
-  {"category": "CUP CAKE &BAR CAKE", "items": [
-    {"name": "CHOCOLATE CUP CAKE 20GMS", "mrp": 60, "agent": 50, "shopRate": 52},
-    {"name": "VENILA CUP CAKE 20GMS", "mrp": 60, "agent": 50, "shopRate": 52},
-    {"name": "ORANGE BAR CAKE", "mrp": 60, "agent": 52, "shopRate": 55},
-    {"name": "PINE APPLE BAR CK 32G", "mrp": 60, "agent": 52, "shopRate": 55},
-    {"name": "PLUM CAKE", "mrp": 30, "agent": 25, "shopRate": 27}
-  ]},
-  {"category": "BADAM MILK SECTION", "items": [
-    {"name": "SF NUT BADAM 200ML", "mrp": 650, "agent": 600, "shopRate": 620},
-    {"name": "SFM CHOCOLATE MILK", "mrp": 500, "agent": 480, "shopRate": 490},
-    {"name": "S F MILK ( DISPO)", "mrp": 600, "agent": 550, "shopRate": 570},
-    {"name": "S F MILK ( PP)", "mrp": 500, "agent": 480, "shopRate": 490}
-  ]},
-  {"category": "BUTTER SECTION", "items": [
-    {"name": "COOKING BUTTER 100 GMS", "mrp": 70, "agent": 62, "shopRate": 65},
-    {"name": "C BUTTER 500GMS", "mrp": 285, "agent": 266, "shopRate": 272}
-  ]},
-  {"category": "GHEE SECTION", "items": [
-    {"name": "B.GHEE 100ML JAR", "mrp": 78, "agent": 67, "shopRate": 70},
-    {"name": "B.GHEE 200ML JAR", "mrp": 145, "agent": 123, "shopRate": 130},
-    {"name": "B. GHEE 500ML JAR", "mrp": 350, "agent": 308, "shopRate": 320},
-    {"name": "BUFFELOGHEE 500ML", "mrp": 345, "agent": 305, "shopRate": 318},
-    {"name": "BUFFELOGHEE 1000ML (4 PACK)", "mrp": 690, "agent": 610, "shopRate": 630},
-    {"name": "COW GHEE 100ML JARS", "mrp": 78, "agent": 66, "shopRate": 70},
-    {"name": "COW GHEE 200ML JARS(60)", "mrp": 145, "agent": 123, "shopRate": 130},
-    {"name": "COWGHEE 500ML (8 PACK)", "mrp": 345, "agent": 305, "shopRate": 318},
-    {"name": "BGHEE 200ML DINING", "mrp": 155, "agent": 133, "shopRate": 140}
-  ]},
-  {"category": "COOKIES", "items": [
-    {"name": "RUSK 55GMS PACK(40)", "mrp": 10, "agent": 8.5, "shopRate": 9},
-    {"name": "RAGI ALMOND COOKIES100G", "mrp": 40, "agent": 35, "shopRate": 36.5},
-    {"name": "JOWAR CASHEW COOKIES 100G", "mrp": 40, "agent": 35, "shopRate": 36.5}
-  ]},
-  {"category": "SPICES", "items": [
-    {"name": "CHILLI POWDER(50GR)", "mrp": 20, "agent": 13, "shopRate": 15},
-    {"name": "TURMERIC POWDER(50G)", "mrp": 20, "agent": 11, "shopRate": 13},
-    {"name": "CHIKEN MASALA ( 8 G)", "mrp": 5, "agent": 2.75, "shopRate": 3.5},
-    {"name": "GARAM MASALA (8 G)", "mrp": 5, "agent": 2.9, "shopRate": 3.5},
-    {"name": "SABAR MASALA (8 G)", "mrp": 5, "agent": 2.75, "shopRate": 3.5}
-  ]},
-  {"category": "OTHERS", "items": [
-    {"name": "ICE CREAM CUP", "mrp": 20, "agent": 15, "shopRate": 17},
-    {"name": "WATER BOTTLE 1L", "mrp": 20, "agent": 15, "shopRate": 16},
-    {"name": "EGGS (per piece)", "mrp": 7, "agent": 5.5, "shopRate": 6}
-  ]}
-];
-
-const ALIAS_MAP = {
-  "tm": "TONNED MILK 500ML",
-  "toned milk": "TONNED MILK 500ML",
-  "fcm": "FULLCREAMILK 500ML",
-  "gold plus": "FCM GOLD PLUS 500 ML",
-  "stm": "STM 500 ML(SANGAM PREMIUM)",
-  "smilk": "TONNEDMILK 170ML",
-  "small milk": "TONNEDMILK 170ML",
-  "curd 125": "CURD 120 GMS SATCHET",
-  "scurd": "CURD 120 GMS SATCHET",
-  "small curd": "CURD 120 GMS SATCHET",
-  "curd 450": "CURD 450GMS SACHET",
-  "curd big": "CURD 450GMS SACHET",
-  "paneer 200": "PANNEER 200 GRMS",
-  "paneer 500": "PANNEER 500 GRMS"
-};
-
-function resolveCatalogName(raw) {
-  if(!raw) return "";
-  const t = raw.trim().toLowerCase();
-  if(ALIAS_MAP[t]) return ALIAS_MAP[t];
-  let matched = "";
-  MASTER_CATALOG.forEach(c => c.items.forEach(it => {
-    if(it.name.toLowerCase() === t) matched = it.name;
-  }));
-  return matched || raw.trim();
-}
-
-let currentDate = "";
-let todayCats = [];
-let openCatIndices = new Set([0, 1]); // Milk & Curd expanded by default
-let kiranaShops = [];
-let currentKiranaShopIdx = 0;
-let liveUnsub = null;
-let invoiceRows = [{item:'', qty:'', price:''}];
-let demandChartInstance = null;
-let salesSplitChartInstance = null;
-
-function num(v){ return parseFloat(v) || 0; }
-function money(n){
-  n = Math.round((num(n) + Number.EPSILON) * 100) / 100;
-  return "₹" + n.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-function fmtDateKey(d){ return d.replaceAll("-",""); }
-function todayISO(){
-  const d = new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-function shiftDateISO(dISO, delta){
-  const d = new Date(dISO + "T00:00:00");
-  d.setDate(d.getDate() + delta);
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-
-function freshCatalogShape(){
-  return MASTER_CATALOG.map(c => ({
-    category: c.category,
-    items: c.items.map(it => ({
-      name: it.name,
-      opening: 0,
-      added: 0,
-      leftover: 0,
-      sold: 0,
-      home: 0,
-      order: 0,
-      mrp: it.mrp,
-      agent: it.agent,
-      shopRate: it.shopRate || it.mrp
-    }))
-  }));
-}
-
-// ----------------------------------------------------
-// TAB NAVIGATION
-// ----------------------------------------------------
-window.switchTab = function(tabKey){
-  ['today','stockMaster','kirana','payments','history','charts'].forEach(t => {
-    const el = document.getElementById(t+'Tab');
-    if(el) el.style.display = (tabKey===t)?'block':'none';
-    const btn = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)+'Btn');
-    if(btn) btn.classList.toggle('active', tabKey===t);
-  });
-  if(tabKey==='stockMaster') renderStockMasterTable();
-  if(tabKey==='kirana') openKiranaTab();
-  if(tabKey==='payments') openPaymentsTab();
-  if(tabKey==='history') loadHistoryAndCashDrawer();
-  if(tabKey==='charts') renderAllCharts();
-};
-
-// ----------------------------------------------------
-// DATE CHANGE & DAY ROLLOVER
-// ----------------------------------------------------
-window.onDateChanged = function(){
-  const newDate = document.getElementById('ledgerDate').value;
-  loadDayData(newDate);
-};
-
-async function loadDayData(dateISO){
-  currentDate = dateISO;
-  document.getElementById('ledgerDate').value = dateISO;
-  const dObj = new Date(dateISO + "T00:00:00");
-  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  document.getElementById('dayBadge').innerText = dayNames[dObj.getDay()] || '';
-
-  const key = 'day:' + fmtDateKey(dateISO);
-
-  if(liveUnsub) liveUnsub();
-  liveUnsub = onSnapshot(doc(db, DB_COLLECTION, key), (docSnap) => {
-    if(docSnap.exists()){
-      const d = JSON.parse(docSnap.data().value);
-      todayCats = mergeSavedIntoShape(d.cats);
-      document.getElementById('inputCashReceived').value = d.cash || "";
-      document.getElementById('inputOnlineReceived').value = d.online || "";
-      renderTodayCats();
-    }
-  });
-
-  let loaded = null;
-  try{
-    const res = await storageGet(key);
-    if(res && res.value) loaded = JSON.parse(res.value);
-  } catch(e){}
-
-  if(loaded){
-    todayCats = mergeSavedIntoShape(loaded.cats);
-    document.getElementById('inputCashReceived').value = loaded.cash || "";
-    document.getElementById('inputOnlineReceived').value = loaded.online || "";
-  } else {
-    // Look backward up to 30 days for last recorded closing stock
-    let prevCats = null;
-    for(let i=1; i<=30; i++){
-      try{
-        const pKey = 'day:' + fmtDateKey(shiftDateISO(dateISO, -i));
-        const pRes = await storageGet(pKey);
-        if(pRes && pRes.value){
-          prevCats = JSON.parse(pRes.value).cats;
-          break;
-        }
-      }catch(e){}
-    }
-
-    todayCats = freshCatalogShape();
-    if(prevCats && prevCats.length){
-      const lookup = {};
-      prevCats.forEach(c => (c.items||[]).forEach(it => { lookup[it.name] = it; }));
-      todayCats.forEach(c => c.items.forEach(it => {
-        const p = lookup[it.name];
-        if(p){
-          const prevClosing = (p.leftover !== undefined) ? num(p.leftover) : Math.max(0, num(p.opening)+num(p.added)-num(p.sold)-num(p.home));
-          it.opening = prevClosing;
-          it.leftover = prevClosing; // Initial leftover = opening until edited
-          it.sold = 0;
-          it.mrp = p.mrp || it.mrp;
-          it.agent = p.agent || it.agent;
-          it.shopRate = p.shopRate || it.shopRate;
-        }
-      }));
-    }
-    document.getElementById('inputCashReceived').value = "";
-    document.getElementById('inputOnlineReceived').value = "";
-  }
-
-  renderTodayCats();
-}
-
-function mergeSavedIntoShape(savedCats){
-  const lookup = {};
-  (savedCats||[]).forEach(c => (c.items||[]).forEach(it => { lookup[it.name] = it; }));
-  const base = freshCatalogShape();
-  base.forEach(c => c.items.forEach(it => {
-    const s = lookup[it.name];
-    if(s){
-      it.opening = num(s.opening);
-      it.added = num(s.added);
-      it.sold = num(s.sold);
-      it.home = num(s.home);
-      it.leftover = (s.leftover !== undefined) ? num(s.leftover) : Math.max(0, it.opening + it.added - it.sold - it.home);
-      it.order = num(s.order);
-      it.mrp = (s.mrp !== undefined) ? num(s.mrp) : it.mrp;
-      it.agent = (s.agent !== undefined) ? num(s.agent) : it.agent;
-      it.shopRate = (s.shopRate !== undefined) ? num(s.shopRate) : it.shopRate;
-    }
-  }));
-  return base;
-}
-
-// ----------------------------------------------------
-// TODAY TAB RENDERING & LOGIC
-// ----------------------------------------------------
-window.renderTodayCats = function(){
-  const container = document.getElementById('todayCategoriesContainer');
-  const q = document.getElementById('productSearchBox').value.trim().toLowerCase();
-  container.innerHTML = "";
-
-  todayCats.forEach((cat, ci) => {
-    let visible = cat.items.map((it, ii) => ({it, ii}));
-    if(q) visible = visible.filter(({it}) => it.name.toLowerCase().includes(q));
-    if(q && visible.length === 0) return;
-
-    const isOpen = q ? true : openCatIndices.has(ci);
-    const block = document.createElement('div');
-    block.className = 'cat-block' + (isOpen ? ' open' : '');
-
-    const header = document.createElement('div');
-    header.className = 'cat-header';
-    header.onclick = () => {
-      if(!q){
-        if(openCatIndices.has(ci)) openCatIndices.delete(ci);
-        else openCatIndices.add(ci);
-        renderTodayCats();
-      }
-    };
-    header.innerHTML = `
-      <span class="cat-title">${cat.category}</span>
-      <span class="cat-meta">${cat.items.length} items ›</span>
-    `;
-    block.appendChild(header);
-
-    const itemsWrap = document.createElement('div');
-    itemsWrap.className = 'cat-items';
-
-    visible.forEach(({it, ii}) => {
-      const opening = num(it.opening), added = num(it.added), sold = num(it.sold), home = num(it.home), mrp = num(it.mrp), agent = num(it.agent), shopRate = num(it.shopRate || mrp);
-      const leftover = (it.leftover !== undefined) ? num(it.leftover) : Math.max(0, opening + added - sold - home);
-      const subSales = sold * mrp;
-      const subMargin = sold * (mrp - agent);
-
-      const div = document.createElement('div');
-      div.className = 'item-card';
-      div.innerHTML = `
-        <div class="item-head">
-          <span class="name">${it.name}</span>
-          <div style="display:flex;gap:4px;">
-            <button class="action-btn btn-green" style="padding:3px 8px;font-size:11px;" onclick="openQuickSupplyModal(${ci},${ii})">🏪 Sell to Shop</button>
-            <button class="action-btn btn-light" style="padding:3px 8px;font-size:11px;" onclick="resetItemQuantity(${ci},${ii})">Reset</button>
+      <!-- Day-Wise Demand Analysis Chart -->
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">📊 Day-Wise Demand &amp; Volume Analysis</h2>
+            <p class="text-xs text-slate-400">Track which days have higher demand to optimize procurement</p>
           </div>
         </div>
-        <div class="qty-grid">
-          <div class="qty-box"><label>Opening</label><input type="number" value="${opening}" onchange="updateTodayItem(${ci},${ii},'opening',this.value)"></div>
-          <div class="qty-box"><label>Inward (+)</label><input type="number" value="${added}" onchange="updateTodayItem(${ci},${ii},'added',this.value)"></div>
-          <div class="qty-box leftover"><label>Leftover</label><input type="number" value="${leftover}" onchange="updateTodayItem(${ci},${ii},'leftover',this.value)"></div>
-          <div class="qty-box sold"><label>Sold</label><input type="number" value="${sold}" onchange="updateTodayItem(${ci},${ii},'sold',this.value)"></div>
-          <div class="qty-box"><label>Home</label><input type="number" value="${home}" onchange="updateTodayItem(${ci},${ii},'home',this.value)"></div>
-          <div class="qty-box"><label>Order</label><input type="number" value="${it.order||0}" onchange="updateTodayItem(${ci},${ii},'order',this.value)"></div>
+        <div class="w-full h-72">
+          <canvas id="demandChartCanvas"></canvas>
         </div>
-        <div class="price-grid">
-          <div class="qty-box agent"><label>Agent Cost (₹)</label><input type="number" value="${agent}" onchange="updateTodayItem(${ci},${ii},'agent',this.value)"></div>
-          <div class="qty-box mrp"><label>MRP (₹)</label><input type="number" value="${mrp}" onchange="updateTodayItem(${ci},${ii},'mrp',this.value)"></div>
-          <div class="qty-box shoprate"><label>Shop Rate (₹)</label><input type="number" value="${shopRate}" onchange="updateTodayItem(${ci},${ii},'shopRate',this.value)"></div>
-        </div>
-        <div class="item-foot">
-          <span>Closing Stock: <b>${leftover}</b></span>
-          <span>Sales: <span class="amt">${money(subSales)}</span></span>
-          <span>Profit: <span class="margin">${money(subMargin)}</span></span>
-        </div>
-      `;
-      itemsWrap.appendChild(div);
-    });
-
-    block.appendChild(itemsWrap);
-    container.appendChild(block);
-  });
-
-  updateTodayTotals();
-};
-
-window.updateTodayItem = function(ci, ii, field, val){
-  const v = num(val);
-  const it = todayCats[ci].items[ii];
-
-  if(field === 'leftover'){
-    it.leftover = v;
-    const avail = num(it.opening) + num(it.added) - num(it.home);
-    it.sold = Math.max(0, avail - v);
-  } else if(field === 'sold'){
-    it.sold = v;
-    const avail = num(it.opening) + num(it.added) - num(it.home);
-    it.leftover = Math.max(0, avail - v);
-  } else {
-    it[field] = v;
-    const avail = num(it.opening) + num(it.added) - num(it.home);
-    it.leftover = Math.max(0, avail - num(it.sold));
-  }
-  renderTodayCats();
-};
-
-window.resetItemQuantity = function(ci, ii){
-  const it = todayCats[ci].items[ii];
-  it.sold = 0; it.added = 0; it.home = 0; it.order = 0; it.leftover = it.opening;
-  renderTodayCats();
-};
-
-window.applyQuickLeftoverText = function(){
-  const text = document.getElementById('quickLeftoverText').value.trim();
-  if(!text) return alert("Please enter leftover text.");
-  const lines = text.split('\n');
-  let matched = 0;
-  lines.forEach(line => {
-    const m = line.trim().match(/^(.+?)(?:[-\s:]+)(\d+(?:\.\d+)?)$/);
-    if(m){
-      const raw = m[1].trim();
-      const resolved = resolveCatalogName(raw).toLowerCase();
-      const qty = parseFloat(m[2]);
-
-      todayCats.forEach(c => c.items.forEach(it => {
-        if(it.name.toLowerCase() === resolved || it.name.toLowerCase().includes(raw.toLowerCase())){
-          it.leftover = qty;
-          const avail = num(it.opening) + num(it.added) - num(it.home);
-          it.sold = Math.max(0, avail - qty);
-          matched++;
-        }
-      }));
-    }
-  });
-
-  if(matched > 0){
-    alert(`Calculated sold counts for ${matched} item(s)!`);
-    document.getElementById('quickLeftoverText').value = "";
-    renderTodayCats();
-  } else {
-    alert("No matching products found. Try: tm 8 or curd 12");
-  }
-};
-
-function updateTodayTotals(){
-  let totSales = 0;
-  let totCost = 0;
-  todayCats.forEach(c => c.items.forEach(it => {
-    const s = num(it.sold);
-    totSales += s * num(it.mrp);
-    totCost += s * num(it.agent);
-  }));
-
-  const totProfit = totSales - totCost;
-  const cash = num(document.getElementById('inputCashReceived').value);
-  const online = num(document.getElementById('inputOnlineReceived').value);
-  const received = cash + online;
-  const diff = Math.round((totSales - received) * 100) / 100;
-
-  document.getElementById('metricTodaySales').innerText = money(totSales);
-  document.getElementById('metricTodayCost').innerText = money(totCost);
-  document.getElementById('metricTodayProfit').innerText = money(totProfit);
-  document.getElementById('metricTodayCash').innerText = money(cash);
-  document.getElementById('metricTodayOnline').innerText = money(online);
-
-  const badge = document.getElementById('balanceReconcileMsg');
-  if(cash === 0 && online === 0){
-    badge.className = 'badge-green';
-    badge.innerText = 'Enter cash and online collections above';
-  } else if(Math.abs(diff) < 0.5){
-    badge.className = 'badge-green';
-    badge.innerText = `✅ Exact match — Total ${money(received)} received`;
-  } else if(diff > 0){
-    badge.className = 'badge-red';
-    badge.innerText = `⚠️ Short by ${money(diff)} compared to sales`;
-  } else {
-    badge.className = 'badge-yellow';
-    badge.innerText = `ℹ️ ${money(-diff)} more than calculated sales`;
-  }
-}
-
-window.saveDayEntry = async function(){
-  const lbl = document.getElementById('saveStatusLabel');
-  lbl.innerText = "Saving to database…";
-  const cash = num(document.getElementById('inputCashReceived').value);
-  const online = num(document.getElementById('inputOnlineReceived').value);
-
-  let totSales = 0;
-  todayCats.forEach(c => c.items.forEach(it => totSales += num(it.sold) * num(it.mrp)));
-
-  const payload = {
-    date: currentDate,
-    cats: todayCats,
-    total: totSales,
-    cash,
-    online
-  };
-
-  const key = 'day:' + fmtDateKey(currentDate);
-  await storageSet(key, JSON.stringify(payload));
-  lbl.innerText = `Saved successfully for ${currentDate}!`;
-  setTimeout(() => lbl.innerText = "", 3000);
-};
-
-// ----------------------------------------------------
-// TAB 2: STOCK INVENTORY MASTER
-// ----------------------------------------------------
-window.renderStockMasterTable = async function(){
-  const tbody = document.getElementById('stockMasterTableBody');
-  tbody.innerHTML = "<tr><td colspan='10' style='text-align:center;'>Loading inventory…</td></tr>";
-
-  // Calculate cumulative inwards & sold from all stored logs
-  const res = await storageList('day:');
-  const keys = res.keys || [];
-  const inwardTally = {};
-  const soldTally = {};
-
-  for(const k of keys){
-    const d = await storageGet(k);
-    if(d && d.value){
-      const parsed = JSON.parse(d.value);
-      (parsed.cats || []).forEach(c => (c.items || []).forEach(it => {
-        inwardTally[it.name] = (inwardTally[it.name] || 0) + num(it.added);
-        soldTally[it.name] = (soldTally[it.name] || 0) + num(it.sold);
-      }));
-    }
-  }
-
-  tbody.innerHTML = "";
-  let totalItems = 0, totalIn = 0, totalOut = 0, totalStock = 0, totalVal = 0;
-
-  MASTER_CATALOG.forEach((cat, ci) => {
-    cat.items.forEach((it, ii) => {
-      totalItems++;
-      const inQty = inwardTally[it.name] || 0;
-      const outQty = soldTally[it.name] || 0;
-      const currentStock = Math.max(0, inQty - outQty);
-      const val = currentStock * num(it.agent);
-
-      totalIn += inQty; totalOut += outQty; totalStock += currentStock; totalVal += val;
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="color:var(--ink-soft);font-size:11px;">${cat.category}</td>
-        <td style="font-weight:600;">${it.name}</td>
-        <td style="text-align:center;">
-          <input type="number" step="0.05" id="masterAgent_${ci}_${ii}" value="${it.agent}" style="width:75px;text-align:right;padding:4px;border:1px solid var(--line);border-radius:4px;" class="mono">
-        </td>
-        <td style="text-align:center;">
-          <input type="number" step="0.05" id="masterMrp_${ci}_${ii}" value="${it.mrp}" style="width:75px;text-align:right;padding:4px;border:1px solid var(--line);border-radius:4px;" class="mono">
-        </td>
-        <td style="text-align:center;">
-          <input type="number" step="0.05" id="masterShop_${ci}_${ii}" value="${it.shopRate || it.mrp}" style="width:75px;text-align:right;padding:4px;border:1px solid var(--line);border-radius:4px;" class="mono">
-        </td>
-        <td style="text-align:right;" class="mono">${inQty}</td>
-        <td style="text-align:right;color:var(--green);" class="mono">${outQty}</td>
-        <td style="text-align:right;font-weight:700;" class="mono">${currentStock}</td>
-        <td style="text-align:right;font-weight:700;color:var(--gold);" class="mono">${money(val)}</td>
-        <td style="text-align:center;">
-          <button class="action-btn btn-green" style="padding:3px 8px;font-size:11px;" onclick="saveMasterItemPricing(${ci},${ii})">Save</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  });
-
-  document.getElementById('kpiMasterTotalCount').innerText = totalItems;
-  document.getElementById('kpiMasterInward').innerText = totalIn;
-  document.getElementById('kpiMasterSold').innerText = totalOut;
-  document.getElementById('kpiMasterOnHand').innerText = totalStock;
-  document.getElementById('kpiMasterValuation').innerText = money(totalVal);
-};
-
-window.saveMasterItemPricing = async function(ci, ii){
-  const newAgent = num(document.getElementById(`masterAgent_${ci}_${ii}`).value);
-  const newMrp = num(document.getElementById(`masterMrp_${ci}_${ii}`).value);
-  const newShop = num(document.getElementById(`masterShop_${ci}_${ii}`).value);
-
-  MASTER_CATALOG[ci].items[ii].agent = newAgent;
-  MASTER_CATALOG[ci].items[ii].mrp = newMrp;
-  MASTER_CATALOG[ci].items[ii].shopRate = newShop;
-
-  await storageSet('catalog:master_custom', JSON.stringify(MASTER_CATALOG));
-  alert(`Updated pricing for ${MASTER_CATALOG[ci].items[ii].name}!`);
-  renderStockMasterTable();
-};
-
-window.addNewCatalogProduct = async function(){
-  const name = document.getElementById('newProdName').value.trim();
-  const category = document.getElementById('newProdCat').value;
-  const agent = num(document.getElementById('newProdAgent').value);
-  const mrp = num(document.getElementById('newProdMrp').value);
-  const shopRate = num(document.getElementById('newProdShopRate').value) || mrp;
-
-  if(!name || mrp <= 0) return alert("Enter valid product name and MRP.");
-
-  let catObj = MASTER_CATALOG.find(c => c.category === category);
-  if(!catObj){
-    catObj = { category, items: [] };
-    MASTER_CATALOG.push(catObj);
-  }
-  catObj.items.push({ name, mrp, agent, shopRate });
-  await storageSet('catalog:master_custom', JSON.stringify(MASTER_CATALOG));
-
-  alert(`Added ${name} to Master Catalog!`);
-  document.getElementById('newProdName').value = "";
-  renderStockMasterTable();
-};
-
-window.exportStockMasterCSV = function(){
-  let csv = "Category,Product Name,Agent Buy Cost,MRP,Shop Rate\n";
-  MASTER_CATALOG.forEach(c => c.items.forEach(it => {
-    csv += `"${c.category}","${it.name}",${it.agent},${it.mrp},${it.shopRate}\n`;
-  }));
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Stock_Master_${todayISO()}.csv`;
-  a.click();
-};
-
-// ----------------------------------------------------
-// TAB 3: KIRANA SHOPS LEDGER
-// ----------------------------------------------------
-async function loadKiranaShopsList(){
-  try{
-    const res = await storageGet('kirana:shops');
-    if(res && res.value) kiranaShops = JSON.parse(res.value);
-  }catch(e){}
-  if(!kiranaShops || kiranaShops.length === 0){
-    kiranaShops = [];
-    for(let i=1; i<=15; i++) kiranaShops.push(`Kirana Shop ${i}`);
-  }
-}
-
-async function openKiranaTab(){
-  await loadKiranaShopsList();
-  const sel = document.getElementById('kiranaShopSelect');
-  sel.innerHTML = kiranaShops.map((name, i) => `<option value="${i}">${name}</option>`).join('');
-  sel.value = currentKiranaShopIdx;
-  renderKiranaShopsOverview();
-  loadCurrentKiranaShopData();
-}
-
-window.onKiranaShopChanged = function(){
-  currentKiranaShopIdx = num(document.getElementById('kiranaShopSelect').value);
-  loadCurrentKiranaShopData();
-};
-
-window.renameCurrentKiranaShop = async function(){
-  const cur = kiranaShops[currentKiranaShopIdx];
-  const name = prompt("Rename shop:", cur);
-  if(name && name.trim()){
-    kiranaShops[currentKiranaShopIdx] = name.trim();
-    await storageSet('kirana:shops', JSON.stringify(kiranaShops));
-    openKiranaTab();
-  }
-};
-
-let currentKiranaShopItems = [];
-let currentKiranaOpeningBal = 0;
-
-async function loadCurrentKiranaShopData(){
-  const key = `kirana:day:${currentKiranaShopIdx}:${fmtDateKey(currentDate || todayISO())}`;
-  let loaded = null;
-  try{
-    const r = await storageGet(key);
-    if(r && r.value) loaded = JSON.parse(r.value);
-  }catch(e){}
-
-  if(loaded){
-    currentKiranaShopItems = loaded.items || [];
-    currentKiranaOpeningBal = num(loaded.openingBal);
-    document.getElementById('kiranaPaymentReceived').value = loaded.received || "";
-  } else {
-    currentKiranaShopItems = [];
-    // fetch previous balance
-    let prevBal = 0;
-    try{
-      const prevKey = `kirana:day:${currentKiranaShopIdx}:${fmtDateKey(shiftDateISO(currentDate||todayISO(), -1))}`;
-      const pRes = await storageGet(prevKey);
-      if(pRes && pRes.value) prevBal = num(JSON.parse(pRes.value).balanceDue);
-    }catch(e){}
-    currentKiranaOpeningBal = prevBal;
-    document.getElementById('kiranaPaymentReceived').value = "";
-  }
-
-  renderKiranaItemsTable();
-}
-
-function renderKiranaItemsTable(){
-  const tbody = document.getElementById('kiranaItemsTableBody');
-  tbody.innerHTML = "";
-
-  if(currentKiranaShopItems.length === 0){
-    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;color:var(--ink-soft);padding:14px;'>No items supplied yet today. Use Quick Supply above or 'Sell to Shop' in Today tab.</td></tr>";
-  } else {
-    currentKiranaShopItems.forEach((it, idx) => {
-      const sub = num(it.qty) * num(it.rate);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-weight:600;">${it.name}</td>
-        <td style="text-align:center;">
-          <input type="number" value="${it.qty}" style="width:70px;text-align:center;padding:4px;border:1px solid var(--line);border-radius:4px;" class="mono" onchange="updateKiranaItemRow(${idx},'qty',this.value)">
-        </td>
-        <td style="text-align:center;">
-          <input type="number" value="${it.rate}" style="width:80px;text-align:center;padding:4px;border:1px solid var(--line);border-radius:4px;" class="mono" onchange="updateKiranaItemRow(${idx},'rate',this.value)">
-        </td>
-        <td style="text-align:right;font-weight:700;" class="mono">${money(sub)}</td>
-        <td style="text-align:center;"><button class="action-btn btn-red" style="padding:2px 6px;" onclick="removeKiranaItemRow(${idx})">✕</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  updateKiranaBalanceDisplay();
-}
-
-window.updateKiranaItemRow = function(idx, field, val){
-  currentKiranaShopItems[idx][field] = num(val);
-  renderKiranaItemsTable();
-};
-
-window.removeKiranaItemRow = function(idx){
-  currentKiranaShopItems.splice(idx, 1);
-  renderKiranaItemsTable();
-};
-
-function updateKiranaBalanceDisplay(){
-  const billTotal = currentKiranaShopItems.reduce((sum, it) => sum + (num(it.qty) * num(it.rate)), 0);
-  const received = num(document.getElementById('kiranaPaymentReceived').value);
-  const balanceDue = Math.round((currentKiranaOpeningBal + billTotal - received) * 100) / 100;
-
-  document.getElementById('kiranaShopBillTotal').innerText = money(billTotal);
-  document.getElementById('kiranaPrevBalance').innerText = money(currentKiranaOpeningBal);
-
-  const badge = document.getElementById('kiranaNetDueBadge');
-  if(balanceDue > 0.5){
-    badge.className = "badge badge-red";
-    badge.innerText = `${money(balanceDue)} Due`;
-  } else if(balanceDue < -0.5){
-    badge.className = "badge badge-green";
-    badge.innerText = `${money(-balanceDue)} Credit`;
-  } else {
-    badge.className = "badge badge-green";
-    badge.innerText = "PAID / CLEARED";
-  }
-}
-
-window.saveKiranaDayEntry = async function(){
-  const dateISO = currentDate || todayISO();
-  const billTotal = currentKiranaShopItems.reduce((sum, it) => sum + (num(it.qty) * num(it.rate)), 0);
-  const received = num(document.getElementById('kiranaPaymentReceived').value);
-  const balanceDue = Math.round((currentKiranaOpeningBal + billTotal - received) * 100) / 100;
-
-  const data = {
-    date: dateISO,
-    shopIdx: currentKiranaShopIdx,
-    shopName: kiranaShops[currentKiranaShopIdx],
-    items: currentKiranaShopItems,
-    billTotal,
-    received,
-    openingBal: currentKiranaOpeningBal,
-    balanceDue
-  };
-
-  const key = `kirana:day:${currentKiranaShopIdx}:${fmtDateKey(dateISO)}`;
-  await storageSet(key, JSON.stringify(data));
-
-  // update summary
-  let summary = {};
-  try{
-    const s = await storageGet('kirana:summary');
-    if(s && s.value) summary = JSON.parse(s.value);
-  }catch(e){}
-  summary[currentKiranaShopIdx] = { name: kiranaShops[currentKiranaShopIdx], balanceDue, date: dateISO };
-  await storageSet('kirana:summary', JSON.stringify(summary));
-
-  alert(`Saved supply record for ${kiranaShops[currentKiranaShopIdx]}!`);
-  renderKiranaShopsOverview();
-};
-
-async function renderKiranaShopsOverview(){
-  const container = document.getElementById('kiranaShopsOverview');
-  let summary = {};
-  try{
-    const s = await storageGet('kirana:summary');
-    if(s && s.value) summary = JSON.parse(s.value);
-  }catch(e){}
-
-  container.innerHTML = kiranaShops.map((name, i) => {
-    const s = summary[i];
-    const due = s ? num(s.balanceDue) : 0;
-    const cls = due > 0.5 ? 'badge-red' : 'badge-green';
-    const label = due > 0.5 ? `${money(due)} Due` : 'PAID';
-
-    return `
-      <div style="background:#F8FAFC; border:1px solid var(--line); border-radius:8px; padding:10px; cursor:pointer;" onclick="jumpToKiranaShop(${i})">
-        <div style="font-weight:700; font-size:12px;">${name}</div>
-        <div style="margin-top:4px;"><span class="badge ${cls}">${label}</span></div>
       </div>
-    `;
-  }).join('');
-}
 
-window.jumpToKiranaShop = function(idx){
-  currentKiranaShopIdx = idx;
-  document.getElementById('kiranaShopSelect').value = idx;
-  loadCurrentKiranaShopData();
-};
-
-window.applyKiranaQuickSupply = async function(){
-  const text = document.getElementById('kiranaQuickText').value.trim();
-  if(!text) return alert("Please enter supply text.");
-
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if(!lines.length) return;
-
-  await loadKiranaShopsList();
-  let targetIdx = currentKiranaShopIdx;
-  let startLine = 0;
-
-  const first = lines[0].toLowerCase();
-  const fMatch = kiranaShops.findIndex(s => s.toLowerCase() === first || s.toLowerCase().includes(first));
-  if(fMatch >= 0){
-    targetIdx = fMatch;
-    startLine = 1;
-  }
-
-  let count = 0;
-  for(let i = startLine; i < lines.length; i++){
-    const m = lines[i].match(/^(.+?)(?:[-\s:]+)(\d+(?:\.\d+)?)$/);
-    if(m){
-      const raw = m[1].trim();
-      const resolved = resolveCatalogName(raw);
-      const qty = parseFloat(m[2]);
-
-      // Look up default shop rate from master catalog
-      let rate = 0;
-      MASTER_CATALOG.forEach(c => c.items.forEach(it => {
-        if(it.name === resolved) rate = it.shopRate || it.mrp;
-      }));
-
-      // Deduct from Today's shop ledger
-      todayCats.forEach(c => c.items.forEach(it => {
-        if(it.name === resolved){
-          it.sold = num(it.sold) + qty;
-          const avail = num(it.opening) + num(it.added) - num(it.home);
-          it.leftover = Math.max(0, avail - it.sold);
-        }
-      }));
-
-      // Add to kirana shop items
-      const existing = currentKiranaShopItems.find(it => it.name === resolved);
-      if(existing) existing.qty = num(existing.qty) + qty;
-      else currentKiranaShopItems.push({ name: resolved, qty, rate });
-      count++;
-    }
-  }
-
-  if(count > 0){
-    document.getElementById('kiranaQuickText').value = "";
-    renderTodayCats();
-    renderKiranaItemsTable();
-    await saveDayEntry();
-    alert(`Applied ${count} supply item(s) to ${kiranaShops[targetIdx]}!`);
-  }
-};
-
-// ----------------------------------------------------
-// QUICK SUPPLY MODAL (FROM TODAY TAB)
-// ----------------------------------------------------
-let modalSelectedProd = null;
-
-window.openQuickSupplyModal = async function(ci, ii){
-  await loadKiranaShopsList();
-  modalSelectedProd = todayCats[ci].items[ii];
-  document.getElementById('modalProdName').value = modalSelectedProd.name;
-  document.getElementById('modalSupplyQty').value = "";
-  document.getElementById('modalSupplyRate').value = modalSelectedProd.shopRate || modalSelectedProd.mrp;
-
-  const sel = document.getElementById('modalShopSelect');
-  sel.innerHTML = kiranaShops.map((name, i) => `<option value="${i}">${name}</option>`).join('');
-
-  document.getElementById('quickSupplyModal').style.display = 'flex';
-};
-
-window.closeQuickSupplyModal = function(){
-  document.getElementById('quickSupplyModal').style.display = 'none';
-  modalSelectedProd = null;
-};
-
-window.confirmQuickSupply = async function(){
-  if(!modalSelectedProd) return;
-  const shopIdx = num(document.getElementById('modalShopSelect').value);
-  const qty = num(document.getElementById('modalSupplyQty').value);
-  const rate = num(document.getElementById('modalSupplyRate').value);
-
-  if(qty <= 0 || rate <= 0) return alert("Enter valid quantity and rate.");
-
-  // Update today's ledger sold quantity
-  modalSelectedProd.sold = num(modalSelectedProd.sold) + qty;
-  const avail = num(modalSelectedProd.opening) + num(modalSelectedProd.added) - num(modalSelectedProd.home);
-  modalSelectedProd.leftover = Math.max(0, avail - modalSelectedProd.sold);
-
-  // Update Kirana Shop Record
-  const key = `kirana:day:${shopIdx}:${fmtDateKey(currentDate || todayISO())}`;
-  let loaded = null;
-  try{
-    const r = await storageGet(key);
-    if(r && r.value) loaded = JSON.parse(r.value);
-  }catch(e){}
-
-  let sItems = loaded ? (loaded.items || []) : [];
-  let sOpen = loaded ? num(loaded.openingBal) : 0;
-  let sRec = loaded ? num(loaded.received) : 0;
-
-  const ex = sItems.find(it => it.name === modalSelectedProd.name);
-  if(ex){ ex.qty = num(ex.qty) + qty; ex.rate = rate; }
-  else sItems.push({ name: modalSelectedProd.name, qty, rate });
-
-  const billTotal = sItems.reduce((sum, it) => sum + (num(it.qty) * num(it.rate)), 0);
-  const balanceDue = Math.round((sOpen + billTotal - sRec) * 100) / 100;
-
-  await storageSet(key, JSON.stringify({
-    date: currentDate || todayISO(), shopIdx, shopName: kiranaShops[shopIdx], items: sItems, billTotal, received: sRec, openingBal: sOpen, balanceDue
-  }));
-
-  closeQuickSupplyModal();
-  renderTodayCats();
-  await saveDayEntry();
-  alert(`Supplied ${qty} units of ${modalSelectedProd.name} to ${kiranaShops[shopIdx]}!`);
-};
-
-// ----------------------------------------------------
-// TAB 4: STOCK PAYMENTS (DISTRIBUTOR INVOICES)
-// ----------------------------------------------------
-function openPaymentsTab(){
-  // Populate datalist with catalog names
-  const dl = document.getElementById('catalogNamesDatalist');
-  const names = [];
-  MASTER_CATALOG.forEach(c => c.items.forEach(it => names.push(it.name)));
-  dl.innerHTML = names.map(n => `<option value="${n}"></option>`).join('');
-
-  invoiceRows = [{item:'', qty:'', price:''}];
-  renderInvoiceRows();
-  renderPaymentsList();
-}
-
-function renderInvoiceRows(){
-  const container = document.getElementById('invoiceRowsContainer');
-  container.innerHTML = invoiceRows.map((r, i) => `
-    <div class="invoice-row">
-      <input type="text" list="catalogNamesDatalist" placeholder="Product name" value="${r.item}" onchange="updateInvoiceRow(${i},'item',this.value)">
-      <input type="number" placeholder="Qty" value="${r.qty}" oninput="updateInvoiceRow(${i},'qty',this.value)">
-      <input type="number" placeholder="Cost Price" value="${r.price}" oninput="updateInvoiceRow(${i},'price',this.value)">
-      <span class="mono" style="font-size:12px;text-align:right;">${money(num(r.qty)*num(r.price))}</span>
-      <button class="action-btn btn-red" style="padding:2px 4px;" onclick="removeInvoiceRow(${i})">✕</button>
     </div>
-  `).join('');
 
-  const tot = invoiceRows.reduce((s, r) => s + (num(r.qty)*num(r.price)), 0);
-  document.getElementById('invoiceRunningTotal').innerText = money(tot);
-}
+    <!-- ============================================================= -->
+    <!-- VIEW 2: STOCK INVENTORY MASTER & PRICING EDIT                 -->
+    <!-- ============================================================= -->
+    <div id="viewStock" class="space-y-6 hidden">
+      
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-white">Stock Inventory Master</h2>
+            <p class="text-xs text-slate-400">Edit Agent Buy Cost and MRP directly in the table below. Changes update live calculations.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="exportStockCSV()" class="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white uppercase tracking-wider">
+              Export CSV
+            </button>
+          </div>
+        </div>
 
-window.addInvoiceRow = function(){
-  invoiceRows.push({item:'', qty:'', price:''});
-  renderInvoiceRows();
-};
+        <!-- Master Table with Inline Price & MRP Editing -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Item Code / Key</th>
+                <th class="p-3">Product Name</th>
+                <th class="p-3 text-center">Unit</th>
+                <th class="p-3 text-center">Agent Cost (₹) [Editable]</th>
+                <th class="p-3 text-center">MRP (₹) [Editable]</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stockMasterTableBody" class="divide-y divide-slate-800">
+              <!-- Injected dynamically with editable fields -->
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-window.removeInvoiceRow = function(i){
-  invoiceRows.splice(i, 1);
-  renderInvoiceRows();
-};
+    </div>
 
-window.updateInvoiceRow = function(i, field, val){
-  invoiceRows[i][field] = val;
-  if(field === 'item'){
-    const resolved = resolveCatalogName(val);
-    MASTER_CATALOG.forEach(c => c.items.forEach(it => {
-      if(it.name === resolved) invoiceRows[i].price = it.agent;
-    }));
-  }
-  renderInvoiceRows();
-};
+  </div>
 
-window.saveStockPaymentInvoice = async function(){
-  const dist = document.getElementById('payDistributor').value.trim();
-  const mode = document.getElementById('payMode').value;
-  const note = document.getElementById('payNote').value.trim();
-  const valid = invoiceRows.filter(r => r.item && num(r.qty) > 0);
+  <script>
+    // Master Product Catalog Schema
+    const DEFAULT_MASTER_ITEMS = {
+      tm: { name: "TM (Toned Milk)", unit: "LTR", agentPrice: 59.65, mrp: 62.00 },
+      fcm: { name: "FCM (Full Cream Milk)", unit: "LTR", agentPrice: 75.40, mrp: 80.00 },
+      smilk: { name: "SMILK (Small Milk)", unit: "PKT", agentPrice: 8.35, mrp: 10.00 },
+      teamilk: { name: "Tea Milk", unit: "LTR", agentPrice: 0.00, mrp: 0.00 },
+      curd450: { name: "450gm Curd", unit: "PKT", agentPrice: 61.00, mrp: 65.00 },
+      scurd: { name: "SCURD (Small Curd)", unit: "PKT", agentPrice: 7.60, mrp: 10.00 },
+      bucket10kg: { name: "10kg STM Green Bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00 },
+      bucket5kg: { name: "5kg STM Curd Bucket", unit: "BUCKET", agentPrice: 0.00, mrp: 0.00 }
+    };
 
-  if(!dist || !valid.length) return alert("Enter distributor name and at least one item with quantity.");
+    const STORAGE_KEY_ITEMS = "annapurna_master_items_v1";
+    const STORAGE_KEY_LOGS = "annapurna_kirana_logs_v1";
 
-  const total = valid.reduce((s, r) => s + (num(r.qty)*num(r.price)), 0);
-  const dateISO = currentDate || todayISO();
+    let masterItems = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS)) || DEFAULT_MASTER_ITEMS;
+    let kiranaLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
+    let demandChart = null;
 
-  const invObj = {
-    id: "inv_" + Date.now(),
-    date: dateISO,
-    distributor: dist,
-    items: valid,
-    amount: total,
-    mode,
-    note
-  };
+    window.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("selectedDate").value = today;
+      refreshAgentLabels();
+      loadDateData();
+      renderStockMasterTable();
+      renderDemandChart();
+    });
 
-  let list = [];
-  try{
-    const r = await storageGet('stockpay:log');
-    if(r && r.value) list = JSON.parse(r.value);
-  }catch(e){}
-  list.unshift(invObj);
-  await storageSet('stockpay:log', JSON.stringify(list));
+    // Tab Switching
+    function switchMainTab(tab) {
+      const viewKirana = document.getElementById("viewKirana");
+      const viewStock = document.getElementById("viewStock");
+      const btnK = document.getElementById("tabBtnKirana");
+      const btnS = document.getElementById("tabBtnStock");
 
-  // Add inward quantities directly to today's ledger
-  valid.forEach(v => {
-    const resolved = resolveCatalogName(v.item);
-    todayCats.forEach(c => c.items.forEach(it => {
-      if(it.name === resolved){
-        it.added = num(it.added) + num(v.qty);
-        const avail = num(it.opening) + num(it.added) - num(it.home);
-        it.leftover = Math.max(0, avail - num(it.sold));
+      if (tab === "stock") {
+        viewKirana.classList.add("hidden");
+        viewStock.classList.remove("hidden");
+        btnS.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow";
+        btnK.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
+        renderStockMasterTable();
+      } else {
+        viewStock.classList.add("hidden");
+        viewKirana.classList.remove("hidden");
+        btnK.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow";
+        btnS.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
+        loadDateData();
       }
-    }));
-  });
+    }
 
-  await saveDayEntry();
-  document.getElementById('payDistributor').value = "";
-  document.getElementById('payNote').value = "";
-  invoiceRows = [{item:'', qty:'', price:''}];
-  renderInvoiceRows();
-  renderPaymentsList();
-  alert(`Saved invoice of ${money(total)} from ${dist}! Inward stock updated.`);
-};
+    function onDateChanged() {
+      loadDateData();
+    }
 
-async function renderPaymentsList(){
-  const container = document.getElementById('paymentsListContainer');
-  let list = [];
-  try{
-    const r = await storageGet('stockpay:log');
-    if(r && r.value) list = JSON.parse(r.value);
-  }catch(e){}
+    function getSelectedDate() {
+      return document.getElementById("selectedDate").value;
+    }
 
-  const dayList = list.filter(l => l.date === (currentDate || todayISO()));
-  if(!dayList.length){
-    container.innerHTML = "<div style='color:var(--ink-soft);font-size:12px;text-align:center;padding:12px;'>No supplier invoices logged for this date.</div>";
-    return;
-  }
-
-  container.innerHTML = dayList.map(inv => `
-    <div style="background:#F8FAFC; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <span class="badge ${inv.mode==='Cash'?'badge-yellow':'badge-green'}">${inv.mode}</span>
-        <strong style="font-size:13px; margin-left:6px;">${inv.distributor}</strong>
-        <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">
-          ${(inv.items||[]).map(it => `${it.item} (${it.qty} × ₹${it.price})`).join(', ')}
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div class="mono" style="font-weight:700; font-size:14px;">${money(inv.amount)}</div>
-        <button class="action-btn btn-red" style="padding:2px 6px; font-size:10px; margin-top:4px;" onclick="deleteInvoice('${inv.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-window.deleteInvoice = async function(id){
-  if(!confirm("Remove this invoice?")) return;
-  let list = [];
-  try{
-    const r = await storageGet('stockpay:log');
-    if(r && r.value) list = JSON.parse(r.value);
-  }catch(e){}
-  list = list.filter(l => l.id !== id);
-  await storageSet('stockpay:log', JSON.stringify(list));
-  renderPaymentsList();
-};
-
-// ----------------------------------------------------
-// TAB 5: HISTORY & CASH DRAWER RECONCILIATION
-// ----------------------------------------------------
-async function loadHistoryAndCashDrawer(){
-  const res = await storageList('day:');
-  const keys = res.keys || [];
-  const entries = [];
-  for(const k of keys){
-    const d = await storageGet(k);
-    if(d && d.value) entries.push(JSON.parse(d.value));
-  }
-  entries.sort((a,b) => b.date.localeCompare(a.date));
-
-  // Compute running cash in hand
-  let totalCashIn = entries.reduce((s, e) => s + num(e.cash), 0);
-  let adjList = [];
-  try{
-    const a = await storageGet('cash:adjustments');
-    if(a && a.value) adjList = JSON.parse(a.value);
-  }catch(e){}
-
-  let adjTotal = adjList.reduce((s, a) => s + (a.type==='deposit' ? -num(a.amount) : (a.type==='withdraw' ? -num(a.amount) : 0)), 0);
-  document.getElementById('dispCashInHand').innerText = money(totalCashIn + adjTotal);
-
-  // History list
-  const container = document.getElementById('historyRecordsList');
-  container.innerHTML = entries.map(e => `
-    <div style="background:#F8FAFC; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="loadDayData('${e.date}'); switchTab('today');">
-      <div>
-        <strong style="font-size:13px;">${e.date}</strong>
-        <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Cash: ${money(e.cash)} | Online: ${money(e.online)}</div>
-      </div>
-      <div class="mono" style="font-size:16px; font-weight:700; color:var(--green);">${money(e.total)}</div>
-    </div>
-  `).join('');
-}
-
-window.addCashAdjustment = async function(type){
-  const label = type==='deposit' ? 'Bank Deposit' : 'Cash Withdrawal';
-  const amt = parseFloat(prompt(`${label} Amount (₹):`));
-  if(isNaN(amt) || amt <= 0) return;
-
-  let list = [];
-  try{
-    const r = await storageGet('cash:adjustments');
-    if(r && r.value) list = JSON.parse(r.value);
-  }catch(e){}
-
-  list.unshift({ date: currentDate || todayISO(), type, amount: amt, time: new Date().toLocaleTimeString() });
-  await storageSet('cash:adjustments', JSON.stringify(list));
-  loadHistoryAndCashDrawer();
-};
-
-window.recountCashDrawer = function(){
-  const counted = parseFloat(prompt("Enter total physical cash counted in drawer right now (₹):"));
-  if(isNaN(counted)) return;
-  alert(`Counted ₹${counted}. Recorded in audit log.`);
-};
-
-// ----------------------------------------------------
-// TAB 6: DEMAND CHARTS & ANALYTICS
-// ----------------------------------------------------
-async function renderAllCharts(){
-  const res = await storageList('day:');
-  const keys = res.keys || [];
-  const entries = [];
-  for(const k of keys){
-    const d = await storageGet(k);
-    if(d && d.value) entries.push(JSON.parse(d.value));
-  }
-  entries.sort((a,b) => a.date.localeCompare(b.date));
-  const recent = entries.slice(-7);
-
-  const labels = recent.map(e => e.date.slice(5));
-  const milkVol = [];
-  const curdVol = [];
-  const cashSales = [];
-  const onlineSales = [];
-
-  recent.forEach(e => {
-    let m = 0, c = 0;
-    (e.cats||[]).forEach(cat => {
-      (cat.items||[]).forEach(it => {
-        if(cat.category.includes("MILK")) m += num(it.sold);
-        if(cat.category.includes("CURD")) c += num(it.sold);
+    function refreshAgentLabels() {
+      Object.keys(masterItems).forEach(k => {
+        const el = document.getElementById(`labelCost_${k}`);
+        if (el) el.innerText = (masterItems[k].agentPrice || 0).toFixed(2);
       });
-    });
-    milkVol.push(m);
-    curdVol.push(c);
-    cashSales.push(num(e.cash));
-    onlineSales.push(num(e.online));
-  });
+    }
 
-  // Demand Chart
-  const ctx1 = document.getElementById('demandChartCanvas').getContext('2d');
-  if(demandChartInstance) demandChartInstance.destroy();
-  demandChartInstance = new Chart(ctx1, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Milk Volume Sold (Units/L)', data: milkVol, backgroundColor: '#38BDF8', borderRadius: 4 },
-        { label: 'Curd Volume Sold (Units/Kg)', data: curdVol, backgroundColor: '#FBBF24', borderRadius: 4 }
-      ]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
+    function loadDateData() {
+      const dateStr = getSelectedDate();
+      const dObj = new Date(dateStr + "T00:00:00");
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[dObj.getDay()] || "";
 
-  // Sales Split Chart
-  const ctx2 = document.getElementById('salesSplitChartCanvas').getContext('2d');
-  if(salesSplitChartInstance) salesSplitChartInstance.destroy();
-  salesSplitChartInstance = new Chart(ctx2, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Cash Sales (₹)', data: cashSales, backgroundColor: '#B9862E', stack: 'a' },
-        { label: 'Online Sales (₹)', data: onlineSales, backgroundColor: '#35634A', stack: 'a' }
-      ]
-    },
-    options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
-  });
-}
+      document.getElementById("currentDayBadge").innerText = dayName;
+      document.getElementById("ledgerDateDisplay").innerText = `${dateStr} (${dayName})`;
 
-// ----------------------------------------------------
-// INITIAL BOOTSTRAP
-// ----------------------------------------------------
-async function boot(){
-  try{
-    const m = await storageGet('catalog:master_custom');
-    if(m && m.value) MASTER_CATALOG = JSON.parse(m.value);
-  }catch(e){}
+      const dayEntries = kiranaLogs.filter(e => e.date === dateStr);
+      renderKiranaTable(dayEntries);
+      calculateDailyMetrics(dayEntries);
+    }
 
-  const today = todayISO();
-  document.getElementById('ledgerDate').value = today;
-  await loadDayData(today);
-}
+    function calculateLivePreview() {
+      const items = getFormItemValues();
+      let bill = 0;
+      let profit = 0;
 
-boot();
-</script>
+      Object.keys(items).forEach(k => {
+        const q = items[k].qty;
+        const r = items[k].sellRate;
+        const cost = masterItems[k] ? masterItems[k].agentPrice : 0;
+        if (q > 0) {
+          bill += (q * r);
+          profit += (q * (r - cost));
+        }
+      });
+
+      document.getElementById("liveBillTotal").innerText = `₹${bill.toFixed(2)}`;
+      document.getElementById("liveProfitTotal").innerText = `₹${profit.toFixed(2)}`;
+    }
+
+    function getFormItemValues() {
+      const keys = ["tm", "fcm", "smilk", "teamilk", "curd450", "scurd", "bucket10kg", "bucket5kg"];
+      const res = {};
+      keys.forEach(k => {
+        res[k] = {
+          qty: parseFloat(document.getElementById(`qty_${k}`).value) || 0,
+          sellRate: parseFloat(document.getElementById(`rate_${k}`).value) || 0
+        };
+      });
+      return res;
+    }
+
+    function handleKiranaSubmit(e) {
+      e.preventDefault();
+      const date = getSelectedDate();
+      const editId = document.getElementById("editKiranaId").value;
+      const shopName = document.getElementById("kiranaShopName").value.trim();
+      const paymentStatus = document.getElementById("kiranaPaymentStatus").value;
+      const note = document.getElementById("kiranaNote").value.trim();
+      const items = getFormItemValues();
+
+      const hasItem = Object.keys(items).some(k => items[k].qty > 0);
+      if (!hasItem) {
+        alert("Please enter a quantity for at least one milk or curd item.");
+        return;
+      }
+
+      const logEntry = {
+        id: editId || ("log_" + Date.now()),
+        date,
+        shopName,
+        paymentStatus,
+        note,
+        items
+      };
+
+      if (editId) {
+        kiranaLogs = kiranaLogs.map(item => item.id === editId ? logEntry : item);
+      } else {
+        kiranaLogs.push(logEntry);
+      }
+
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+      resetKiranaForm();
+      loadDateData();
+      renderDemandChart();
+    }
+
+    function computeFinancials(items) {
+      let bill = 0;
+      let cost = 0;
+
+      Object.keys(items).forEach(k => {
+        const q = items[k].qty || 0;
+        const sellRate = items[k].sellRate || 0;
+        const agentBuy = masterItems[k] ? masterItems[k].agentPrice : 0;
+
+        bill += (q * sellRate);
+        cost += (q * agentBuy);
+      });
+
+      return { bill, profit: bill - cost };
+    }
+
+    function renderKiranaTable(entries) {
+      const tbody = document.getElementById("kiranaTableBody");
+      tbody.innerHTML = "";
+      document.getElementById("shopCountBadge").innerText = `${entries.length} Shops`;
+
+      if (entries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 text-xs">No shop dispatches logged for this date. Enter deliveries above.</td></tr>`;
+        return;
+      }
+
+      entries.forEach(entry => {
+        const fin = computeFinancials(entry.items);
+        const isPaid = entry.paymentStatus === "Paid";
+
+        const milkSummary = [];
+        if (entry.items.tm?.qty > 0) milkSummary.push(`TM: ${entry.items.tm.qty}L @₹${entry.items.tm.sellRate}`);
+        if (entry.items.fcm?.qty > 0) milkSummary.push(`FCM: ${entry.items.fcm.qty}L @₹${entry.items.fcm.sellRate}`);
+        if (entry.items.smilk?.qty > 0) milkSummary.push(`SMILK: ${entry.items.smilk.qty}p @₹${entry.items.smilk.sellRate}`);
+        if (entry.items.teamilk?.qty > 0) milkSummary.push(`Tea: ${entry.items.teamilk.qty}L @₹${entry.items.teamilk.sellRate}`);
+
+        const curdSummary = [];
+        if (entry.items.curd450?.qty > 0) curdSummary.push(`450g: ${entry.items.curd450.qty}p @₹${entry.items.curd450.sellRate}`);
+        if (entry.items.scurd?.qty > 0) curdSummary.push(`SCURD: ${entry.items.scurd.qty}p @₹${entry.items.scurd.sellRate}`);
+
+        const bucketSummary = [];
+        if (entry.items.bucket10kg?.qty > 0) bucketSummary.push(`10kg: ${entry.items.bucket10kg.qty} @₹${entry.items.bucket10kg.sellRate}`);
+        if (entry.items.bucket5kg?.qty > 0) bucketSummary.push(`5kg: ${entry.items.bucket5kg.qty} @₹${entry.items.bucket5kg.sellRate}`);
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3">
+            <div class="font-bold text-white text-xs md:text-sm">${entry.shopName}</div>
+            ${entry.note ? `<div class="text-[10px] text-slate-400 mt-0.5">${entry.note}</div>` : ""}
+          </td>
+          <td class="p-3 mono text-[11px] text-sky-300">${milkSummary.join("<br>") || "—"}</td>
+          <td class="p-3 mono text-[11px] text-amber-300">${curdSummary.join("<br>") || "—"}</td>
+          <td class="p-3 mono text-[11px] text-indigo-300">${bucketSummary.join("<br>") || "—"}</td>
+          <td class="p-3 text-right font-bold text-white mono text-xs md:text-sm">₹${fin.bill.toFixed(2)}</td>
+          <td class="p-3 text-right font-bold text-emerald-400 mono text-xs md:text-sm">₹${fin.profit.toFixed(2)}</td>
+          <td class="p-3 text-center">
+            <button onclick="togglePaymentStatus('${entry.id}')" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
+              ${entry.paymentStatus}
+            </button>
+          </td>
+          <td class="p-3 text-center space-x-2">
+            <button onclick="editKiranaEntry('${entry.id}')" class="text-xs text-sky-400 hover:text-sky-300 font-semibold">Edit</button>
+            <button onclick="deleteKiranaEntry('${entry.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateDailyMetrics(entries) {
+      let sales = 0;
+      let profit = 0;
+      let due = 0;
+      let milkUnits = 0;
+      let curdUnits = 0;
+
+      entries.forEach(e => {
+        const fin = computeFinancials(e.items);
+        sales += fin.bill;
+        profit += fin.profit;
+        if (e.paymentStatus !== "Paid") {
+          due += fin.bill;
+        }
+
+        milkUnits += (Number(e.items.tm?.qty || 0) + Number(e.items.fcm?.qty || 0) + Number(e.items.smilk?.qty || 0) + Number(e.items.teamilk?.qty || 0));
+        curdUnits += (Number(e.items.curd450?.qty || 0) + Number(e.items.scurd?.qty || 0) + Number(e.items.bucket10kg?.qty || 0) + Number(e.items.bucket5kg?.qty || 0));
+      });
+
+      document.getElementById("kpiTotalSales").innerText = `₹${sales.toFixed(2)}`;
+      document.getElementById("kpiTotalProfit").innerText = `₹${profit.toFixed(2)}`;
+      document.getElementById("kpiPendingDue").innerText = `₹${due.toFixed(2)}`;
+      document.getElementById("kpiMilkVolume").innerText = `${milkUnits} Units/L`;
+      document.getElementById("kpiCurdVolume").innerText = `${curdUnits} Units`;
+    }
+
+    function togglePaymentStatus(id) {
+      kiranaLogs = kiranaLogs.map(e => {
+        if (e.id === id) {
+          return { ...e, paymentStatus: e.paymentStatus === "Paid" ? "Not Paid" : "Paid" };
+        }
+        return e;
+      });
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+      loadDateData();
+    }
+
+    function editKiranaEntry(id) {
+      const entry = kiranaLogs.find(e => e.id === id);
+      if (!entry) return;
+
+      document.getElementById("editKiranaId").value = entry.id;
+      document.getElementById("kiranaShopName").value = entry.shopName;
+      document.getElementById("kiranaPaymentStatus").value = entry.paymentStatus;
+      document.getElementById("kiranaNote").value = entry.note || "";
+
+      const keys = ["tm", "fcm", "smilk", "teamilk", "curd450", "scurd", "bucket10kg", "bucket5kg"];
+      keys.forEach(k => {
+        document.getElementById(`qty_${k}`).value = entry.items[k]?.qty || "";
+        document.getElementById(`rate_${k}`).value = entry.items[k]?.sellRate || "";
+      });
+
+      document.getElementById("kiranaFormHeading").innerText = `Edit Entry: ${entry.shopName}`;
+      document.getElementById("saveKiranaBtn").innerText = "Update Shop Dispatch";
+      calculateLivePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteKiranaEntry(id) {
+      if (confirm("Are you sure you want to delete this shop entry?")) {
+        kiranaLogs = kiranaLogs.filter(e => e.id !== id);
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(kiranaLogs));
+        loadDateData();
+        renderDemandChart();
+      }
+    }
+
+    function resetKiranaForm() {
+      document.getElementById("editKiranaId").value = "";
+      document.getElementById("kiranaDeliveryForm").reset();
+      document.getElementById("kiranaPaymentStatus").value = "Not Paid";
+      document.getElementById("kiranaFormHeading").innerText = "Log Kirana Shop Delivery";
+      document.getElementById("saveKiranaBtn").innerText = "Save Shop Dispatch";
+      calculateLivePreview();
+    }
+
+    // ==========================================
+    // STOCK INVENTORY MASTER INLINE EDITING
+    // ==========================================
+    function renderStockMasterTable() {
+      const tbody = document.getElementById("stockMasterTableBody");
+      tbody.innerHTML = "";
+
+      Object.keys(masterItems).forEach(key => {
+        const item = masterItems[key];
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 mono font-bold text-slate-400 uppercase">${key}</td>
+          <td class="p-3 font-semibold text-white">${item.name}</td>
+          <td class="p-3 text-center text-slate-400 font-medium">${item.unit}</td>
+          <td class="p-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <span class="text-slate-500">₹</span>
+              <input type="number" step="0.05" id="editAgent_${key}" value="${item.agentPrice}" 
+                class="w-24 bg-slate-800 border border-slate-700 text-right text-emerald-400 mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
+            </div>
+          </td>
+          <td class="p-3 text-center">
+            <div class="inline-flex items-center gap-1">
+              <span class="text-slate-500">₹</span>
+              <input type="number" step="0.05" id="editMrp_${key}" value="${item.mrp}" 
+                class="w-24 bg-slate-800 border border-slate-700 text-right text-white mono font-bold px-2 py-1 rounded focus:outline-none focus:border-emerald-500">
+            </div>
+          </td>
+          <td class="p-3 text-center">
+            <button type="button" onclick="saveMasterItemRates('${key}')" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
+              Save
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveMasterItemRates(key) {
+      const newAgent = parseFloat(document.getElementById(`editAgent_${key}`).value) || 0;
+      const newMrp = parseFloat(document.getElementById(`editMrp_${key}`).value) || 0;
+
+      masterItems[key].agentPrice = newAgent;
+      masterItems[key].mrp = newMrp;
+
+      localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(masterItems));
+      refreshAgentLabels();
+      calculateLivePreview();
+      alert(`Updated ${masterItems[key].name} pricing: Agent Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)}`);
+    }
+
+    function exportStockCSV() {
+      let csv = "Item Key,Product Name,Unit,Agent Cost (INR),MRP (INR)\n";
+      Object.keys(masterItems).forEach(k => {
+        const it = masterItems[k];
+        csv += `"${k}","${it.name}","${it.unit}",${it.agentPrice},${it.mrp}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Stock_Master_${new Date().toISOString().split("T")[0]}.csv`;
+      link.click();
+    }
+
+    // Day-Wise Demand Analysis Chart
+    function renderDemandChart() {
+      const dates = [];
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        dates.push(d.toISOString().split("T")[0]);
+      }
+
+      const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const labels = dates.map(dt => {
+        const dObj = new Date(dt + "T00:00:00");
+        return `${daysShort[dObj.getDay()]} (${dt.slice(5)})`;
+      });
+
+      const milkVol = [];
+      const curdVol = [];
+
+      dates.forEach(dt => {
+        const dayRows = kiranaLogs.filter(e => e.date === dt);
+        let m = 0;
+        let c = 0;
+        dayRows.forEach(row => {
+          m += (Number(row.items.tm?.qty || 0) + Number(row.items.fcm?.qty || 0) + Number(row.items.smilk?.qty || 0) + Number(row.items.teamilk?.qty || 0));
+          c += (Number(row.items.curd450?.qty || 0) + Number(row.items.scurd?.qty || 0) + Number(row.items.bucket10kg?.qty || 0) + Number(row.items.bucket5kg?.qty || 0));
+        });
+        milkVol.push(m);
+        curdVol.push(c);
+      });
+
+      const ctx = document.getElementById("demandChartCanvas").getContext("2d");
+      if (demandChart) demandChart.destroy();
+
+      demandChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Milk Demand (Units / L)",
+              data: milkVol,
+              backgroundColor: "rgba(56, 189, 248, 0.85)",
+              borderColor: "#38bdf8",
+              borderWidth: 1,
+              borderRadius: 6
+            },
+            {
+              label: "Curd Demand (Units / Kg)",
+              data: curdVol,
+              backgroundColor: "rgba(251, 191, 36, 0.85)",
+              borderColor: "#fbbf24",
+              borderWidth: 1,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: "#94a3b8", font: { family: "'IBM Plex Sans'", size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: "rgba(51, 65, 85, 0.2)" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: "rgba(51, 65, 85, 0.3)" }
+            }
+          }
+        }
+      });
+    }
+  </script>
 </body>
 </html>
