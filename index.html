@@ -3,273 +3,367 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kirana Milk & Curd Distribution Manager</title>
+  <title>Kirana Distribution & Daily Profit Ledger</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'IBM Plex Sans', sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6">
 
   <div class="max-w-7xl mx-auto space-y-6">
-    
-    <!-- Top Header & Date Navigation -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl gap-4">
+
+    <!-- Header & Date Navigation -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-emerald-400">Kirana Milk & Curd Dispatch Ledger</h1>
-        <p class="text-xs text-slate-400">Track shop-wise deliveries, payment status, daily profit, and product demand</p>
+        <h1 class="text-2xl font-bold text-emerald-400">Kirana Milk &amp; Curd Distribution Ledger</h1>
+        <p class="text-xs text-slate-400 mt-1">Daily shop delivery register, custom shop rates, collection tracker &amp; profit analytics</p>
       </div>
 
       <div class="flex items-center gap-3">
         <div class="flex flex-col">
-          <label class="text-xs text-slate-400 font-medium">Selected Date & Day</label>
-          <input type="date" id="ledgerDate" class="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500" onchange="loadDateData()">
+          <label class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Select Date</label>
+          <input type="date" id="ledgerDate" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500 mono" onchange="loadDateData()">
         </div>
-        <div class="bg-slate-700 px-4 py-2 rounded-lg text-center mt-3.5">
-          <span id="dayLabel" class="text-sm font-semibold text-emerald-300 uppercase tracking-wider">--</span>
+        <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-center mt-4">
+          <span id="dayLabel" class="text-sm font-bold text-emerald-300 uppercase tracking-widest">--</span>
         </div>
       </div>
     </div>
 
-    <!-- Product Rates Configuration (Collapsible Accordion) -->
-    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-      <div class="p-4 bg-slate-750 flex justify-between items-center cursor-pointer border-b border-slate-700" onclick="toggleRateSettings()">
-        <span class="font-semibold text-sm text-slate-200 flex items-center gap-2">
-          ⚙️ Product Price Master (Agent Cost, Selling Rate & MRP)
+    <!-- Agent Buy Price Settings (Collapsible) -->
+    <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+      <div class="p-4 bg-slate-850 flex justify-between items-center cursor-pointer border-b border-slate-800" onclick="toggleAgentSettings()">
+        <span class="font-semibold text-xs md:text-sm text-slate-200 flex items-center gap-2">
+          ⚙️ Default Agent Buy Price Master (Your Cost Reference)
         </span>
-        <button id="rateToggleText" class="text-xs text-emerald-400 font-semibold uppercase">Edit Rates</button>
+        <button id="agentToggleBtn" class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Edit Agent Costs</button>
       </div>
-      
-      <div id="rateSettingsBody" class="p-5 hidden grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 bg-slate-850">
-        <!-- Injected via JS -->
-      </div>
-    </div>
-
-    <!-- Daily Metrics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">Total Day Revenue</span>
-        <p class="text-xl font-bold text-white mt-1" id="metricRevenue">₹0.00</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">Total Day Profit</span>
-        <p class="text-xl font-bold text-emerald-400 mt-1" id="metricProfit">₹0.00</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">Pending Collection</span>
-        <p class="text-xl font-bold text-rose-400 mt-1" id="metricPending">₹0.00</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">Total Milk Units (L)</span>
-        <p class="text-xl font-bold text-sky-400 mt-1" id="metricMilkUnits">0 L</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-medium">Total Curd Units (Units/Kg)</span>
-        <p class="text-xl font-bold text-amber-400 mt-1" id="metricCurdUnits">0</p>
+      <div id="agentSettingsBody" class="p-4 hidden grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 bg-slate-900">
+        <!-- Rendered dynamically via JS -->
       </div>
     </div>
 
-    <!-- Entry Form -->
-    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-      <div class="flex justify-between items-center mb-4">
-        <h2 id="formTitle" class="text-lg font-semibold text-white">Add Shop Entry</h2>
-        <button type="button" onclick="resetForm()" class="text-xs text-slate-400 hover:text-white underline">Clear Form</button>
+    <!-- Top Summary Dashboard Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total Sales (Day)</span>
+        <p class="text-xl font-bold text-white mt-1 mono" id="metricTotalSales">₹0.00</p>
       </div>
-      
-      <form id="entryForm" onsubmit="handleSaveEntry(event)" class="space-y-4">
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Your Profit (Day)</span>
+        <p class="text-xl font-bold text-emerald-400 mt-1 mono" id="metricTotalProfit">₹0.00</p>
+      </div>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-rose-400 font-semibold uppercase tracking-wider">To Collect (Due)</span>
+        <p class="text-xl font-bold text-rose-400 mt-1 mono" id="metricPendingDue">₹0.00</p>
+      </div>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-sky-400 font-semibold uppercase tracking-wider">Total Milk Volume</span>
+        <p class="text-xl font-bold text-sky-300 mt-1 mono" id="metricMilkQty">0 Units</p>
+      </div>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Total Curd Volume</span>
+        <p class="text-xl font-bold text-amber-300 mt-1 mono" id="metricCurdQty">0 Units</p>
+      </div>
+    </div>
+
+    <!-- Shop Entry Form -->
+    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+        <div>
+          <h2 id="formHeading" class="text-lg font-bold text-white">Add Kirana Shop Delivery</h2>
+          <p class="text-xs text-slate-400">Enter delivery quantity &amp; shop-specific selling rate</p>
+        </div>
+        <button type="button" onclick="resetForm()" class="text-xs text-slate-400 hover:text-white underline">Clear / Reset Form</button>
+      </div>
+
+      <form id="deliveryForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
         <input type="hidden" id="editEntryId" value="">
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Kirana / Shop Name</label>
-            <input type="text" id="shopName" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Sri Balaji Kirana">
+            <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
+            <input type="text" id="shopName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Payment Status</label>
-            <select id="paymentStatus" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Not Paid</option>
+            <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Payment Status</label>
+            <select id="paymentStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-medium">
+              <option value="Not Paid" selected class="text-rose-400">Not Paid (Due)</option>
+              <option value="Paid" class="text-emerald-400">Paid (Cleared)</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Notes / Remarks (Optional)</label>
-            <input type="text" id="entryNotes" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Morning / Evening delivery">
+            <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Delivery Notes (Optional)</label>
+            <input type="text" id="deliveryNote" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Morning delivery, Cash promised evening">
           </div>
         </div>
 
-        <!-- Product Quantities Breakdown -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-700">
-          <!-- Milk Group -->
-          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
-            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">🥛 Milk Section (Liters / Pkts)</h3>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">1. TM (Toned Milk)</label>
-                <input type="number" min="0" step="1" id="qty_tm" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+        <!-- Product Sections Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          
+          <!-- 1. Milk Section -->
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-slate-800">
+              🥛 Milk Section
+            </h3>
+            
+            <!-- TM -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">1. TM (Toned Milk)</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_tm">59.65</span></span>
               </div>
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">2. FCM (Full Cream)</label>
-                <input type="number" min="0" step="1" id="qty_fcm" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_tm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_tm" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
               </div>
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">3. SMILK (Standard)</label>
-                <input type="number" min="0" step="1" id="qty_smilk" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+            </div>
+
+            <!-- FCM -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">2. FCM (Full Cream)</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_fcm">75.40</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_fcm" placeholder="Qty (Ltr)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_fcm" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+              </div>
+            </div>
+
+            <!-- SMILK -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">3. SMILK (Small Milk)</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_smilk">8.35</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_smilk" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_smilk" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+              </div>
+            </div>
+
+            <!-- TEA MILK -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">4. Tea Milk</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_teamilk">0.00</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_teamilk" placeholder="Qty" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_teamilk" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 2. Curd Packets Section -->
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-slate-800">
+              🥣 Curd Packets Section
+            </h3>
+
+            <!-- 450GM CURD -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">1. 450gm Curd</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_curd450">61.00</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_curd450" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_curd450" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+              </div>
+            </div>
+
+            <!-- SCURD -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">2. SCURD (Small Curd)</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_scurd">7.60</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_scurd" placeholder="Qty (Pkts)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_scurd" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
               </div>
             </div>
           </div>
 
-          <!-- Curd Group -->
-          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
-            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">🥣 Curd Packets Section</h3>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">1. 450gm Curd</label>
-                <input type="number" min="0" step="1" id="qty_curd450" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+          <!-- 3. Curd Buckets Section -->
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-slate-800">
+              🪣 Curd Buckets Section
+            </h3>
+
+            <!-- 10KG BUCKET -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">1. 10kg STM Bucket</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_bucket10kg">680.00</span></span>
               </div>
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">2. SCURD (Special Curd)</label>
-                <input type="number" min="0" step="1" id="qty_scurd" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_bucket10kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_bucket10kg" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
+              </div>
+            </div>
+
+            <!-- 5KG BUCKET -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-slate-300">
+                <span class="font-semibold">2. 5kg STM Bucket</span>
+                <span class="text-[10px] text-slate-500">Agent: ₹<span id="disp_agent_bucket5kg">0.00</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" min="0" step="any" id="qty_bucket5kg" placeholder="Qty (Buckets)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white mono" oninput="calculateLivePreview()">
+                <input type="number" min="0" step="any" id="rate_bucket5kg" placeholder="Sell Rate ₹" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-emerald-400 mono" oninput="calculateLivePreview()">
               </div>
             </div>
           </div>
 
-          <!-- Bucket Group -->
-          <div class="bg-slate-750 p-3 rounded-xl border border-slate-700">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">🪣 Curd Buckets Section</h3>
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">1. 10 Kg Bucket</label>
-                <input type="number" min="0" step="1" id="qty_bucket10kg" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
-              </div>
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-300">2. 5 Kg Bucket</label>
-                <input type="number" min="0" step="1" id="qty_bucket5kg" class="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-right text-sm" value="0">
-              </div>
-            </div>
+        </div>
+
+        <!-- Live Subtotal / Profit Indicator -->
+        <div class="flex flex-col md:flex-row justify-between items-center p-3 bg-slate-800 rounded-xl border border-slate-700 gap-2">
+          <div class="text-xs text-slate-300 flex items-center gap-4">
+            <span>Bill Total: <strong class="text-white text-sm mono" id="liveBillPreview">₹0.00</strong></span>
+            <span>Profit: <strong class="text-emerald-400 text-sm mono" id="liveProfitPreview">₹0.00</strong></span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="resetForm()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-semibold uppercase tracking-wider">Reset</button>
+            <button type="submit" id="saveBtn" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-950">Save Shop Entry</button>
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 pt-2">
-          <button type="button" onclick="resetForm()" class="px-5 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-600">Reset</button>
-          <button type="submit" id="saveButton" class="px-6 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 shadow-lg">Save Shop Dispatch</button>
-        </div>
       </form>
     </div>
 
-    <!-- Shop Wise Ledger Table -->
-    <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-      <div class="p-4 border-b border-slate-700 flex justify-between items-center">
-        <h2 class="text-md font-semibold text-white">Daily Shop Dispatch Register</h2>
-        <span id="entryCountBadge" class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">0 Shops</span>
+    <!-- Shop Ledger Table -->
+    <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+      <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+        <div>
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider">Kirana Delivery Register (<span id="tableDateDisplay">--</span>)</h2>
+          <p class="text-xs text-slate-400">Click on status badge to toggle Paid / Not Paid</p>
+        </div>
+        <span id="shopCountBadge" class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 mono">0 Shops</span>
       </div>
+
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="bg-slate-750 text-xs uppercase text-slate-400 border-b border-slate-700">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-800 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
             <tr>
               <th class="p-3">Shop Name</th>
-              <th class="p-3">Milk (TM / FCM / SM)</th>
-              <th class="p-3">Curd (450g / SC)</th>
-              <th class="p-3">Buckets (10k / 5k)</th>
-              <th class="p-3 text-right">Bill Total</th>
-              <th class="p-3 text-right">Shop Profit</th>
+              <th class="p-3">Milk Details (Qty @ Rate)</th>
+              <th class="p-3">Curd Packets (Qty @ Rate)</th>
+              <th class="p-3">Buckets (Qty @ Rate)</th>
+              <th class="p-3 text-right">Total Bill</th>
+              <th class="p-3 text-right text-emerald-400">Profit</th>
               <th class="p-3 text-center">Status</th>
               <th class="p-3 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody id="shopTableBody" class="divide-y divide-slate-700">
-            <!-- Dynamic rows -->
+          <tbody id="ledgerTableBody" class="divide-y divide-slate-800">
+            <!-- Rendered dynamically -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Day-Wise Demand Analysis Chart -->
-    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+    <!-- Day-Wise Demand Analysis Bar Graph -->
+    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-md font-semibold text-white">Weekly / Day-Wise Demand Analysis</h2>
-          <p class="text-xs text-slate-400">Compare overall daily milk & curd volume demand across days</p>
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider">📊 Day-Wise Demand &amp; Volume Analysis</h2>
+          <p class="text-xs text-slate-400">Track which day has the highest volume demand for Milk &amp; Curd</p>
         </div>
       </div>
       <div class="w-full h-72">
-        <canvas id="demandBarChart"></canvas>
+        <canvas id="demandChartCanvas"></canvas>
       </div>
     </div>
 
   </div>
 
   <script>
-    // Product default schema
-    const DEFAULT_PRODUCTS = {
-      tm: { name: 'TM Milk (1L)', mrp: 56, agent: 48, sell: 52, type: 'milk' },
-      fcm: { name: 'FCM Milk (1L)', mrp: 70, agent: 60, sell: 65, type: 'milk' },
-      smilk: { name: 'SMILK (1L)', mrp: 62, agent: 53, sell: 58, type: 'milk' },
-      curd450: { name: '450gm Curd', mrp: 35, agent: 27, sell: 31, type: 'curd' },
-      scurd: { name: 'SCURD Packet', mrp: 40, agent: 31, sell: 36, type: 'curd' },
-      bucket10kg: { name: '10kg Bucket', mrp: 750, agent: 620, sell: 690, type: 'curd' },
-      bucket5kg: { name: '5kg Bucket', mrp: 390, agent: 320, sell: 360, type: 'curd' },
+    // Master Item Definition with default Agent Buy Prices
+    const DEFAULT_AGENT_RATES = {
+      tm: 59.65,
+      fcm: 75.40,
+      smilk: 8.35,
+      teamilk: 0.00,
+      curd450: 61.00,
+      scurd: 7.60,
+      bucket10kg: 680.00,
+      bucket5kg: 0.00
     };
 
-    // Storage Keys
-    const STORAGE_ENTRIES = 'kirana_entries_v2';
-    const STORAGE_PRICES = 'kirana_prices_v2';
+    const ITEM_NAMES = {
+      tm: 'TM',
+      fcm: 'FCM',
+      smilk: 'SMILK',
+      teamilk: 'Tea Milk',
+      curd450: '450g Curd',
+      scurd: 'SCURD',
+      bucket10kg: '10kg STM',
+      bucket5kg: '5kg STM'
+    };
 
-    let productRates = JSON.parse(localStorage.getItem(STORAGE_PRICES)) || DEFAULT_PRODUCTS;
-    let allEntries = JSON.parse(localStorage.getItem(STORAGE_ENTRIES)) || [];
+    const STORAGE_ENTRIES = 'kirana_ledger_entries_v3';
+    const STORAGE_AGENT_RATES = 'kirana_agent_rates_v3';
+
+    let agentRates = JSON.parse(localStorage.getItem(STORAGE_AGENT_RATES)) || DEFAULT_AGENT_RATES;
+    let ledgerEntries = JSON.parse(localStorage.getItem(STORAGE_ENTRIES)) || [];
     let demandChart = null;
 
-    // Initialization
     window.addEventListener('DOMContentLoaded', () => {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('ledgerDate').value = today;
-      renderRateSettings();
+      renderAgentSettingsUI();
+      updateAgentPriceLabels();
       loadDateData();
       renderDemandChart();
     });
 
-    function toggleRateSettings() {
-      const body = document.getElementById('rateSettingsBody');
-      const text = document.getElementById('rateToggleText');
+    function toggleAgentSettings() {
+      const body = document.getElementById('agentSettingsBody');
+      const btn = document.getElementById('agentToggleBtn');
       const isHidden = body.classList.toggle('hidden');
-      text.innerText = isHidden ? 'Edit Rates' : 'Close Rates';
+      btn.innerText = isHidden ? 'Edit Agent Costs' : 'Close Master';
     }
 
-    function renderRateSettings() {
-      const container = document.getElementById('rateSettingsBody');
+    function renderAgentSettingsUI() {
+      const container = document.getElementById('agentSettingsBody');
       container.innerHTML = '';
-
-      Object.keys(productRates).forEach(key => {
-        const item = productRates[key];
+      Object.keys(agentRates).forEach(k => {
         const card = document.createElement('div');
-        card.className = 'bg-slate-700 p-3 rounded-lg border border-slate-600';
+        card.className = 'bg-slate-800 p-2.5 rounded-lg border border-slate-700 text-xs';
         card.innerHTML = `
-          <div class="text-xs font-bold text-white mb-2 truncate">${item.name}</div>
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between items-center">
-              <span class="text-slate-400">Agent:</span>
-              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-white" value="${item.agent}" onchange="updateRate('${key}', 'agent', this.value)">
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-slate-400">Selling:</span>
-              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-emerald-300 font-semibold" value="${item.sell}" onchange="updateRate('${key}', 'sell', this.value)">
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-slate-400">MRP:</span>
-              <input type="number" step="0.5" class="w-16 bg-slate-800 text-right px-1 py-0.5 rounded text-slate-300" value="${item.mrp}" onchange="updateRate('${key}', 'mrp', this.value)">
-            </div>
+          <div class="font-semibold text-slate-300 mb-1 truncate">${ITEM_NAMES[k]}</div>
+          <div class="flex items-center gap-1">
+            <span class="text-slate-500">₹</span>
+            <input type="number" step="0.05" class="w-full bg-slate-900 text-right px-1.5 py-1 rounded text-white mono font-bold focus:border-emerald-500 focus:outline-none border border-slate-700" 
+              value="${agentRates[k]}" onchange="saveAgentRate('${k}', this.value)">
           </div>
         `;
         container.appendChild(card);
       });
     }
 
-    function updateRate(key, field, val) {
-      productRates[key][field] = parseFloat(val) || 0;
-      localStorage.setItem(STORAGE_PRICES, JSON.stringify(productRates));
+    function saveAgentRate(key, value) {
+      agentRates[key] = parseFloat(value) || 0;
+      localStorage.setItem(STORAGE_AGENT_RATES, JSON.stringify(agentRates));
+      updateAgentPriceLabels();
+      calculateLivePreview();
       loadDateData();
-      renderDemandChart();
+    }
+
+    function updateAgentPriceLabels() {
+      Object.keys(agentRates).forEach(k => {
+        const el = document.getElementById(`disp_agent_${k}`);
+        if(el) el.innerText = (agentRates[k] || 0).toFixed(2);
+      });
     }
 
     function getSelectedDate() {
@@ -277,59 +371,98 @@
     }
 
     function loadDateData() {
-      const selectedDate = getSelectedDate();
-      const dateObj = new Date(selectedDate + 'T00:00:00');
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      document.getElementById('dayLabel').innerText = days[dateObj.getDay()] || '';
+      const dateStr = getSelectedDate();
+      const dObj = new Date(dateStr + 'T00:00:00');
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = dayNames[dObj.getDay()] || '';
 
-      const dayEntries = allEntries.filter(e => e.date === selectedDate);
-      renderTable(dayEntries);
-      calculateMetrics(dayEntries);
+      document.getElementById('dayLabel').innerText = dayName;
+      document.getElementById('tableDateDisplay').innerText = `${dateStr} (${dayName})`;
+
+      const dayEntries = ledgerEntries.filter(e => e.date === dateStr);
+      renderLedgerTable(dayEntries);
+      calculateDailyMetrics(dayEntries);
     }
 
-    function handleSaveEntry(e) {
+    function calculateLivePreview() {
+      const items = getItemDataFromForm();
+      let billTotal = 0;
+      let totalProfit = 0;
+
+      Object.keys(items).forEach(k => {
+        const q = items[k].qty;
+        const r = items[k].sellRate;
+        const cost = agentRates[k] || 0;
+        if(q > 0) {
+          billTotal += (q * r);
+          totalProfit += (q * (r - cost));
+        }
+      });
+
+      document.getElementById('liveBillPreview').innerText = `₹${billTotal.toFixed(2)}`;
+      document.getElementById('liveProfitPreview').innerText = `₹${totalProfit.toFixed(2)}`;
+    }
+
+    function getItemDataFromForm() {
+      const keys = ['tm', 'fcm', 'smilk', 'teamilk', 'curd450', 'scurd', 'bucket10kg', 'bucket5kg'];
+      const result = {};
+      keys.forEach(k => {
+        result[k] = {
+          qty: parseFloat(document.getElementById(`qty_${k}`).value) || 0,
+          sellRate: parseFloat(document.getElementById(`rate_${k}`).value) || 0
+        };
+      });
+      return result;
+    }
+
+    function handleFormSubmit(e) {
       e.preventDefault();
-      const selectedDate = getSelectedDate();
+      const date = getSelectedDate();
       const editId = document.getElementById('editEntryId').value;
+      const shopName = document.getElementById('shopName').value.trim();
+      const paymentStatus = document.getElementById('paymentStatus').value;
+      const note = document.getElementById('deliveryNote').value.trim();
+      const items = getItemDataFromForm();
+
+      // Ensure at least one product has quantity
+      const hasProduct = Object.keys(items).some(k => items[k].qty > 0);
+      if(!hasProduct) {
+        alert("Please enter a quantity for at least one item.");
+        return;
+      }
 
       const entry = {
         id: editId ? editId : 'id_' + Date.now(),
-        date: selectedDate,
-        shopName: document.getElementById('shopName').value.trim(),
-        paymentStatus: document.getElementById('paymentStatus').value,
-        notes: document.getElementById('entryNotes').value.trim(),
-        items: {
-          tm: parseFloat(document.getElementById('qty_tm').value) || 0,
-          fcm: parseFloat(document.getElementById('qty_fcm').value) || 0,
-          smilk: parseFloat(document.getElementById('qty_smilk').value) || 0,
-          curd450: parseFloat(document.getElementById('qty_curd450').value) || 0,
-          scurd: parseFloat(document.getElementById('qty_scurd').value) || 0,
-          bucket10kg: parseFloat(document.getElementById('qty_bucket10kg').value) || 0,
-          bucket5kg: parseFloat(document.getElementById('qty_bucket5kg').value) || 0,
-        }
+        date,
+        shopName,
+        paymentStatus,
+        note,
+        items
       };
 
-      if (editId) {
-        allEntries = allEntries.map(item => item.id === editId ? entry : item);
+      if(editId) {
+        ledgerEntries = ledgerEntries.map(item => item.id === editId ? entry : item);
       } else {
-        allEntries.push(entry);
+        ledgerEntries.push(entry);
       }
 
-      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(ledgerEntries));
       resetForm();
       loadDateData();
       renderDemandChart();
     }
 
-    function calculateShopFinancials(items) {
+    function calculateEntryFinancials(items) {
       let billTotal = 0;
       let totalCost = 0;
 
       Object.keys(items).forEach(k => {
-        const qty = items[k] || 0;
-        const rate = productRates[k] || { sell: 0, agent: 0 };
-        billTotal += qty * rate.sell;
-        totalCost += qty * rate.agent;
+        const q = items[k].qty || 0;
+        const sellRate = items[k].sellRate || 0;
+        const agentCost = agentRates[k] || 0;
+
+        billTotal += (q * sellRate);
+        totalCost += (q * agentCost);
       });
 
       return {
@@ -338,115 +471,123 @@
       };
     }
 
-    function renderTable(entries) {
-      const tbody = document.getElementById('shopTableBody');
+    function renderLedgerTable(entries) {
+      const tbody = document.getElementById('ledgerTableBody');
       tbody.innerHTML = '';
-      document.getElementById('entryCountBadge').innerText = `${entries.length} Shops`;
+      document.getElementById('shopCountBadge').innerText = `${entries.length} Shops`;
 
-      if (entries.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 text-xs">No dispatches recorded for this date.</td></tr>`;
+      if(entries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 text-xs">No dispatches logged for this date. Use the form above to add a shop entry.</td></tr>`;
         return;
       }
 
       entries.forEach(entry => {
-        const financials = calculateShopFinancials(entry.items);
+        const financials = calculateEntryFinancials(entry.items);
         const isPaid = entry.paymentStatus === 'Paid';
 
+        // Format items summary
+        const milkArr = [];
+        if(entry.items.tm?.qty > 0) milkArr.push(`TM: ${entry.items.tm.qty}L @₹${entry.items.tm.sellRate}`);
+        if(entry.items.fcm?.qty > 0) milkArr.push(`FCM: ${entry.items.fcm.qty}L @₹${entry.items.fcm.sellRate}`);
+        if(entry.items.smilk?.qty > 0) milkArr.push(`SM: ${entry.items.smilk.qty}p @₹${entry.items.smilk.sellRate}`);
+        if(entry.items.teamilk?.qty > 0) milkArr.push(`Tea: ${entry.items.teamilk.qty} @₹${entry.items.teamilk.sellRate}`);
+
+        const curdArr = [];
+        if(entry.items.curd450?.qty > 0) curdArr.push(`450g: ${entry.items.curd450.qty}p @₹${entry.items.curd450.sellRate}`);
+        if(entry.items.scurd?.qty > 0) curdArr.push(`SC: ${entry.items.scurd.qty}p @₹${entry.items.scurd.sellRate}`);
+
+        const bucketArr = [];
+        if(entry.items.bucket10kg?.qty > 0) bucketArr.push(`10kg: ${entry.items.bucket10kg.qty} @₹${entry.items.bucket10kg.sellRate}`);
+        if(entry.items.bucket5kg?.qty > 0) bucketArr.push(`5kg: ${entry.items.bucket5kg.qty} @₹${entry.items.bucket5kg.sellRate}`);
+
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-750 transition-colors';
+        tr.className = 'hover:bg-slate-800/60 transition-colors';
         tr.innerHTML = `
           <td class="p-3">
-            <div class="font-medium text-white">${entry.shopName}</div>
-            ${entry.notes ? `<div class="text-[11px] text-slate-400">${entry.notes}</div>` : ''}
+            <div class="font-bold text-white text-xs md:text-sm">${entry.shopName}</div>
+            ${entry.note ? `<div class="text-[10px] text-slate-400 mt-0.5">${entry.note}</div>` : ''}
           </td>
-          <td class="p-3 font-mono text-xs text-sky-300">
-            ${entry.items.tm} / ${entry.items.fcm} / ${entry.items.smilk}
-          </td>
-          <td class="p-3 font-mono text-xs text-amber-300">
-            ${entry.items.curd450} / ${entry.items.scurd}
-          </td>
-          <td class="p-3 font-mono text-xs text-indigo-300">
-            ${entry.items.bucket10kg} / ${entry.items.bucket5kg}
-          </td>
-          <td class="p-3 text-right font-bold text-white">₹${financials.billTotal.toFixed(2)}</td>
-          <td class="p-3 text-right font-semibold text-emerald-400">₹${financials.profit.toFixed(2)}</td>
+          <td class="p-3 mono text-[11px] text-sky-300">${milkArr.join('<br>') || '—'}</td>
+          <td class="p-3 mono text-[11px] text-amber-300">${curdArr.join('<br>') || '—'}</td>
+          <td class="p-3 mono text-[11px] text-indigo-300">${bucketArr.join('<br>') || '—'}</td>
+          <td class="p-3 text-right font-bold text-white mono text-xs md:text-sm">₹${financials.billTotal.toFixed(2)}</td>
+          <td class="p-3 text-right font-bold text-emerald-400 mono text-xs md:text-sm">₹${financials.profit.toFixed(2)}</td>
           <td class="p-3 text-center">
-            <button onclick="togglePaymentStatus('${entry.id}')" class="px-2.5 py-1 text-[11px] font-semibold rounded-full cursor-pointer transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
+            <button onclick="toggleStatus('${entry.id}')" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-rose-950 text-rose-300 border border-rose-700'}">
               ${entry.paymentStatus}
             </button>
           </td>
           <td class="p-3 text-center space-x-2">
-            <button onclick="editEntry('${entry.id}')" class="text-xs text-sky-400 hover:text-sky-300 font-medium">Edit</button>
-            <button onclick="deleteEntry('${entry.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Delete</button>
+            <button onclick="editEntry('${entry.id}')" class="text-xs text-sky-400 hover:text-sky-300 font-semibold">Edit</button>
+            <button onclick="deleteEntry('${entry.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Delete</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function calculateMetrics(entries) {
-      let revenue = 0;
+    function calculateDailyMetrics(entries) {
+      let sales = 0;
       let profit = 0;
       let pending = 0;
-      let milkQty = 0;
-      let curdQty = 0;
+      let milkCount = 0;
+      let curdCount = 0;
 
       entries.forEach(e => {
-        const { billTotal, profit: shopProfit } = calculateShopFinancials(e.items);
-        revenue += billTotal;
-        profit += shopProfit;
-        if (e.paymentStatus !== 'Paid') {
+        const { billTotal, profit: p } = calculateEntryFinancials(e.items);
+        sales += billTotal;
+        profit += p;
+        if(e.paymentStatus !== 'Paid') {
           pending += billTotal;
         }
 
-        milkQty += (e.items.tm + e.items.fcm + e.items.smilk);
-        curdQty += (e.items.curd450 + e.items.scurd + e.items.bucket10kg + e.items.bucket5kg);
+        milkCount += (Number(e.items.tm?.qty || 0) + Number(e.items.fcm?.qty || 0) + Number(e.items.smilk?.qty || 0) + Number(e.items.teamilk?.qty || 0));
+        curdCount += (Number(e.items.curd450?.qty || 0) + Number(e.items.scurd?.qty || 0) + Number(e.items.bucket10kg?.qty || 0) + Number(e.items.bucket5kg?.qty || 0));
       });
 
-      document.getElementById('metricRevenue').innerText = `₹${revenue.toFixed(2)}`;
-      document.getElementById('metricProfit').innerText = `₹${profit.toFixed(2)}`;
-      document.getElementById('metricPending').innerText = `₹${pending.toFixed(2)}`;
-      document.getElementById('metricMilkUnits').innerText = `${milkQty} L`;
-      document.getElementById('metricCurdUnits').innerText = `${curdQty} Units`;
+      document.getElementById('metricTotalSales').innerText = `₹${sales.toFixed(2)}`;
+      document.getElementById('metricTotalProfit').innerText = `₹${profit.toFixed(2)}`;
+      document.getElementById('metricPendingDue').innerText = `₹${pending.toFixed(2)}`;
+      document.getElementById('metricMilkQty').innerText = `${milkCount} Units`;
+      document.getElementById('metricCurdQty').innerText = `${curdCount} Units`;
     }
 
-    function togglePaymentStatus(id) {
-      allEntries = allEntries.map(e => {
-        if (e.id === id) {
-          return { ...e, paymentStatus: e.paymentStatus === 'Paid' ? 'Unpaid' : 'Paid' };
+    function toggleStatus(id) {
+      ledgerEntries = ledgerEntries.map(e => {
+        if(e.id === id) {
+          return { ...e, paymentStatus: e.paymentStatus === 'Paid' ? 'Not Paid' : 'Paid' };
         }
         return e;
       });
-      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(ledgerEntries));
       loadDateData();
     }
 
     function editEntry(id) {
-      const entry = allEntries.find(e => e.id === id);
-      if (!entry) return;
+      const entry = ledgerEntries.find(e => e.id === id);
+      if(!entry) return;
 
       document.getElementById('editEntryId').value = entry.id;
       document.getElementById('shopName').value = entry.shopName;
       document.getElementById('paymentStatus').value = entry.paymentStatus;
-      document.getElementById('entryNotes').value = entry.notes || '';
+      document.getElementById('deliveryNote').value = entry.note || '';
 
-      document.getElementById('qty_tm').value = entry.items.tm;
-      document.getElementById('qty_fcm').value = entry.items.fcm;
-      document.getElementById('qty_smilk').value = entry.items.smilk;
-      document.getElementById('qty_curd450').value = entry.items.curd450;
-      document.getElementById('qty_scurd').value = entry.items.scurd;
-      document.getElementById('qty_bucket10kg').value = entry.items.bucket10kg;
-      document.getElementById('qty_bucket5kg').value = entry.items.bucket5kg;
+      const keys = ['tm', 'fcm', 'smilk', 'teamilk', 'curd450', 'scurd', 'bucket10kg', 'bucket5kg'];
+      keys.forEach(k => {
+        document.getElementById(`qty_${k}`).value = entry.items[k]?.qty || '';
+        document.getElementById(`rate_${k}`).value = entry.items[k]?.sellRate || '';
+      });
 
-      document.getElementById('formTitle').innerText = `Edit Dispatch: ${entry.shopName}`;
-      document.getElementById('saveButton').innerText = 'Update Dispatch';
+      document.getElementById('formHeading').innerText = `Edit Entry: ${entry.shopName}`;
+      document.getElementById('saveBtn').innerText = 'Update Shop Entry';
+      calculateLivePreview();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteEntry(id) {
-      if (confirm('Are you sure you want to remove this shop entry?')) {
-        allEntries = allEntries.filter(e => e.id !== id);
-        localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(allEntries));
+      if(confirm('Are you sure you want to delete this shop entry?')) {
+        ledgerEntries = ledgerEntries.filter(e => e.id !== id);
+        localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(ledgerEntries));
         loadDateData();
         renderDemandChart();
       }
@@ -454,9 +595,11 @@
 
     function resetForm() {
       document.getElementById('editEntryId').value = '';
-      document.getElementById('entryForm').reset();
-      document.getElementById('formTitle').innerText = 'Add Shop Entry';
-      document.getElementById('saveButton').innerText = 'Save Shop Dispatch';
+      document.getElementById('deliveryForm').reset();
+      document.getElementById('paymentStatus').value = 'Not Paid';
+      document.getElementById('formHeading').innerText = 'Add Kirana Shop Delivery';
+      document.getElementById('saveBtn').innerText = 'Save Shop Entry';
+      calculateLivePreview();
     }
 
     function renderDemandChart() {
@@ -474,22 +617,22 @@
         return `${daysShort[dObj.getDay()]} (${dt.slice(5)})`;
       });
 
-      const milkDemandData = [];
-      const curdDemandData = [];
+      const milkVol = [];
+      const curdVol = [];
 
       dates.forEach(dt => {
-        const daily = allEntries.filter(e => e.date === dt);
+        const dayRows = ledgerEntries.filter(e => e.date === dt);
         let m = 0;
         let c = 0;
-        daily.forEach(entry => {
-          m += (entry.items.tm + entry.items.fcm + entry.items.smilk);
-          c += (entry.items.curd450 + entry.items.scurd + entry.items.bucket10kg + entry.items.bucket5kg);
+        dayRows.forEach(row => {
+          m += (Number(row.items.tm?.qty || 0) + Number(row.items.fcm?.qty || 0) + Number(row.items.smilk?.qty || 0) + Number(row.items.teamilk?.qty || 0));
+          c += (Number(row.items.curd450?.qty || 0) + Number(row.items.scurd?.qty || 0) + Number(row.items.bucket10kg?.qty || 0) + Number(row.items.bucket5kg?.qty || 0));
         });
-        milkDemandData.push(m);
-        curdDemandData.push(c);
+        milkVol.push(m);
+        curdVol.push(c);
       });
 
-      const ctx = document.getElementById('demandBarChart').getContext('2d');
+      const ctx = document.getElementById('demandChartCanvas').getContext('2d');
       if (demandChart) demandChart.destroy();
 
       demandChart = new Chart(ctx, {
@@ -498,17 +641,17 @@
           labels: labels,
           datasets: [
             {
-              label: 'Milk Demand (Liters)',
-              data: milkDemandData,
-              backgroundColor: 'rgba(56, 189, 248, 0.8)',
+              label: 'Milk Demand (Units/L)',
+              data: milkVol,
+              backgroundColor: 'rgba(56, 189, 248, 0.85)',
               borderColor: '#38bdf8',
               borderWidth: 1,
               borderRadius: 6
             },
             {
-              label: 'Curd Total Units',
-              data: curdDemandData,
-              backgroundColor: 'rgba(251, 191, 36, 0.8)',
+              label: 'Curd Demand (Units/Kg)',
+              data: curdVol,
+              backgroundColor: 'rgba(251, 191, 36, 0.85)',
               borderColor: '#fbbf24',
               borderWidth: 1,
               borderRadius: 6
@@ -520,18 +663,18 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              labels: { color: '#94a3b8', font: { size: 11 } }
+              labels: { color: '#94a3b8', font: { family: "'IBM Plex Sans'", size: 11 } }
             }
           },
           scales: {
             x: {
-              ticks: { color: '#94a3b8', font: { size: 10 } },
-              grid: { color: 'rgba(51, 65, 85, 0.3)' }
+              ticks: { color: '#94a3b8', font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: 'rgba(51, 65, 85, 0.2)' }
             },
             y: {
               beginAtZero: true,
-              ticks: { color: '#94a3b8', font: { size: 10 } },
-              grid: { color: 'rgba(51, 65, 85, 0.4)' }
+              ticks: { color: '#94a3b8', font: { family: "'IBM Plex Mono'", size: 10 } },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' }
             }
           }
         }
