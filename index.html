@@ -147,20 +147,23 @@
     <!-- ============================================================= -->
     <div id="viewKirana" class="space-y-6 hidden">
 
-      <!-- ⚡ SMART KIRANA QUICK TEXT ENTRY BOX -->
-      <div class="bg-emerald-950/40 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-2">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            ⚡ Quick Entry for Kirana Shops (Type Shorthand)
-          </span>
-          <button type="button" onclick="applyKiranaQuickShorthand()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase shadow">
-            Parse &amp; Add Delivery
+      <!-- ⚡ SMART KIRANA QUICK TEXT ENTRY BOX (PROMINENT AT TOP) -->
+      <div class="bg-gradient-to-r from-emerald-950/80 to-slate-900 p-5 rounded-2xl border-2 border-emerald-500/80 shadow-2xl space-y-3">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+          <div>
+            <span class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+              ⚡ Quick Shorthand Entry for Kirana Shops
+            </span>
+            <p class="text-xs text-slate-300 mt-0.5">
+              Type shorthand directly (e.g. <code>ashok kirana tm5l</code> or <code>mani kirana tm 5l, smilk 3, scurd 4</code>)
+            </p>
+          </div>
+          <button type="button" onclick="applyKiranaQuickShorthand()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase shadow-lg shadow-emerald-950 transition">
+            🚀 Parse &amp; Add Delivery
           </button>
         </div>
-        <p class="text-[11.5px] text-slate-300">
-          Type one or multiple lines (e.g. <code>ashok kirana tm5l</code>, <code>mani kirana tm 5l, smilk 3, scurd 4</code>, <code>balaji stores curd450 12</code>):
-        </p>
-        <textarea id="kiranaQuickInput" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="ashok kirana tm5l&#10;mani kirana tm 2l, smilk 3, scurd 4&#10;balaji stores curd450 12, bucket10kg 1"></textarea>
+        
+        <textarea id="kiranaQuickInput" rows="2" class="w-full bg-slate-950 border border-emerald-600/50 rounded-xl p-3 text-xs md:text-sm text-emerald-200 mono focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400" placeholder="ashok kirana tm5l&#10;mani kirana tm 2l, smilk 3, scurd 4&#10;balaji stores curd450 12, bucket10kg 1"></textarea>
       </div>
 
       <!-- Kirana Entry Form -->
@@ -370,7 +373,7 @@
       bucket5kg: { name: "5kg STM Curd Bucket", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 }
     };
 
-    // Aliases Map for Shorthand Quick Entry Parsing
+    // Shorthand Aliases Dictionary for Flexible Quick Entry Parsing
     const ITEM_ALIASES = {
       "tm": "tm", "toned milk": "tm", "tonedmilk": "tm",
       "fcm": "fcm", "full cream": "fcm", "fullcream": "fcm",
@@ -717,7 +720,7 @@
               date: dateStr,
               shopName,
               paymentStatus: "Not Paid",
-              note: "Quick Entry Shorthand",
+              note: "Quick Shorthand Entry",
               items
             });
             successCount++;
@@ -932,7 +935,7 @@
       document.getElementById("editKiranaId").value = "";
       document.getElementById("kiranaDeliveryForm").reset();
       document.getElementById("kiranaPaymentStatus").value = "Not Paid";
-      document.getElementById("kiranaFormHeading").innerText = "Log Kirana Shop Delivery";
+      document.getElementById("kiranaFormHeading").innerText = "Manual Shop Dispatch Form";
       document.getElementById("saveKiranaBtn").innerText = "Save Shop Dispatch";
       renderKiranaFormFields();
       calculateKiranaLivePreview();
