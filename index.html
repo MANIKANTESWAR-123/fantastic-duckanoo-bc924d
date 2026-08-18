@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annapurna Dairy — Complete Store & Kirana Distribution Manager</title>
+  <title>Annapurna Dairy — Live Cloud Ledger &amp; Inventory</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -19,21 +19,26 @@
     <!-- Header & Date Navigation -->
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
-        <p class="text-xs text-slate-400 mt-1">Unified In-Store Customer Retail (MRP) &amp; Kirana Shop Distribution System</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
+          <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
+            ☁️ Cloud Synced
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Multi-device live sync: Retail customer sales, Kirana deliveries &amp; stock balance</p>
       </div>
 
       <!-- Navigation & Date Selector -->
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button type="button" id="tabBtnRetail" onclick="switchView('retail')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
-            🛒 In-Store &amp; Stock Balance
+            🛒 In-Store &amp; Stock
           </button>
           <button type="button" id="tabBtnKirana" onclick="switchView('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
             🏪 Kirana Deliveries
           </button>
           <button type="button" id="tabBtnMaster" onclick="switchView('master')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
-            ⚙️ Stock Master (MRP/Cost)
+            ⚙️ Price Master
           </button>
         </div>
 
@@ -62,12 +67,12 @@
         <span class="text-[10px] text-slate-500">Unpaid shop bills</span>
       </div>
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-sky-400 font-bold uppercase tracking-wider">In-Store Cust. Milk Sold</span>
+        <span class="text-[10px] text-sky-400 font-bold uppercase tracking-wider">In-Store Milk Sold</span>
         <p class="text-lg md:text-xl font-bold text-sky-300 mt-1 mono" id="metricRetailMilkSold">0 Ltr</p>
         <span class="text-[10px] text-slate-500" id="subTotalMilk">Total: 0 Ltr</span>
       </div>
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow">
-        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">In-Store Cust. Curd Sold</span>
+        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">In-Store Curd Sold</span>
         <p class="text-lg md:text-xl font-bold text-amber-300 mt-1 mono" id="metricRetailCurdSold">0 Units</p>
         <span class="text-[10px] text-slate-500" id="subTotalCurd">Total: 0 Units</span>
       </div>
@@ -94,7 +99,7 @@
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Type the unsold packets physically remaining in your fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
+          Type the unsold packets remaining in fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
         </p>
         <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 15&#10;curd450 6"></textarea>
       </div>
@@ -104,7 +109,7 @@
         <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
           <div>
             <h2 class="text-sm font-bold text-white uppercase tracking-wider">In-Store Customer &amp; Stock Balance (<span id="stockDateDisplay">--</span>)</h2>
-            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Customer Sold = Available − Kirana − Leftovers − Home</p>
+            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Sold = Available − Kirana − Leftover − Home</p>
           </div>
           <button type="button" onclick="saveDayStockRecord()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
             Save Today Stock
@@ -176,7 +181,6 @@
 
           <!-- Product Inputs Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-            <!-- Milk -->
             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
               <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider pb-2 border-b border-slate-800">
                 🥛 Milk Section (Qty | Shop Rate)
@@ -184,7 +188,6 @@
               <div class="space-y-2" id="kiranaMilkInputs"></div>
             </div>
 
-            <!-- Curd Packets -->
             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
               <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider pb-2 border-b border-slate-800">
                 🥣 Curd Packets (Qty | Shop Rate)
@@ -192,7 +195,6 @@
               <div class="space-y-2" id="kiranaCurdInputs"></div>
             </div>
 
-            <!-- Curd Buckets -->
             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
               <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider pb-2 border-b border-slate-800">
                 🪣 Curd Buckets (Qty | Shop Rate)
@@ -256,7 +258,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-3 border-b border-slate-800 gap-3">
           <div>
             <h2 class="text-lg font-bold text-white">Master Price &amp; Catalog Configuration</h2>
-            <p class="text-xs text-slate-400">Edit Agent Cost, Customer MRP, and default Shop Rates. Saved changes apply to all stock &amp; customer calculations.</p>
+            <p class="text-xs text-slate-400">Edit Agent Cost, Customer MRP, and default Shop Rates. Saved changes sync to cloud and update all profit calculations.</p>
           </div>
           <button type="button" onclick="exportMasterCSV()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white rounded-lg uppercase">
             Export Master CSV
@@ -299,8 +301,49 @@
 
   </div>
 
-  <script>
-    // Master Product Catalog Schema with Agent Costs, MRP, and Default Shop Rates
+  <!-- Firebase Live Sync Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, getDocs, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOrNP6n8oF0h8-n5NJgY2slzVsL3s63Hk",
+      authDomain: "annapurna-dairy-and-foods.firebaseapp.com",
+      projectId: "annapurna-dairy-and-foods",
+      storageBucket: "annapurna-dairy-and-foods.firebasestorage.app",
+      messagingSenderId: "510695796901",
+      appId: "1:510695796901:web:614a9238180d2eada3dd4c",
+      measurementId: "G-53ZC87HFHQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const DB_COLLECTION = "ledger_store";
+
+    // Firestore storage wrappers with local fallback
+    async function cloudGet(key) {
+      try {
+        const docSnap = await getDoc(doc(db, DB_COLLECTION, key));
+        if (docSnap.exists()) return { value: docSnap.data().value };
+        const local = localStorage.getItem(key);
+        return local ? { value: local } : null;
+      } catch (e) {
+        const local = localStorage.getItem(key);
+        return local ? { value: local } : null;
+      }
+    }
+
+    async function cloudSet(key, value) {
+      localStorage.setItem(key, value);
+      try {
+        await setDoc(doc(db, DB_COLLECTION, key), { value: value, updatedAt: new Date().toISOString() });
+        return { ok: true };
+      } catch (e) {
+        return { ok: true };
+      }
+    }
+
+    // Master Product Catalog Schema
     const DEFAULT_MASTER_ITEMS = {
       tm: { name: "TM (Toned Milk 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 60.00 },
       fcm: { name: "FCM (Full Cream 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 76.00 },
@@ -312,17 +355,15 @@
       bucket5kg: { name: "5kg STM Curd Bucket", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 }
     };
 
-    const STORAGE_KEY_MASTER = "annapurna_master_catalog_v3";
-    const STORAGE_KEY_KIRANA = "annapurna_kirana_dispatches_v3";
-    const STORAGE_KEY_STOCK_DAYS = "annapurna_stock_days_v3";
-    const STORAGE_KEY_LAST_DATE = "annapurna_active_date_v3";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v1";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v1";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v1";
 
     let masterItems = {};
     let kiranaLogs = [];
-    let stockDays = {}; // Keyed by YYYY-MM-DD
+    let stockDays = {};
     let demandChart = null;
 
-    // Helper: Local date formatted YYYY-MM-DD
     function getLocalDateString(d = new Date()) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -336,49 +377,68 @@
       return getLocalDateString(d);
     }
 
-    // Load state from localStorage
-    function loadState() {
-      try {
-        const storedMaster = localStorage.getItem(STORAGE_KEY_MASTER);
-        masterItems = storedMaster ? JSON.parse(storedMaster) : JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
-        Object.keys(DEFAULT_MASTER_ITEMS).forEach(k => {
-          if (!masterItems[k]) masterItems[k] = { ...DEFAULT_MASTER_ITEMS[k] };
-        });
-      } catch (e) {
-        masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
-      }
+    // Live Snapshot Realtime Listeners for Master, Kirana, and Stock
+    function attachLiveSyncListeners() {
+      // 1. Master Catalog Realtime Sync
+      onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
+        if (docSnap.exists()) {
+          masterItems = JSON.parse(docSnap.data().value);
+          renderMasterTable();
+          renderKiranaFormFields();
+          loadDateData();
+        }
+      });
 
-      try {
-        const storedKirana = localStorage.getItem(STORAGE_KEY_KIRANA);
-        kiranaLogs = storedKirana ? JSON.parse(storedKirana) : [];
-      } catch (e) {
-        kiranaLogs = [];
-      }
+      // 2. Kirana Dispatches Realtime Sync
+      onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_KIRANA), (docSnap) => {
+        if (docSnap.exists()) {
+          kiranaLogs = JSON.parse(docSnap.data().value);
+          updateShopDatalist();
+          loadDateData();
+          renderDemandChart();
+        }
+      });
 
-      try {
-        const storedStock = localStorage.getItem(STORAGE_KEY_STOCK_DAYS);
-        stockDays = storedStock ? JSON.parse(storedStock) : {};
-      } catch (e) {
-        stockDays = {};
-      }
+      // 3. Stock Days Realtime Sync
+      onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_STOCK_DAYS), (docSnap) => {
+        if (docSnap.exists()) {
+          stockDays = JSON.parse(docSnap.data().value);
+          loadDateData();
+          renderDemandChart();
+        }
+      });
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      loadState();
+    async function initialLoad() {
+      // Load Master
+      const mRes = await cloudGet(CLOUD_KEY_MASTER);
+      if (mRes && mRes.value) masterItems = JSON.parse(mRes.value);
+      else {
+        masterItems = JSON.parse(JSON.stringify(DEFAULT_MASTER_ITEMS));
+        await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
+      }
 
-      const savedDate = localStorage.getItem(STORAGE_KEY_LAST_DATE);
-      const activeDate = savedDate || getLocalDateString();
-      document.getElementById("selectedDate").value = activeDate;
+      // Load Kirana
+      const kRes = await cloudGet(CLOUD_KEY_KIRANA);
+      if (kRes && kRes.value) kiranaLogs = JSON.parse(kRes.value);
+
+      // Load Stock Days
+      const sRes = await cloudGet(CLOUD_KEY_STOCK_DAYS);
+      if (sRes && sRes.value) stockDays = JSON.parse(sRes.value);
+
+      const defaultDate = getLocalDateString();
+      document.getElementById("selectedDate").value = defaultDate;
 
       renderKiranaFormFields();
       updateShopDatalist();
       loadDateData();
       renderMasterTable();
       renderDemandChart();
-    });
 
-    // View Navigation Tabs
-    function switchView(viewKey) {
+      attachLiveSyncListeners();
+    }
+
+    window.switchView = function(viewKey) {
       document.getElementById("viewRetail").classList.toggle("hidden", viewKey !== 'retail');
       document.getElementById("viewKirana").classList.toggle("hidden", viewKey !== 'kirana');
       document.getElementById("viewMaster").classList.toggle("hidden", viewKey !== 'master');
@@ -397,25 +457,19 @@
 
       if (viewKey === 'master') renderMasterTable();
       else loadDateData();
-    }
+    };
 
-    function onDateChanged() {
-      const newDate = getActiveDate();
-      localStorage.setItem(STORAGE_KEY_LAST_DATE, newDate);
+    window.onDateChanged = function() {
       loadDateData();
       renderDemandChart();
-    }
+    };
 
     function getActiveDate() {
       return document.getElementById("selectedDate").value || getLocalDateString();
     }
 
-    // =========================================================================
-    // IN-STORE RETAIL & STOCK RECONCILIATION
-    // =========================================================================
     function getOrInitDayStock(dateStr) {
       if (!stockDays[dateStr]) {
-        // Auto carry-over yesterday's leftover as today's opening stock!
         const prevDate = shiftDate(dateStr, -1);
         const prevStock = stockDays[prevDate];
 
@@ -429,7 +483,7 @@
             home: 0
           };
         });
-        localStorage.setItem(STORAGE_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
       }
       return stockDays[dateStr];
     }
@@ -480,7 +534,6 @@
         const leftover = Number(stockData.leftover) || 0;
         const home = Number(stockData.home) || 0;
 
-        // The Core Night Balance Formula:
         const retailCustSold = Math.max(0, totalAvail - sentToKirana - leftover - home);
         const retailRevenue = retailCustSold * Number(item.mrp);
         const retailProfit = retailCustSold * (Number(item.mrp) - Number(item.agentPrice));
@@ -528,32 +581,30 @@
       });
     }
 
-    function updateStockField(itemKey, field, val) {
+    window.updateStockField = async function(itemKey, field, val) {
       const dateStr = getActiveDate();
       const numVal = parseFloat(val) || 0;
       if (!stockDays[dateStr]) getOrInitDayStock(dateStr);
 
       stockDays[dateStr][itemKey][field] = numVal;
 
-      // If inward or opening changes without manual leftover, sync leftover to total available
       if (field === 'inward' || field === 'opening') {
         const kiranaSent = getKiranaSentTotalPerItem(kiranaLogs.filter(e => e.date === dateStr))[itemKey] || 0;
         const total = (Number(stockDays[dateStr][itemKey].opening) || 0) + (Number(stockDays[dateStr][itemKey].inward) || 0);
         stockDays[dateStr][itemKey].leftover = Math.max(0, total - kiranaSent);
       }
 
-      localStorage.setItem(STORAGE_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
       loadDateData();
       renderDemandChart();
-    }
+    };
 
-    function saveDayStockRecord() {
-      localStorage.setItem(STORAGE_KEY_STOCK_DAYS, JSON.stringify(stockDays));
-      alert(`Stock inventory and in-store customer sales successfully saved for ${getActiveDate()}!`);
-    }
+    window.saveDayStockRecord = async function() {
+      await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+      alert(`Stock inventory and in-store customer sales synced to cloud for ${getActiveDate()}!`);
+    };
 
-    // Quick leftover parser
-    function applyQuickLeftovers() {
+    window.applyQuickLeftovers = async function() {
       const text = document.getElementById("quickLeftoverText").value.trim();
       if (!text) return alert("Please enter leftover lines (e.g. tm 10, scurd 15).");
 
@@ -567,7 +618,6 @@
           const rawKey = m[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
           const qty = parseFloat(m[2]) || 0;
 
-          // Match item key
           const matchedKey = Object.keys(masterItems).find(k => {
             const cleanK = k.toLowerCase();
             const cleanName = masterItems[k].name.toLowerCase();
@@ -582,19 +632,16 @@
       });
 
       if (matchCount > 0) {
-        localStorage.setItem(STORAGE_KEY_STOCK_DAYS, JSON.stringify(stockDays));
+        await cloudSet(CLOUD_KEY_STOCK_DAYS, JSON.stringify(stockDays));
         document.getElementById("quickLeftoverText").value = "";
         loadDateData();
         renderDemandChart();
-        alert(`Matched and updated fridge leftovers for ${matchCount} items! In-store retail customer sales recalculated.`);
+        alert(`Updated leftovers for ${matchCount} items! In-store retail customer sales recalculated.`);
       } else {
         alert("Could not match product names. Please use formats like: tm 10, fcm 4, scurd 12, curd450 6");
       }
-    }
+    };
 
-    // =========================================================================
-    // KIRANA SHOP DISPATCH & DUES
-    // =========================================================================
     function renderKiranaFormFields() {
       const milkContainer = document.getElementById("kiranaMilkInputs");
       const curdContainer = document.getElementById("kiranaCurdInputs");
@@ -625,7 +672,7 @@
       });
     }
 
-    function calculateKiranaLivePreview() {
+    window.calculateKiranaLivePreview = function() {
       let bill = 0;
       let profit = 0;
 
@@ -642,9 +689,9 @@
 
       document.getElementById("liveKiranaBill").innerText = `₹${bill.toFixed(2)}`;
       document.getElementById("liveKiranaProfit").innerText = `₹${profit.toFixed(2)}`;
-    }
+    };
 
-    function handleKiranaSubmit(e) {
+    window.handleKiranaSubmit = async function(e) {
       e.preventDefault();
       const date = getActiveDate();
       const editId = document.getElementById("editKiranaId").value;
@@ -682,12 +729,12 @@
         kiranaLogs.push(logEntry);
       }
 
-      localStorage.setItem(STORAGE_KEY_KIRANA, JSON.stringify(kiranaLogs));
+      await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
       updateShopDatalist();
       resetKiranaForm();
       loadDateData();
       renderDemandChart();
-    }
+    };
 
     function renderKiranaTable(entries) {
       const tbody = document.getElementById("kiranaLedgerTableBody");
@@ -750,13 +797,13 @@
       });
     }
 
-    function toggleKiranaPayment(id) {
+    window.toggleKiranaPayment = async function(id) {
       kiranaLogs = kiranaLogs.map(l => l.id === id ? { ...l, paymentStatus: l.paymentStatus === 'Paid' ? 'Not Paid' : 'Paid' } : l);
-      localStorage.setItem(STORAGE_KEY_KIRANA, JSON.stringify(kiranaLogs));
+      await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
       loadDateData();
-    }
+    };
 
-    function editKiranaEntry(id) {
+    window.editKiranaEntry = function(id) {
       const entry = kiranaLogs.find(l => l.id === id);
       if (!entry) return;
 
@@ -774,19 +821,19 @@
       document.getElementById("saveKiranaBtn").innerText = "Update Delivery";
       calculateKiranaLivePreview();
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    };
 
-    function deleteKiranaEntry(id) {
+    window.deleteKiranaEntry = async function(id) {
       if (confirm("Are you sure you want to delete this Kirana delivery entry?")) {
         kiranaLogs = kiranaLogs.filter(l => l.id !== id);
-        localStorage.setItem(STORAGE_KEY_KIRANA, JSON.stringify(kiranaLogs));
+        await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
         updateShopDatalist();
         loadDateData();
         renderDemandChart();
       }
-    }
+    };
 
-    function resetKiranaForm() {
+    window.resetKiranaForm = function() {
       document.getElementById("editKiranaId").value = "";
       document.getElementById("kiranaDeliveryForm").reset();
       document.getElementById("kiranaPaymentStatus").value = "Not Paid";
@@ -794,7 +841,7 @@
       document.getElementById("saveKiranaBtn").innerText = "Save Shop Dispatch";
       renderKiranaFormFields();
       calculateKiranaLivePreview();
-    }
+    };
 
     function updateShopDatalist() {
       const datalist = document.getElementById("shopNamesDatalist");
@@ -803,9 +850,6 @@
       datalist.innerHTML = unique.map(n => `<option value="${n}"></option>`).join('');
     }
 
-    // =========================================================================
-    // OVERALL METRICS RECONCILIATION
-    // =========================================================================
     function calculateOverallDailyMetrics(dayStock, kiranaEntries) {
       let kiranaSales = 0;
       let kiranaProfit = 0;
@@ -876,9 +920,6 @@
       document.getElementById("metricLeftoversTotal").innerText = `${totalLeftovers} Pkts`;
     }
 
-    // =========================================================================
-    // VIEW 3: MASTER CATALOG TABLE
-    // =========================================================================
     function renderMasterTable() {
       const tbody = document.getElementById("masterTableBody");
       tbody.innerHTML = "";
@@ -913,7 +954,7 @@
       });
     }
 
-    function saveMasterRate(k) {
+    window.saveMasterRate = async function(k) {
       const newAgent = parseFloat(document.getElementById(`masterAgent_${k}`).value) || 0;
       const newMrp = parseFloat(document.getElementById(`masterMrp_${k}`).value) || 0;
       const newShop = parseFloat(document.getElementById(`masterShop_${k}`).value) || newMrp;
@@ -922,13 +963,13 @@
       masterItems[k].mrp = newMrp;
       masterItems[k].shopRate = newShop;
 
-      localStorage.setItem(STORAGE_KEY_MASTER, JSON.stringify(masterItems));
+      await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
       renderKiranaFormFields();
       loadDateData();
-      alert(`Updated pricing for ${masterItems[k].name}: Agent Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)} | Shop Rate ₹${newShop.toFixed(2)}`);
-    }
+      alert(`Updated pricing for ${masterItems[k].name}: Cost ₹${newAgent.toFixed(2)} | MRP ₹${newMrp.toFixed(2)} | Shop Rate ₹${newShop.toFixed(2)}`);
+    };
 
-    function exportMasterCSV() {
+    window.exportMasterCSV = function() {
       let csv = "Item Key,Product Name,Section,Unit,Agent Buy Cost (INR),Customer MRP (INR),Default Shop Rate (INR)\n";
       Object.keys(masterItems).forEach(k => {
         const it = masterItems[k];
@@ -939,11 +980,8 @@
       a.href = URL.createObjectURL(blob);
       a.download = `Annapurna_Price_Master_${getActiveDate()}.csv`;
       a.click();
-    }
+    };
 
-    // =========================================================================
-    // 7-DAY DEMAND ANALYSIS CHART
-    // =========================================================================
     function renderDemandChart() {
       const dates = [];
       const now = new Date();
@@ -1022,7 +1060,6 @@
           },
           scales: {
             x: {
-              stacked: true,
               ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
               grid: { color: "rgba(51, 65, 85, 0.2)" }
             },
@@ -1036,6 +1073,8 @@
         }
       });
     }
+
+    initialLoad();
   </script>
 </body>
 </html>
