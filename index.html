@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Annapurna Dairy — Live Cloud Ledger &amp; Inventory</title>
+  <title>Annapurna Dairy — Kirana &amp; Stock Inventory Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -16,26 +16,26 @@
 
   <div class="max-w-7xl mx-auto space-y-6">
 
-    <!-- Header & Date Navigation -->
+    <!-- Main Navigation Header -->
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl gap-4">
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
-          <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2.5 py-0.5 rounded-full">
-            ☁️ Cloud Synced Live
+          <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
+            ☁️ Cloud Synced
           </span>
         </div>
-        <p class="text-xs text-slate-400 mt-1">Multi-device live sync: Retail customer sales (MRP), Kirana deliveries &amp; live stock balance</p>
+        <p class="text-xs text-slate-400 mt-1">Multi-device live sync: Retail customer sales, Kirana deliveries &amp; stock balance</p>
       </div>
 
-      <!-- Navigation & Date Selector -->
+      <!-- Navigation Tabs & Date Selector -->
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-          <button type="button" id="tabBtnRetail" onclick="switchView('retail')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
-            🛒 In-Store &amp; Stock
-          </button>
-          <button type="button" id="tabBtnKirana" onclick="switchView('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+          <button type="button" id="tabBtnKirana" onclick="switchView('kirana')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow">
             🏪 Kirana Deliveries
+          </button>
+          <button type="button" id="tabBtnRetail" onclick="switchView('retail')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
+            🛒 In-Store &amp; Stock
           </button>
           <button type="button" id="tabBtnMaster" onclick="switchView('master')" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white">
             ⚙️ Price Master
@@ -84,94 +84,32 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- VIEW 1: IN-STORE CUSTOMER RECONCILIATION & STOCK BALANCE      -->
+    <!-- VIEW 1: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
     <!-- ============================================================= -->
-    <div id="viewRetail" class="space-y-6">
+    <div id="viewKirana" class="space-y-6">
 
-      <!-- Night Leftover Bulk Entry Box -->
-      <div class="bg-sky-950/40 p-4 rounded-2xl border border-sky-800/60 shadow-lg space-y-2">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
-            🌙 Quick Leftover Stock Entry (Count Fridge Packets at Night)
+      <!-- SMART QUICK BULK TEXT DISPATCH BOX -->
+      <div class="bg-emerald-950/30 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-3">
+        <div class="flex justify-between items-center flex-wrap gap-2">
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            ⚡ Quick Bulk Kirana Text Dispatch (Type or Paste)
           </span>
-          <button type="button" onclick="applyQuickLeftovers()" class="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold uppercase">
-            Auto-Calculate In-Store Customers
+          <button type="button" onclick="applyKiranaQuickText()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow">
+            Parse &amp; Add Shop Dispatch
           </button>
         </div>
         <p class="text-[11px] text-slate-300">
-          Type the unsold packets remaining in fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
+          Line 1 is the <b>Shop Name</b> (e.g. <code>Jay Bhavani Kiran</code>), followed by item quantities (e.g. <code>TM - 5L</code>, <code>SMilk - 5L</code>, <code>scurd - 10</code>, <code>curd big - 2</code>).
         </p>
-        <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 15&#10;curd450 6"></textarea>
+        <textarea id="kiranaQuickInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="Jay Bhavani Kiran&#10;TM - 5L&#10;SMilk - 5L&#10;scurd - 10&#10;curd big - 2"></textarea>
       </div>
 
-      <!-- Live Stock & Retail Reconciliation Table -->
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-bold text-white uppercase tracking-wider">In-Store Customer &amp; Stock Balance (<span id="stockDateDisplay">--</span>)</h2>
-            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Sold = Available − Kirana − Leftover − Home</p>
-          </div>
-          <button type="button" onclick="saveDayStockRecord()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
-            Save Today Stock
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-800 text-[10.5px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
-              <tr>
-                <th class="p-3">Product Name</th>
-                <th class="p-3 text-center">Cost / MRP</th>
-                <th class="p-3 text-center bg-slate-850">Opening</th>
-                <th class="p-3 text-center bg-slate-850">Inward (+)</th>
-                <th class="p-3 text-center font-bold text-white">Total Avail</th>
-                <th class="p-3 text-center text-amber-300">Kirana Sent</th>
-                <th class="p-3 text-center bg-sky-950/50 text-sky-300 font-bold">Fridge Leftover</th>
-                <th class="p-3 text-center">Home/Damage</th>
-                <th class="p-3 text-center text-emerald-400 font-bold bg-emerald-950/40">Cust. Sold (MRP)</th>
-                <th class="p-3 text-right">Retail Revenue</th>
-                <th class="p-3 text-right text-emerald-400 font-bold">Retail Profit</th>
-              </tr>
-            </thead>
-            <tbody id="retailStockTableBody" class="divide-y divide-slate-800">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- VIEW 2: KIRANA SHOP DISPATCH & DUES LEDGER                    -->
-    <!-- ============================================================= -->
-    <div id="viewKirana" class="space-y-6 hidden">
-
-      <!-- ⚡ SMART KIRANA QUICK TEXT ENTRY BOX (PROMINENT AT TOP) -->
-      <div class="bg-gradient-to-r from-emerald-950/80 to-slate-900 p-5 rounded-2xl border-2 border-emerald-500/80 shadow-2xl space-y-3">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-          <div>
-            <span class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-              ⚡ Quick Shorthand Entry for Kirana Shops
-            </span>
-            <p class="text-xs text-slate-300 mt-0.5">
-              Type shorthand directly (e.g. <code>ashok kirana tm5l</code> or <code>mani kirana tm 5l, smilk 3, scurd 4</code>)
-            </p>
-          </div>
-          <button type="button" onclick="applyKiranaQuickShorthand()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase shadow-lg shadow-emerald-950 transition">
-            🚀 Parse &amp; Add Delivery
-          </button>
-        </div>
-        
-        <textarea id="kiranaQuickInput" rows="2" class="w-full bg-slate-950 border border-emerald-600/50 rounded-xl p-3 text-xs md:text-sm text-emerald-200 mono focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400" placeholder="ashok kirana tm5l&#10;mani kirana tm 2l, smilk 3, scurd 4&#10;balaji stores curd450 12, bucket10kg 1"></textarea>
-      </div>
-
-      <!-- Kirana Entry Form -->
+      <!-- Manual Kirana Delivery Form -->
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800">
           <div>
-            <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Manual Shop Dispatch Form</h2>
-            <p class="text-xs text-slate-400">Select shop and enter quantities with individual selling rates</p>
+            <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
+            <p class="text-xs text-slate-400">Enter delivery quantities &amp; custom selling rates for this shop</p>
           </div>
           <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline">Clear Form</button>
         </div>
@@ -182,7 +120,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
-              <input type="text" id="kiranaShopName" list="shopNamesDatalist" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Ashok Kirana, Mani Kirana">
+              <input type="text" id="kiranaShopName" list="shopNamesDatalist" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Jay Bhavani Kiran, Mani Kirana">
               <datalist id="shopNamesDatalist"></datalist>
             </div>
             <div>
@@ -262,6 +200,65 @@
             </thead>
             <tbody id="kiranaLedgerTableBody" class="divide-y divide-slate-800">
               <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 2: IN-STORE CUSTOMER RECONCILIATION & STOCK BALANCE      -->
+    <!-- ============================================================= -->
+    <div id="viewRetail" class="space-y-6 hidden">
+
+      <!-- Night Leftover Bulk Entry Box -->
+      <div class="bg-sky-950/40 p-4 rounded-2xl border border-sky-800/60 shadow-lg space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+            🌙 Quick Leftover Stock Entry (Count Fridge Packets at Night)
+          </span>
+          <button type="button" onclick="applyQuickLeftovers()" class="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold uppercase">
+            Auto-Calculate In-Store Customers
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-300">
+          Type the unsold packets remaining in fridge (e.g. <code>tm 10</code>, <code>fcm 4</code>, <code>scurd 15</code>, <code>curd450 6</code>). Customer sales at MRP will calculate automatically!
+        </p>
+        <textarea id="quickLeftoverText" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-sky-500" placeholder="tm 10&#10;fcm 4&#10;scurd 15&#10;curd450 6"></textarea>
+      </div>
+
+      <!-- Live Stock & Retail Reconciliation Table -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-4 bg-slate-850 border-b border-slate-800 flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">In-Store Customer &amp; Stock Balance (<span id="stockDateDisplay">--</span>)</h2>
+            <p class="text-xs text-slate-400">Available = Opening + Inward | In-Store Sold = Available − Kirana − Leftover − Home</p>
+          </div>
+          <button type="button" onclick="saveDayStockRecord()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow">
+            Save Today Stock
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-[10.5px] uppercase tracking-wider text-slate-400 border-b border-slate-700">
+              <tr>
+                <th class="p-3">Product Name</th>
+                <th class="p-3 text-center">Cost / MRP</th>
+                <th class="p-3 text-center bg-slate-850">Opening</th>
+                <th class="p-3 text-center bg-slate-850">Inward (+)</th>
+                <th class="p-3 text-center font-bold text-white">Total Avail</th>
+                <th class="p-3 text-center text-amber-300">Kirana Sent</th>
+                <th class="p-3 text-center bg-sky-950/50 text-sky-300 font-bold">Fridge Leftover</th>
+                <th class="p-3 text-center">Home/Damage</th>
+                <th class="p-3 text-center text-emerald-400 font-bold bg-emerald-950/40">Cust. Sold (MRP)</th>
+                <th class="p-3 text-right">Retail Revenue</th>
+                <th class="p-3 text-right text-emerald-400 font-bold">Retail Profit</th>
+              </tr>
+            </thead>
+            <tbody id="retailStockTableBody" class="divide-y divide-slate-800">
+              <!-- Rendered dynamically -->
             </tbody>
           </table>
         </div>
@@ -361,33 +358,20 @@
       }
     }
 
-    // Master Product Catalog Schema
     const DEFAULT_MASTER_ITEMS = {
-      tm: { name: "TM (Toned Milk 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 60.00 },
-      fcm: { name: "FCM (Full Cream 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 76.00 },
+      tm: { name: "TM (Toned Milk 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 59.65, mrp: 65.00, shopRate: 31.00 },
+      fcm: { name: "FCM (Full Cream 500ml)", section: "milk", unit: "LTR/PKT", agentPrice: 75.40, mrp: 81.00, shopRate: 38.00 },
       smilk: { name: "SMILK (Small Milk 170ml)", section: "milk", unit: "PKT", agentPrice: 8.35, mrp: 10.00, shopRate: 9.00 },
-      teamilk: { name: "Tea Milk Special", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 74.00 },
-      curd450: { name: "450gm Curd Sachet", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 66.00 },
+      teamilk: { name: "Tea Milk Special", section: "milk", unit: "LTR/PKT", agentPrice: 71.60, mrp: 79.00, shopRate: 37.00 },
+      curd450: { name: "450gm Curd Sachet", section: "curd", unit: "PKT", agentPrice: 61.00, mrp: 84.00, shopRate: 36.00 },
       scurd: { name: "SCURD (Small Curd 120g)", section: "curd", unit: "PKT", agentPrice: 7.60, mrp: 10.00, shopRate: 8.50 },
       bucket10kg: { name: "10kg STM Green Bucket", section: "bucket", unit: "BUCKET", agentPrice: 680.00, mrp: 750.00, shopRate: 700.00 },
       bucket5kg: { name: "5kg STM Curd Bucket", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 }
     };
 
-    // Shorthand Aliases Dictionary for Flexible Quick Entry Parsing
-    const ITEM_ALIASES = {
-      "tm": "tm", "toned milk": "tm", "tonedmilk": "tm",
-      "fcm": "fcm", "full cream": "fcm", "fullcream": "fcm",
-      "smilk": "smilk", "small milk": "smilk", "s milk": "smilk", "sm": "smilk",
-      "teamilk": "teamilk", "tea milk": "teamilk", "tea": "teamilk",
-      "450gm": "curd450", "450g": "curd450", "curd 450": "curd450", "curd450": "curd450", "curd big": "curd450",
-      "scurd": "scurd", "small curd": "scurd", "s curd": "scurd", "sc": "scurd", "curd small": "scurd",
-      "bucket10kg": "bucket10kg", "10kg bucket": "bucket10kg", "10kg": "bucket10kg", "bucket 10kg": "bucket10kg",
-      "bucket5kg": "bucket5kg", "5kg bucket": "bucket5kg", "5kg": "bucket5kg", "bucket 5kg": "bucket5kg"
-    };
-
-    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v1";
-    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v1";
-    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v1";
+    const CLOUD_KEY_MASTER = "annapurna_cloud_master_v2";
+    const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v2";
+    const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v2";
 
     let masterItems = {};
     let kiranaLogs = [];
@@ -466,11 +450,11 @@
       document.getElementById("viewKirana").classList.toggle("hidden", viewKey !== 'kirana');
       document.getElementById("viewMaster").classList.toggle("hidden", viewKey !== 'master');
 
-      document.getElementById("tabBtnRetail").className = viewKey === 'retail' 
+      document.getElementById("tabBtnKirana").className = viewKey === 'kirana' 
         ? "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow"
         : "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
 
-      document.getElementById("tabBtnKirana").className = viewKey === 'kirana' 
+      document.getElementById("tabBtnRetail").className = viewKey === 'retail' 
         ? "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition bg-emerald-600 text-white shadow"
         : "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition text-slate-400 hover:text-white";
 
@@ -666,78 +650,145 @@
     };
 
     // =========================================================================
-    // ⚡ SMART KIRANA QUICK SHORTHAND PARSER (e.g. "ashok kirana tm5l")
+    // SMART KIRANA QUICK BULK TEXT PARSER & DISPATCH
     // =========================================================================
-    window.applyKiranaQuickShorthand = async function() {
+    const KIRANA_ALIAS_RULES = {
+      'tm': 'tm',
+      'toned': 'tm',
+      'toned milk': 'tm',
+      'fcm': 'fcm',
+      'full cream': 'fcm',
+      'full cream milk': 'fcm',
+      'smilk': 'smilk',
+      'small milk': 'smilk',
+      's.milk': 'smilk',
+      's milk': 'smilk',
+      's. milk': 'smilk',
+      'stm 150ml': 'smilk',
+      'teamilk': 'teamilk',
+      'tea milk': 'teamilk',
+      'tea special': 'teamilk',
+      'curd 450': 'curd450',
+      '450g': 'curd450',
+      '450gm': 'curd450',
+      '450g curd': 'curd450',
+      '450gm curd': 'curd450',
+      'curd big': 'curd450',
+      'scurd': 'scurd',
+      'small curd': 'scurd',
+      's.curd': 'scurd',
+      's curd': 'scurd',
+      's. curd': 'scurd',
+      'curd 120': 'scurd',
+      'curd 125': 'scurd',
+      '10kg': 'bucket10kg',
+      '10 kg': 'bucket10kg',
+      '10kg bucket': 'bucket10kg',
+      '10kg stm': 'bucket10kg',
+      '5kg': 'bucket5kg',
+      '5 kg': 'bucket5kg',
+      '5kg bucket': 'bucket5kg',
+      '5kg stm': 'bucket5kg'
+    };
+
+    window.applyKiranaQuickText = async function() {
       const text = document.getElementById("kiranaQuickInput").value.trim();
-      if (!text) return alert("Please type your Kirana shorthand entry (e.g. ashok kirana tm5l).");
+      if (!text) return alert("Please enter dispatch text first.");
 
-      const dateStr = getActiveDate();
       const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-      let successCount = 0;
+      if (!lines.length) return;
 
-      // Sort alias keys longest first
-      const sortedAliasKeys = Object.keys(ITEM_ALIASES).sort((a, b) => b.length - a.length);
-      const aliasPattern = sortedAliasKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-      
-      // Regex matches: alias + optional whitespace/hyphen + number + optional units (l, ltr, pkts, kg, etc.)
-      const itemRegex = new RegExp(`(?:\\b|(?<=[^a-zA-Z0-9]))(${aliasPattern})(?:[\\s:\\-]*?)(\\d+(?:\\.\\d+)?)(?:\\s*(?:l|ltr|ltrs|liters|litre|litres|p|pkt|pkts|packets|packet|kg|kgs|kilo|kilos|bkt|bucket|buckets))?(?=\\b|[^a-zA-Z0-9]|$)`, 'gi');
+      // Line 1 is the exact Kirana shop name (e.g. Jay Bhavani Kiran)
+      const shopName = lines[0].replace(/[:\-]/g, '').trim();
+      const parsedItems = {};
+      let matchedCount = 0;
 
-      for (const line of lines) {
-        const matches = [];
-        let match;
-        while ((match = itemRegex.exec(line)) !== null) {
-          matches.push(match);
-        }
+      for (let i = 1; i < lines.length; i++) {
+        let line = lines[i];
+        // Clean out parenthetical notes like (small milk/smilk/s.milk/S.Milk)
+        line = line.replace(/\(.*?\)/g, '').trim();
 
-        if (matches.length > 0) {
-          // Shop name is everything preceding the first item match
-          const firstIdx = matches[0].index;
-          let shopName = line.substring(0, firstIdx).trim().replace(/^[,:\-\s]+|[,:\-\s]+$/g, '');
-          if (!shopName) shopName = "Kirana Store";
+        const match = line.match(/^(.+?)(?:[-\s:=]+)(\d+(?:\.\d+)?)\s*([a-zA-Z]*)/i);
+        if (match) {
+          let rawKey = match[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+          let qty = parseFloat(match[2]) || 0;
+          let unit = (match[3] || '').trim().toLowerCase();
 
-          // Format Proper Case for Shop Name
-          shopName = shopName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-
-          const items = {};
-          matches.forEach(m => {
-            const rawAlias = m[1].toLowerCase().trim();
-            const qty = parseFloat(m[2]) || 0;
-            const canonicalKey = ITEM_ALIASES[rawAlias] || rawAlias;
-            const rate = Number(masterItems[canonicalKey]?.shopRate || masterItems[canonicalKey]?.mrp || 0);
-
-            if (qty > 0) {
-              items[canonicalKey] = {
-                qty: (items[canonicalKey]?.qty || 0) + qty,
-                sellRate: rate
-              };
-            }
-          });
-
-          if (Object.keys(items).length > 0) {
-            kiranaLogs.push({
-              id: "kirana_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
-              date: dateStr,
-              shopName,
-              paymentStatus: "Not Paid",
-              note: "Quick Shorthand Entry",
-              items
+          // Match alias
+          let matchedKey = null;
+          if (KIRANA_ALIAS_RULES[rawKey]) {
+            matchedKey = KIRANA_ALIAS_RULES[rawKey];
+          } else {
+            Object.keys(KIRANA_ALIAS_RULES).forEach(k => {
+              if (rawKey.includes(k) || k.includes(rawKey)) matchedKey = KIRANA_ALIAS_RULES[k];
             });
-            successCount++;
+          }
+
+          if (matchedKey) {
+            // Intelligent Unit Conversions:
+            // 1) SMILK: 1 Liter = 5 packets (170ml). If unit is 'l', 'ltr', 'liter', 5L = 25 packets!
+            if (matchedKey === 'smilk' && (unit === 'l' || unit === 'ltr' || unit === 'liter' || unit === 'liters')) {
+              qty = qty * 5; // 5L * 5 = 25 pkts
+            }
+            // 2) SCURD: 1 Liter = 5 packets.
+            if (matchedKey === 'scurd' && (unit === 'l' || unit === 'ltr' || unit === 'liter' || unit === 'liters')) {
+              qty = qty * 5;
+            }
+            // 3) CURD 450g: 1 Liter = 2 packets.
+            if (matchedKey === 'curd450' && (unit === 'l' || unit === 'ltr' || unit === 'liter' || unit === 'liters')) {
+              qty = qty * 2;
+            }
+
+            const defaultRate = Number(masterItems[matchedKey].shopRate || masterItems[matchedKey].mrp);
+            parsedItems[matchedKey] = {
+              qty: qty,
+              sellRate: defaultRate
+            };
+            matchedCount++;
           }
         }
       }
 
-      if (successCount > 0) {
-        await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
-        document.getElementById("kiranaQuickInput").value = "";
-        updateShopDatalist();
-        loadDateData();
-        renderDemandChart();
-        alert(`Successfully added ${successCount} Kirana delivery dispatch(es) to cloud!`);
-      } else {
-        alert("Could not recognize entry format. Try like: 'ashok kirana tm5l' or 'mani kirana tm 5l, smilk 3, scurd 4'");
+      if (matchedCount === 0) {
+        return alert("Could not match items. Ensure format: Line 1 = Shop Name, Line 2+ = TM - 5L, SMilk - 5L, etc.");
       }
+
+      // Pre-fill form fields for quick visual review
+      document.getElementById("kiranaShopName").value = shopName;
+      document.getElementById("kiranaPaymentStatus").value = "Not Paid";
+      document.getElementById("kiranaNote").value = "Quick text dispatch";
+
+      Object.keys(masterItems).forEach(k => {
+        if (parsedItems[k]) {
+          document.getElementById(`kqty_${k}`).value = parsedItems[k].qty;
+          document.getElementById(`krate_${k}`).value = parsedItems[k].sellRate;
+        } else {
+          document.getElementById(`kqty_${k}`).value = "";
+        }
+      });
+
+      calculateKiranaLivePreview();
+
+      // Automatically log dispatch
+      const date = getActiveDate();
+      const logEntry = {
+        id: "kirana_" + Date.now(),
+        date,
+        shopName,
+        paymentStatus: "Not Paid",
+        note: "Quick bulk dispatch",
+        items: parsedItems
+      };
+
+      kiranaLogs.push(logEntry);
+      await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
+
+      document.getElementById("kiranaQuickInput").value = "";
+      updateShopDatalist();
+      loadDateData();
+      renderDemandChart();
+
+      alert(`✔ Successfully dispatched ${matchedCount} items to "${shopName}"! Status set to Not Paid (Due).`);
     };
 
     function renderKiranaFormFields() {
@@ -935,7 +986,7 @@
       document.getElementById("editKiranaId").value = "";
       document.getElementById("kiranaDeliveryForm").reset();
       document.getElementById("kiranaPaymentStatus").value = "Not Paid";
-      document.getElementById("kiranaFormHeading").innerText = "Manual Shop Dispatch Form";
+      document.getElementById("kiranaFormHeading").innerText = "Log Kirana Shop Delivery";
       document.getElementById("saveKiranaBtn").innerText = "Save Shop Dispatch";
       renderKiranaFormFields();
       calculateKiranaLivePreview();
@@ -1018,9 +1069,6 @@
       document.getElementById("metricLeftoversTotal").innerText = `${totalLeftovers} Pkts`;
     }
 
-    // =========================================================================
-    // VIEW 3: MASTER CATALOG TABLE
-    // =========================================================================
     function renderMasterTable() {
       const tbody = document.getElementById("masterTableBody");
       tbody.innerHTML = "";
@@ -1083,9 +1131,6 @@
       a.click();
     };
 
-    // =========================================================================
-    // 7-DAY DEMAND ANALYSIS CHART
-    // =========================================================================
     function renderDemandChart() {
       const dates = [];
       const now = new Date();
