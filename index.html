@@ -21,11 +21,11 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-2xl font-bold text-emerald-400">Annapurna Dairy &amp; Foods</h1>
-          <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded-full">
-            ☁️ Cloud Synced
+          <span id="cloudStatusBadge" class="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 px-2.5 py-0.5 rounded-full">
+            ☁️ Cloud Synced Live
           </span>
         </div>
-        <p class="text-xs text-slate-400 mt-1">Multi-device live sync: Retail customer sales, Kirana deliveries &amp; stock balance</p>
+        <p class="text-xs text-slate-400 mt-1">Multi-device live sync: Retail customer sales (MRP), Kirana deliveries &amp; live stock balance</p>
       </div>
 
       <!-- Navigation & Date Selector -->
@@ -147,12 +147,28 @@
     <!-- ============================================================= -->
     <div id="viewKirana" class="space-y-6 hidden">
 
+      <!-- ⚡ SMART KIRANA QUICK TEXT ENTRY BOX -->
+      <div class="bg-emerald-950/40 p-4 rounded-2xl border border-emerald-800/60 shadow-lg space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            ⚡ Quick Entry for Kirana Shops (Type Shorthand)
+          </span>
+          <button type="button" onclick="applyKiranaQuickShorthand()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold uppercase shadow">
+            Parse &amp; Add Delivery
+          </button>
+        </div>
+        <p class="text-[11.5px] text-slate-300">
+          Type one or multiple lines (e.g. <code>ashok kirana tm5l</code>, <code>mani kirana tm 5l, smilk 3, scurd 4</code>, <code>balaji stores curd450 12</code>):
+        </p>
+        <textarea id="kiranaQuickInput" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white mono focus:outline-none focus:border-emerald-500" placeholder="ashok kirana tm5l&#10;mani kirana tm 2l, smilk 3, scurd 4&#10;balaji stores curd450 12, bucket10kg 1"></textarea>
+      </div>
+
       <!-- Kirana Entry Form -->
       <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center pb-3 border-b border-slate-800">
           <div>
-            <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Log Kirana Shop Delivery</h2>
-            <p class="text-xs text-slate-400">Enter delivery quantities &amp; custom selling rates for this shop</p>
+            <h2 id="kiranaFormHeading" class="text-base font-bold text-white">Manual Shop Dispatch Form</h2>
+            <p class="text-xs text-slate-400">Select shop and enter quantities with individual selling rates</p>
           </div>
           <button type="button" onclick="resetKiranaForm()" class="text-xs text-slate-400 hover:text-white underline">Clear Form</button>
         </div>
@@ -163,7 +179,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">Kirana / Shop Name *</label>
-              <input type="text" id="kiranaShopName" list="shopNamesDatalist" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Mani Kirana, Balaji Stores">
+              <input type="text" id="kiranaShopName" list="shopNamesDatalist" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. Ashok Kirana, Mani Kirana">
               <datalist id="shopNamesDatalist"></datalist>
             </div>
             <div>
@@ -320,7 +336,6 @@
     const db = getFirestore(app);
     const DB_COLLECTION = "ledger_store";
 
-    // Firestore storage wrappers with local fallback
     async function cloudGet(key) {
       try {
         const docSnap = await getDoc(doc(db, DB_COLLECTION, key));
@@ -355,6 +370,18 @@
       bucket5kg: { name: "5kg STM Curd Bucket", section: "bucket", unit: "BUCKET", agentPrice: 340.00, mrp: 390.00, shopRate: 360.00 }
     };
 
+    // Aliases Map for Shorthand Quick Entry Parsing
+    const ITEM_ALIASES = {
+      "tm": "tm", "toned milk": "tm", "tonedmilk": "tm",
+      "fcm": "fcm", "full cream": "fcm", "fullcream": "fcm",
+      "smilk": "smilk", "small milk": "smilk", "s milk": "smilk", "sm": "smilk",
+      "teamilk": "teamilk", "tea milk": "teamilk", "tea": "teamilk",
+      "450gm": "curd450", "450g": "curd450", "curd 450": "curd450", "curd450": "curd450", "curd big": "curd450",
+      "scurd": "scurd", "small curd": "scurd", "s curd": "scurd", "sc": "scurd", "curd small": "scurd",
+      "bucket10kg": "bucket10kg", "10kg bucket": "bucket10kg", "10kg": "bucket10kg", "bucket 10kg": "bucket10kg",
+      "bucket5kg": "bucket5kg", "5kg bucket": "bucket5kg", "5kg": "bucket5kg", "bucket 5kg": "bucket5kg"
+    };
+
     const CLOUD_KEY_MASTER = "annapurna_cloud_master_v1";
     const CLOUD_KEY_KIRANA = "annapurna_cloud_kirana_v1";
     const CLOUD_KEY_STOCK_DAYS = "annapurna_cloud_stock_v1";
@@ -377,9 +404,7 @@
       return getLocalDateString(d);
     }
 
-    // Live Snapshot Realtime Listeners for Master, Kirana, and Stock
     function attachLiveSyncListeners() {
-      // 1. Master Catalog Realtime Sync
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_MASTER), (docSnap) => {
         if (docSnap.exists()) {
           masterItems = JSON.parse(docSnap.data().value);
@@ -389,7 +414,6 @@
         }
       });
 
-      // 2. Kirana Dispatches Realtime Sync
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_KIRANA), (docSnap) => {
         if (docSnap.exists()) {
           kiranaLogs = JSON.parse(docSnap.data().value);
@@ -399,7 +423,6 @@
         }
       });
 
-      // 3. Stock Days Realtime Sync
       onSnapshot(doc(db, DB_COLLECTION, CLOUD_KEY_STOCK_DAYS), (docSnap) => {
         if (docSnap.exists()) {
           stockDays = JSON.parse(docSnap.data().value);
@@ -410,7 +433,6 @@
     }
 
     async function initialLoad() {
-      // Load Master
       const mRes = await cloudGet(CLOUD_KEY_MASTER);
       if (mRes && mRes.value) masterItems = JSON.parse(mRes.value);
       else {
@@ -418,11 +440,9 @@
         await cloudSet(CLOUD_KEY_MASTER, JSON.stringify(masterItems));
       }
 
-      // Load Kirana
       const kRes = await cloudGet(CLOUD_KEY_KIRANA);
       if (kRes && kRes.value) kiranaLogs = JSON.parse(kRes.value);
 
-      // Load Stock Days
       const sRes = await cloudGet(CLOUD_KEY_STOCK_DAYS);
       if (sRes && sRes.value) stockDays = JSON.parse(sRes.value);
 
@@ -639,6 +659,81 @@
         alert(`Updated leftovers for ${matchCount} items! In-store retail customer sales recalculated.`);
       } else {
         alert("Could not match product names. Please use formats like: tm 10, fcm 4, scurd 12, curd450 6");
+      }
+    };
+
+    // =========================================================================
+    // ⚡ SMART KIRANA QUICK SHORTHAND PARSER (e.g. "ashok kirana tm5l")
+    // =========================================================================
+    window.applyKiranaQuickShorthand = async function() {
+      const text = document.getElementById("kiranaQuickInput").value.trim();
+      if (!text) return alert("Please type your Kirana shorthand entry (e.g. ashok kirana tm5l).");
+
+      const dateStr = getActiveDate();
+      const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      let successCount = 0;
+
+      // Sort alias keys longest first
+      const sortedAliasKeys = Object.keys(ITEM_ALIASES).sort((a, b) => b.length - a.length);
+      const aliasPattern = sortedAliasKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      
+      // Regex matches: alias + optional whitespace/hyphen + number + optional units (l, ltr, pkts, kg, etc.)
+      const itemRegex = new RegExp(`(?:\\b|(?<=[^a-zA-Z0-9]))(${aliasPattern})(?:[\\s:\\-]*?)(\\d+(?:\\.\\d+)?)(?:\\s*(?:l|ltr|ltrs|liters|litre|litres|p|pkt|pkts|packets|packet|kg|kgs|kilo|kilos|bkt|bucket|buckets))?(?=\\b|[^a-zA-Z0-9]|$)`, 'gi');
+
+      for (const line of lines) {
+        const matches = [];
+        let match;
+        while ((match = itemRegex.exec(line)) !== null) {
+          matches.push(match);
+        }
+
+        if (matches.length > 0) {
+          // Shop name is everything preceding the first item match
+          const firstIdx = matches[0].index;
+          let shopName = line.substring(0, firstIdx).trim().replace(/^[,:\-\s]+|[,:\-\s]+$/g, '');
+          if (!shopName) shopName = "Kirana Store";
+
+          // Format Proper Case for Shop Name
+          shopName = shopName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+          const items = {};
+          matches.forEach(m => {
+            const rawAlias = m[1].toLowerCase().trim();
+            const qty = parseFloat(m[2]) || 0;
+            const canonicalKey = ITEM_ALIASES[rawAlias] || rawAlias;
+            const rate = Number(masterItems[canonicalKey]?.shopRate || masterItems[canonicalKey]?.mrp || 0);
+
+            if (qty > 0) {
+              items[canonicalKey] = {
+                qty: (items[canonicalKey]?.qty || 0) + qty,
+                sellRate: rate
+              };
+            }
+          });
+
+          if (Object.keys(items).length > 0) {
+            kiranaLogs.push({
+              id: "kirana_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+              date: dateStr,
+              shopName,
+              paymentStatus: "Not Paid",
+              note: "Quick Entry Shorthand",
+              items
+            });
+            successCount++;
+          }
+        }
+      }
+
+      if (successCount > 0) {
+        await cloudSet(CLOUD_KEY_KIRANA, JSON.stringify(kiranaLogs));
+        document.getElementById("kiranaQuickInput").value = "";
+        updateShopDatalist();
+        loadDateData();
+        renderDemandChart();
+        alert(`Successfully added ${successCount} Kirana delivery dispatch(es) to cloud!`);
+      } else {
+        alert("Could not recognize entry format. Try like: 'ashok kirana tm5l' or 'mani kirana tm 5l, smilk 3, scurd 4'");
       }
     };
 
@@ -920,6 +1015,9 @@
       document.getElementById("metricLeftoversTotal").innerText = `${totalLeftovers} Pkts`;
     }
 
+    // =========================================================================
+    // VIEW 3: MASTER CATALOG TABLE
+    // =========================================================================
     function renderMasterTable() {
       const tbody = document.getElementById("masterTableBody");
       tbody.innerHTML = "";
@@ -982,6 +1080,9 @@
       a.click();
     };
 
+    // =========================================================================
+    // 7-DAY DEMAND ANALYSIS CHART
+    // =========================================================================
     function renderDemandChart() {
       const dates = [];
       const now = new Date();
@@ -1060,6 +1161,7 @@
           },
           scales: {
             x: {
+              stacked: true,
               ticks: { color: "#94a3b8", font: { family: "'IBM Plex Mono'", size: 10 } },
               grid: { color: "rgba(51, 65, 85, 0.2)" }
             },
